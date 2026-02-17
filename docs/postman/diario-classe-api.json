@@ -1819,6 +1819,1687 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "Assessment Periods",
+			"item": [
+				{
+					"name": "Listar Periodos Avaliativos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/assessment-periods?academic_year_id=&status=",
+							"host": ["{{base_url}}"],
+							"path": ["assessment-periods"],
+							"query": [
+								{
+									"key": "academic_year_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Criar Periodo Avaliativo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"academic_year_id\": 1,\n    \"type\": \"bimestral\",\n    \"number\": 1,\n    \"name\": \"1º Bimestre\",\n    \"start_date\": \"2026-02-09\",\n    \"end_date\": \"2026-04-30\",\n    \"status\": \"open\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/assessment-periods",
+							"host": ["{{base_url}}"],
+							"path": ["assessment-periods"]
+						}
+					}
+				},
+				{
+					"name": "Exibir Periodo Avaliativo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/assessment-periods/1",
+							"host": ["{{base_url}}"],
+							"path": ["assessment-periods", "1"]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Periodo Avaliativo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"closing\",\n    \"name\": \"1º Bimestre Atualizado\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/assessment-periods/1",
+							"host": ["{{base_url}}"],
+							"path": ["assessment-periods", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Curricular Components",
+			"item": [
+				{
+					"name": "Listar Componentes Curriculares",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/curricular-components",
+							"host": ["{{base_url}}"],
+							"path": ["curricular-components"]
+						}
+					}
+				},
+				{
+					"name": "Criar Componente Curricular",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Lingua Portuguesa\",\n    \"knowledge_area\": \"linguagens\",\n    \"code\": \"LP\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/curricular-components",
+							"host": ["{{base_url}}"],
+							"path": ["curricular-components"]
+						}
+					}
+				},
+				{
+					"name": "Exibir Componente Curricular",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/curricular-components/1",
+							"host": ["{{base_url}}"],
+							"path": ["curricular-components", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Experience Fields",
+			"item": [
+				{
+					"name": "Listar Campos de Experiencia",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/experience-fields",
+							"host": ["{{base_url}}"],
+							"path": ["experience-fields"]
+						}
+					}
+				},
+				{
+					"name": "Criar Campo de Experiencia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"O eu, o outro e o nos\",\n    \"code\": \"EI-EO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/experience-fields",
+							"host": ["{{base_url}}"],
+							"path": ["experience-fields"]
+						}
+					}
+				},
+				{
+					"name": "Exibir Campo de Experiencia",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/experience-fields/1",
+							"host": ["{{base_url}}"],
+							"path": ["experience-fields", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Teacher Assignments",
+			"item": [
+				{
+					"name": "Listar Vinculos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/teacher-assignments?teacher_id=&class_group_id=",
+							"host": ["{{base_url}}"],
+							"path": ["teacher-assignments"],
+							"query": [
+								{
+									"key": "teacher_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "class_group_id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Criar Vinculo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"teacher_id\": 1,\n    \"class_group_id\": 1,\n    \"curricular_component_id\": 1,\n    \"start_date\": \"2026-02-09\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/teacher-assignments",
+							"host": ["{{base_url}}"],
+							"path": ["teacher-assignments"]
+						}
+					}
+				},
+				{
+					"name": "Exibir Vinculo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/teacher-assignments/1",
+							"host": ["{{base_url}}"],
+							"path": ["teacher-assignments", "1"]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Vinculo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"active\": false,\n    \"end_date\": \"2026-06-30\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/teacher-assignments/1",
+							"host": ["{{base_url}}"],
+							"path": ["teacher-assignments", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "Registrar Chamada em Lote",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"class_group_id\": 1,\n    \"teacher_assignment_id\": 1,\n    \"date\": \"2026-03-10\",\n    \"records\": [\n        {\"student_id\": 1, \"status\": \"present\"},\n        {\"student_id\": 2, \"status\": \"absent\"},\n        {\"student_id\": 3, \"status\": \"justified_absence\"}\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/bulk",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "bulk"]
+						}
+					}
+				},
+				{
+					"name": "Frequencia por Turma",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/class/1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "class", "1"]
+						}
+					}
+				},
+				{
+					"name": "Historico do Aluno",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/student/1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "student", "1"]
+						}
+					}
+				},
+				{
+					"name": "Frequencia Calculada do Aluno",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/student/1/frequency?class_group_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "student", "1", "frequency"],
+							"query": [
+								{
+									"key": "class_group_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Alertas de Frequencia",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/alerts/1?school_id=1&academic_year_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "alerts", "1"],
+							"query": [
+								{
+									"key": "school_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "academic_year_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Criar Justificativa de Falta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_id\": 1,\n    \"start_date\": \"2026-03-10\",\n    \"end_date\": \"2026-03-12\",\n    \"reason\": \"Atestado medico\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/absence-justifications",
+							"host": ["{{base_url}}"],
+							"path": ["absence-justifications"]
+						}
+					}
+				},
+				{
+					"name": "Aprovar Justificativa",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/absence-justifications/1/approve",
+							"host": ["{{base_url}}"],
+							"path": ["absence-justifications", "1", "approve"]
+						}
+					}
+				},
+				{
+					"name": "Listar Configuracoes de Frequencia",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance-configs",
+							"host": ["{{base_url}}"],
+							"path": ["attendance-configs"]
+						}
+					}
+				},
+				{
+					"name": "Criar Configuracao de Frequencia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"school_id\": 1,\n    \"academic_year_id\": 1,\n    \"consecutive_absences_alert\": 5,\n    \"monthly_absences_alert\": 10,\n    \"period_absence_percentage_alert\": 25.00,\n    \"annual_minimum_frequency\": 75.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance-configs",
+							"host": ["{{base_url}}"],
+							"path": ["attendance-configs"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Lesson Records",
+			"item": [
+				{
+					"name": "Listar Registros de Aula",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/lesson-records?class_group_id=&teacher_assignment_id=&date_from=&date_to=",
+							"host": ["{{base_url}}"],
+							"path": ["lesson-records"],
+							"query": [
+								{
+									"key": "class_group_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "teacher_assignment_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date_from",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Criar Registro de Aula",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"class_group_id\": 1,\n    \"teacher_assignment_id\": 1,\n    \"date\": \"2026-03-10\",\n    \"content\": \"Introducao a geometria plana\",\n    \"methodology\": \"Aula expositiva com material concreto\",\n    \"observations\": \"Turma participativa\",\n    \"class_count\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/lesson-records",
+							"host": ["{{base_url}}"],
+							"path": ["lesson-records"]
+						}
+					}
+				},
+				{
+					"name": "Exibir Registro de Aula",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/lesson-records/1",
+							"host": ["{{base_url}}"],
+							"path": ["lesson-records", "1"]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Registro de Aula",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Geometria plana - triangulos e quadrilateros\",\n    \"methodology\": \"Aula expositiva dialogada\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/lesson-records/1",
+							"host": ["{{base_url}}"],
+							"path": ["lesson-records", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Assessment",
+			"item": [
+				{
+					"name": "Lancar Notas em Lote",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"class_group_id\": 1,\n    \"teacher_assignment_id\": 1,\n    \"assessment_period_id\": 1,\n    \"assessment_instrument_id\": 1,\n    \"grades\": [\n        {\"student_id\": 1, \"numeric_value\": 8.5},\n        {\"student_id\": 2, \"numeric_value\": 7.0},\n        {\"student_id\": 3, \"numeric_value\": 9.0}\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/grades/bulk",
+							"host": ["{{base_url}}"],
+							"path": ["grades", "bulk"]
+						}
+					}
+				},
+				{
+					"name": "Listar Notas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/grades?student_id=&class_group_id=&assessment_period_id=&teacher_assignment_id=",
+							"host": ["{{base_url}}"],
+							"path": ["grades"],
+							"query": [
+								{
+									"key": "student_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "class_group_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "assessment_period_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "teacher_assignment_id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Atualizar Nota",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"numeric_value\": 9.0,\n    \"observations\": \"Nota corrigida\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/grades/1",
+							"host": ["{{base_url}}"],
+							"path": ["grades", "1"]
+						}
+					}
+				},
+				{
+					"name": "Lancar Nota de Recuperacao",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_id\": 1,\n    \"class_group_id\": 1,\n    \"teacher_assignment_id\": 1,\n    \"assessment_period_id\": 1,\n    \"assessment_instrument_id\": 1,\n    \"numeric_value\": 7.5,\n    \"recovery_type\": \"parallel\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/grades/recovery",
+							"host": ["{{base_url}}"],
+							"path": ["grades", "recovery"]
+						}
+					}
+				},
+				{
+					"name": "Calcular Media do Periodo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_id\": 1,\n    \"class_group_id\": 1,\n    \"teacher_assignment_id\": 1,\n    \"assessment_period_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/period-averages/calculate",
+							"host": ["{{base_url}}"],
+							"path": ["period-averages", "calculate"]
+						}
+					}
+				},
+				{
+					"name": "Criar Relatorio Descritivo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_id\": 1,\n    \"class_group_id\": 1,\n    \"experience_field_id\": 1,\n    \"assessment_period_id\": 1,\n    \"content\": \"O aluno demonstra interesse nas atividades propostas...\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/descriptive-reports",
+							"host": ["{{base_url}}"],
+							"path": ["descriptive-reports"]
+						}
+					}
+				},
+				{
+					"name": "Listar Relatorios Descritivos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/descriptive-reports?student_id=&class_group_id=&assessment_period_id=",
+							"host": ["{{base_url}}"],
+							"path": ["descriptive-reports"],
+							"query": [
+								{
+									"key": "student_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "class_group_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "assessment_period_id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Boletim do Aluno",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/report-cards/student/1?class_group_id=1&academic_year_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["report-cards", "student", "1"],
+							"query": [
+								{
+									"key": "class_group_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "academic_year_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Configuracoes de Avaliacao",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/assessment-configs?school_id=&academic_year_id=",
+							"host": ["{{base_url}}"],
+							"path": ["assessment-configs"],
+							"query": [
+								{
+									"key": "school_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "academic_year_id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Criar Configuracao de Avaliacao",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"school_id\": 1,\n    \"academic_year_id\": 1,\n    \"grade_level_id\": 7,\n    \"grade_type\": \"numeric\",\n    \"scale_min\": 0,\n    \"scale_max\": 10,\n    \"passing_grade\": 6,\n    \"average_formula\": \"arithmetic\",\n    \"rounding_precision\": 1,\n    \"recovery_enabled\": true,\n    \"recovery_replaces\": \"higher\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/assessment-configs",
+							"host": ["{{base_url}}"],
+							"path": ["assessment-configs"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Period Closing",
+			"item": [
+				{
+					"name": "Listar Fechamentos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings?class_group_id=&assessment_period_id=&status=",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings"],
+							"query": [
+								{
+									"key": "class_group_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "assessment_period_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Verificar Completude",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings/1/check",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings", "1", "check"]
+						}
+					}
+				},
+				{
+					"name": "Submeter Fechamento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings/1/submit",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings", "1", "submit"]
+						}
+					}
+				},
+				{
+					"name": "Validar Fechamento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"approve\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings/1/validate",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings", "1", "validate"]
+						}
+					}
+				},
+				{
+					"name": "Rejeitar Fechamento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"approve\": false,\n    \"rejection_reason\": \"Faltam registros de aula\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings/1/validate",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings", "1", "validate"]
+						}
+					}
+				},
+				{
+					"name": "Fechar Periodo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings/1/close",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings", "1", "close"]
+						}
+					}
+				},
+				{
+					"name": "Dashboard de Fechamentos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/period-closings/dashboard?school_id=1&assessment_period_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["period-closings", "dashboard"],
+							"query": [
+								{
+									"key": "school_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "assessment_period_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Solicitar Retificacao",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"period_closing_id\": 1,\n    \"entity_type\": \"grade\",\n    \"entity_id\": 1,\n    \"field_changed\": \"numeric_value\",\n    \"old_value\": \"5.0\",\n    \"new_value\": \"7.0\",\n    \"justification\": \"Erro de digitacao\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rectifications",
+							"host": ["{{base_url}}"],
+							"path": ["rectifications"]
+						}
+					}
+				},
+				{
+					"name": "Aprovar Retificacao",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"approve\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rectifications/1/approve",
+							"host": ["{{base_url}}"],
+							"path": ["rectifications", "1", "approve"]
+						}
+					}
+				},
+				{
+					"name": "Calcular Resultado Final",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_id\": 1,\n    \"class_group_id\": 1,\n    \"academic_year_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/final-results/calculate",
+							"host": ["{{base_url}}"],
+							"path": ["final-results", "calculate"]
+						}
+					}
+				},
+				{
+					"name": "Resultado Final do Aluno",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/final-results/student/1?class_group_id=1&academic_year_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["final-results", "student", "1"],
+							"query": [
+								{
+									"key": "class_group_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "academic_year_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					}
+				}
+			]
 		}
 	]
 }
