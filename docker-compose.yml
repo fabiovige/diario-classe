@@ -13,14 +13,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=diario_classe
-      - DB_USERNAME=diario
-      - DB_PASSWORD=diario
-      - REDIS_HOST=redis
     networks:
       - diario-network
 
