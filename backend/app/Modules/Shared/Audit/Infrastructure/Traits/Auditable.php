@@ -3,16 +3,17 @@
 namespace App\Modules\Shared\Audit\Infrastructure\Traits;
 
 use App\Modules\Shared\Audit\Domain\Entities\AuditLog;
+use Illuminate\Database\Eloquent\Model;
 
 trait Auditable
 {
     public static function bootAuditable(): void
     {
-        static::created(function ($model) {
+        static::created(function (Model $model) {
             self::logAudit($model, 'created', null, $model->getAttributes());
         });
 
-        static::updated(function ($model) {
+        static::updated(function (Model $model) {
             $original = $model->getOriginal();
             $changed = $model->getChanges();
 
@@ -30,12 +31,16 @@ trait Auditable
             self::logAudit($model, 'updated', $oldValues, $changed);
         });
 
-        static::deleted(function ($model) {
+        static::deleted(function (Model $model) {
             self::logAudit($model, 'deleted', $model->getAttributes(), null);
         });
     }
 
-    protected static function logAudit($model, string $action, ?array $oldValues, ?array $newValues): void
+    /**
+     * @param  array<string, mixed>|null  $oldValues
+     * @param  array<string, mixed>|null  $newValues
+     */
+    protected static function logAudit(Model $model, string $action, ?array $oldValues, ?array $newValues): void
     {
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -44,8 +49,8 @@ trait Auditable
             'entity_id' => (string) $model->getKey(),
             'old_values' => $oldValues,
             'new_values' => $newValues,
-            'ip_address' => request()?->ip(),
-            'user_agent' => request()?->userAgent(),
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
         ]);
     }
 }

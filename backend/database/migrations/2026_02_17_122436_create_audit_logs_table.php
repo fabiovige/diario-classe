@@ -14,8 +14,8 @@ return new class extends Migration
             $table->string('action', 50);
             $table->string('entity_type');
             $table->string('entity_id');
-            $table->jsonb('old_values')->nullable();
-            $table->jsonb('new_values')->nullable();
+            $table->json('old_values')->nullable();
+            $table->json('new_values')->nullable();
             $table->ipAddress('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->timestamp('created_at')->useCurrent();

@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: diario-app
+    volumes:
+      - ./backend:/var/www
+    ports:
+      - "5015:5015"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=diario_classe
+      - DB_USERNAME=diario
+      - DB_PASSWORD=diario
+      - REDIS_HOST=redis
+    networks:
+      - diario-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: diario-mysql
+    environment:
+      MYSQL_DATABASE: diario_classe
+      MYSQL_USER: diario
+      MYSQL_PASSWORD: diario
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - diario-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: diario-redis
+    networks:
+      - diario-network
+
+volumes:
+  mysql_data:
+
+networks:
+  diario-network:
+    driver: bridge

@@ -9,7 +9,8 @@ Multi-escola (30 EMEBs), multi-ano letivo. Ed. Infantil + Ensino Fundamental.
 
 ## Stack
 
-- **Backend**: PHP 8.4 / Laravel 12 / PostgreSQL 16+ / Redis
+- **Backend**: PHP 8.4 / Laravel 12 / MySQL 8.0 / Redis
+- **Infra Dev**: Docker Compose (app + mysql + redis)
 - **Frontend**: Vue.js 3 (Composition API) + TypeScript + Vite
 - **Arquitetura**: Modular Monolith (bounded contexts)
 - **Principios**: SOLID, Clean Architecture, DDD pragmatico
@@ -31,15 +32,27 @@ diario-classe/
 └── CLAUDE.md             # Este arquivo (indice)
 ```
 
+## Docker (ambiente dev)
+
+```bash
+docker compose up -d --build          # subir ambiente
+docker compose exec app composer install  # instalar deps
+docker compose exec app php artisan migrate:fresh --seed  # migrations + seeders
+docker compose exec app composer test     # rodar testes
+docker compose down                       # parar ambiente
+```
+
+Acesso: http://localhost:5015
+
 ## Scripts Backend
 
-Executar dentro de `backend/`:
+Executar dentro do container (`docker compose exec app`) ou local em `backend/`:
 
 - `composer test` — Pest + PHPUnit
 - `composer analyse` — PHPStan level 6
 - `composer lint` — Laravel Pint (corrige)
 - `composer lint:check` — Laravel Pint (verifica)
-- `php artisan serve` — servidor dev (http://localhost:8000)
+- `php artisan serve` — servidor dev (http://localhost:5015)
 
 ## Regras Inviolaveis
 
