@@ -20,6 +20,11 @@ class DatabaseSeeder extends Seeder
             GuardianSeeder::class,
             ClassGroupSeeder::class,
             EnrollmentSeeder::class,
+            AssessmentPeriodSeeder::class,
+            CurricularComponentSeeder::class,
+            ExperienceFieldSeeder::class,
+            TeacherAssignmentSeeder::class,
+            AttendanceConfigSeeder::class,
         ]);
     }
 }
