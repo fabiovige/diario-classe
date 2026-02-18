@@ -18,7 +18,7 @@ class LessonRecordController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
-        $records = LessonRecord::with(['classGroup', 'teacherAssignment'])
+        $records = LessonRecord::with(['classGroup.gradeLevel', 'classGroup.shift', 'teacherAssignment'])
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('teacher_assignment_id'), fn ($q, $id) => $q->where('teacher_assignment_id', $id))
             ->when($request->query('date_from'), fn ($q, $date) => $q->where('date', '>=', $date))
@@ -41,12 +41,12 @@ class LessonRecordController extends ApiController
             classCount: $request->validated('class_count', 1),
         ));
 
-        return $this->created(new LessonRecordResource($record->load(['classGroup', 'teacherAssignment'])));
+        return $this->created(new LessonRecordResource($record->load(['classGroup.gradeLevel', 'classGroup.shift', 'teacherAssignment'])));
     }
 
     public function show(int $id): JsonResponse
     {
-        $record = LessonRecord::with(['classGroup', 'teacherAssignment'])->findOrFail($id);
+        $record = LessonRecord::with(['classGroup.gradeLevel', 'classGroup.shift', 'teacherAssignment'])->findOrFail($id);
 
         return $this->success(new LessonRecordResource($record));
     }
@@ -61,6 +61,6 @@ class LessonRecordController extends ApiController
             classCount: $request->validated('class_count'),
         ));
 
-        return $this->success(new LessonRecordResource($record->load(['classGroup', 'teacherAssignment'])));
+        return $this->success(new LessonRecordResource($record->load(['classGroup.gradeLevel', 'classGroup.shift', 'teacherAssignment'])));
     }
 }

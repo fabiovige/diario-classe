@@ -25,6 +25,15 @@ class DatabaseSeeder extends Seeder
             ExperienceFieldSeeder::class,
             TeacherAssignmentSeeder::class,
             AttendanceConfigSeeder::class,
+            AssessmentConfigSeeder::class,
+            LessonRecordSeeder::class,
+            AttendanceRecordSeeder::class,
+            AbsenceJustificationSeeder::class,
+            GradeSeeder::class,
+            DescriptiveReportSeeder::class,
+            PeriodAverageSeeder::class,
+            PeriodClosingSeeder::class,
+            FinalResultSeeder::class,
         ]);
     }
 }

@@ -16,7 +16,7 @@ class TeacherAssignmentController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
-        $assignments = TeacherAssignment::with(['teacher.user', 'classGroup', 'curricularComponent', 'experienceField'])
+        $assignments = TeacherAssignment::with(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])
             ->when($request->query('teacher_id'), fn ($q, $id) => $q->where('teacher_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('active') !== null, fn ($q) => $q->where('active', $request->boolean('active')))
@@ -38,13 +38,13 @@ class TeacherAssignmentController extends ApiController
         ));
 
         return $this->created(new TeacherAssignmentResource(
-            $assignment->load(['teacher.user', 'classGroup', 'curricularComponent', 'experienceField'])
+            $assignment->load(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])
         ));
     }
 
     public function show(int $id): JsonResponse
     {
-        $assignment = TeacherAssignment::with(['teacher.user', 'classGroup', 'curricularComponent', 'experienceField'])
+        $assignment = TeacherAssignment::with(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])
             ->findOrFail($id);
 
         return $this->success(new TeacherAssignmentResource($assignment));
@@ -58,7 +58,7 @@ class TeacherAssignmentController extends ApiController
         $assignment->update($data);
 
         return $this->success(new TeacherAssignmentResource(
-            $assignment->refresh()->load(['teacher.user', 'classGroup', 'curricularComponent', 'experienceField'])
+            $assignment->refresh()->load(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])
         ));
     }
 }

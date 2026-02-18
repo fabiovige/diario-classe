@@ -7,6 +7,7 @@ import Button from 'primevue/button'
 import Paginator from 'primevue/paginator'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
+import MetricCard from '@/shared/components/MetricCard.vue'
 import { periodClosingService } from '@/services/period-closing.service'
 import { useToast } from '@/composables/useToast'
 import { periodClosingStatusLabel } from '@/shared/utils/enum-labels'
@@ -21,7 +22,7 @@ const totalRecords = ref(0)
 const currentPage = ref(1)
 const perPage = ref(15)
 
-const dashboard = ref<any>(null)
+const dashboard = ref<Record<string, number> | null>(null)
 
 async function loadDashboard() {
   try {
@@ -47,6 +48,20 @@ async function loadData() {
   }
 }
 
+function disciplineName(row: PeriodClosing): string {
+  return row.teacher_assignment?.curricular_component?.name
+    ?? row.teacher_assignment?.experience_field?.name
+    ?? '--'
+}
+
+function turmaName(row: PeriodClosing): string {
+  if (!row.class_group) return '--'
+  const grade = row.class_group.grade_level?.name ?? ''
+  const shift = row.class_group.shift?.name ?? ''
+  const parts = [row.class_group.name, grade, shift].filter(Boolean)
+  return parts.join(' - ')
+}
+
 function onPageChange(event: { page: number; rows: number }) {
   currentPage.value = event.page + 1
   perPage.value = event.rows
@@ -59,36 +74,31 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Fechamento de Periodo</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Fechamento de Periodo</h1>
 
-    <div v-if="dashboard" class="stats-row">
-      <div class="stat-card">
-        <span class="stat-value">{{ dashboard.pending ?? 0 }}</span>
-        <span class="stat-label">Pendentes</span>
-      </div>
-      <div class="stat-card stat-warn">
-        <span class="stat-value">{{ dashboard.submitted ?? 0 }}</span>
-        <span class="stat-label">Enviados</span>
-      </div>
-      <div class="stat-card stat-info">
-        <span class="stat-value">{{ dashboard.validated ?? 0 }}</span>
-        <span class="stat-label">Validados</span>
-      </div>
-      <div class="stat-card stat-success">
-        <span class="stat-value">{{ dashboard.closed ?? 0 }}</span>
-        <span class="stat-label">Fechados</span>
-      </div>
-      <div class="stat-card stat-danger">
-        <span class="stat-value">{{ dashboard.rejected ?? 0 }}</span>
-        <span class="stat-label">Rejeitados</span>
-      </div>
+    <div v-if="dashboard" class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 mb-6">
+      <MetricCard title="Total" :value="dashboard.total ?? 0" label="Fechamentos" color="#0078D4" icon="pi pi-list" />
+      <MetricCard title="Pendentes" :value="dashboard.pending ?? 0" label="Aguardando envio" color="#9D5D00" icon="pi pi-clock" />
+      <MetricCard title="Em Validacao" :value="dashboard.in_validation ?? 0" label="Aguardando aprovacao" color="#005A9E" icon="pi pi-hourglass" />
+      <MetricCard title="Aprovados" :value="dashboard.approved ?? 0" label="Prontos para fechar" color="#0F7B0F" icon="pi pi-check" />
+      <MetricCard title="Fechados" :value="dashboard.closed ?? 0" label="Concluidos" color="#0F7B0F" icon="pi pi-lock" />
     </div>
 
-    <div class="card-section mt-3">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <EmptyState v-if="!loading && items.length === 0" message="Nenhum fechamento encontrado" />
 
       <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+        <Column header="Turma">
+          <template #body="{ data }">
+            {{ turmaName(data) }}
+          </template>
+        </Column>
+        <Column header="Disciplina">
+          <template #body="{ data }">
+            {{ disciplineName(data) }}
+          </template>
+        </Column>
         <Column header="Periodo">
           <template #body="{ data }">
             {{ data.assessment_period?.name ?? '--' }}
@@ -101,17 +111,17 @@ onMounted(async () => {
         </Column>
         <Column header="Notas">
           <template #body="{ data }">
-            <i :class="data.all_grades_complete ? 'pi pi-check-circle text-success' : 'pi pi-times-circle text-danger'" />
+            <i :class="data.all_grades_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
           </template>
         </Column>
         <Column header="Frequencia">
           <template #body="{ data }">
-            <i :class="data.all_attendance_complete ? 'pi pi-check-circle text-success' : 'pi pi-times-circle text-danger'" />
+            <i :class="data.all_attendance_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
           </template>
         </Column>
         <Column header="Diario">
           <template #body="{ data }">
-            <i :class="data.all_lesson_records_complete ? 'pi pi-check-circle text-success' : 'pi pi-times-circle text-danger'" />
+            <i :class="data.all_lesson_records_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
           </template>
         </Column>
         <Column header="Acoes" :style="{ width: '80px' }">
@@ -127,22 +137,9 @@ onMounted(async () => {
         :totalRecords="totalRecords"
         :first="(currentPage - 1) * perPage"
         :rowsPerPageOptions="[10, 15, 25, 50]"
+        class="mt-4 border-t border-[#E0E0E0] pt-3"
         @page="onPageChange"
       />
     </div>
   </div>
 </template>
-
-<style scoped>
-.stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
-.stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; text-align: center; display: flex; flex-direction: column; gap: 0.25rem; }
-.stat-value { font-size: 1.5rem; font-weight: 700; }
-.stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
-.stat-success .stat-value { color: #22c55e; }
-.stat-warn .stat-value { color: #f59e0b; }
-.stat-info .stat-value { color: #3b82f6; }
-.stat-danger .stat-value { color: #ef4444; }
-.mt-3 { margin-top: 1.5rem; }
-.text-success { color: #22c55e; }
-.text-danger { color: #ef4444; }
-</style>

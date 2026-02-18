@@ -28,10 +28,10 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Niveis de Ensino</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Niveis de Ensino</h1>
 
-    <div class="card-section">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <EmptyState v-if="!loading && items.length === 0" message="Nenhum nivel de ensino encontrado" />
 
       <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">

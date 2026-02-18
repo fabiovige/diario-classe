@@ -17,6 +17,7 @@ const severityMap: Record<string, string> = {
   completed: 'success',
   council_approved: 'success',
   validated: 'info',
+  in_validation: 'warn',
   justified: 'info',
   dispensed: 'info',
   submitted: 'warn',

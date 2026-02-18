@@ -88,37 +88,37 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">{{ isEdit ? 'Editar Periodo' : 'Novo Periodo' }}</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Periodo' : 'Novo Periodo' }}</h1>
 
-    <div class="card-section form-card">
-      <form @submit.prevent="handleSubmit" class="form-grid">
-        <div class="field">
-          <label>Ano Letivo *</label>
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Ano Letivo *</label>
           <Select v-model="form.academic_year_id" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
-        <div class="field">
-          <label>Tipo *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Tipo *</label>
           <Select v-model="form.type" :options="typeOptions" optionLabel="label" optionValue="value" class="w-full" />
         </div>
-        <div class="field">
-          <label>Numero *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Numero *</label>
           <InputNumber v-model="form.number" :min="1" :max="6" class="w-full" />
         </div>
-        <div class="field">
-          <label>Nome *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Data Inicio</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data Inicio</label>
           <InputText v-model="form.start_date" type="date" class="w-full" />
         </div>
-        <div class="field">
-          <label>Data Fim</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data Fim</label>
           <InputText v-model="form.end_date" type="date" class="w-full" />
         </div>
 
-        <div class="form-actions">
+        <div class="mt-4 flex justify-end gap-3">
           <Button label="Cancelar" severity="secondary" @click="router.push('/academic-calendar/periods')" />
           <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
         </div>
@@ -126,12 +126,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.form-card { max-width: 700px; }
-.form-grid { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
-</style>

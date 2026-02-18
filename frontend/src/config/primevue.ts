@@ -2,32 +2,32 @@ import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
 import type { PrimeVueConfiguration } from 'primevue'
 
-const JandiraPreset = definePreset(Aura, {
+const Windows11Preset = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '#e6eef8',
-      100: '#b3cce8',
-      200: '#80aad8',
-      300: '#4d88c8',
-      400: '#316DC8',
-      500: '#004698',
-      600: '#003d86',
-      700: '#003474',
-      800: '#002b62',
-      900: '#001d44',
-      950: '#001233',
+      50: '#e5f1fb',
+      100: '#b3d7f2',
+      200: '#80bde9',
+      300: '#4da3e0',
+      400: '#2690d9',
+      500: '#0078D4',
+      600: '#006cbe',
+      700: '#005A9E',
+      800: '#004880',
+      900: '#003662',
+      950: '#002444',
     },
     colorScheme: {
       light: {
         primary: {
-          color: '#004698',
+          color: '#0078D4',
           inverseColor: '#ffffff',
-          hoverColor: '#003d86',
-          activeColor: '#003474',
+          hoverColor: '#005A9E',
+          activeColor: '#004880',
         },
         highlight: {
-          background: '#004698',
-          focusBackground: '#316DC8',
+          background: '#0078D4',
+          focusBackground: '#005A9E',
           color: '#ffffff',
           focusColor: '#ffffff',
         },
@@ -38,7 +38,7 @@ const JandiraPreset = definePreset(Aura, {
 
 export const primevueConfig: PrimeVueConfiguration = {
   theme: {
-    preset: JandiraPreset,
+    preset: Windows11Preset,
     options: {
       darkModeSelector: '.app-dark',
     },

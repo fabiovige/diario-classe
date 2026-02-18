@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Menu from 'primevue/menu'
+import AppBreadcrumb from './AppBreadcrumb.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAuth } from '@/composables/useAuth'
 
@@ -30,101 +31,20 @@ function toggleUserMenu(event: Event) {
 </script>
 
 <template>
-  <header class="app-header">
-    <div class="header-left">
+  <header class="sticky top-0 z-[90] flex h-[var(--header-height)] items-center justify-between border-b border-fluent-border bg-fluent-surface px-6">
+    <div class="flex items-center gap-4">
       <AppBreadcrumb />
     </div>
-    <div class="header-right">
-      <div class="header-user" @click="toggleUserMenu">
-        <i class="pi pi-user header-avatar" />
-        <div class="header-user-info">
-          <span class="header-user-name">{{ authStore.userName }}</span>
-          <span class="header-user-role">{{ authStore.roleSlug }}</span>
+    <div class="flex items-center gap-4">
+      <div class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 transition-colors hover:bg-fluent-hover" @click="toggleUserMenu">
+        <i class="pi pi-user flex h-8 w-8 items-center justify-center rounded-full bg-fluent-selected text-lg text-fluent-primary" />
+        <div class="flex flex-col leading-tight">
+          <span class="text-[0.8125rem] font-semibold text-fluent-text">{{ authStore.userName }}</span>
+          <span class="text-[0.6875rem] capitalize text-fluent-text-secondary">{{ authStore.roleSlug }}</span>
         </div>
-        <i class="pi pi-chevron-down header-chevron" />
+        <i class="pi pi-chevron-down text-[0.625rem] text-fluent-text-secondary" />
       </div>
       <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
     </div>
   </header>
 </template>
-
-<script lang="ts">
-import AppBreadcrumb from './AppBreadcrumb.vue'
-export default { components: { AppBreadcrumb } }
-</script>
-
-<style scoped>
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: var(--header-height);
-  padding: 0 1.5rem;
-  background: #fff;
-  border-bottom: 1px solid #e2e8f0;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.header-user:hover {
-  background: #f1f5f9;
-}
-
-.header-avatar {
-  font-size: 1.25rem;
-  color: var(--jandira-primary);
-  background: #e6eef8;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header-user-info {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.header-user-name {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--jandira-text);
-}
-
-.header-user-role {
-  font-size: 0.6875rem;
-  color: #94a3b8;
-  text-transform: capitalize;
-}
-
-.header-chevron {
-  font-size: 0.625rem;
-  color: #94a3b8;
-}
-</style>

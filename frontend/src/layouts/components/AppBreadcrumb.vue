@@ -15,17 +15,5 @@ const items = computed(() => {
 </script>
 
 <template>
-  <Breadcrumb :home="home" :model="items" class="app-breadcrumb" />
+  <Breadcrumb :home="home" :model="items" class="border-none bg-transparent p-0 text-[0.8125rem]" />
 </template>
-
-<style scoped>
-.app-breadcrumb {
-  background: transparent;
-  border: none;
-  padding: 0;
-}
-
-:deep(.p-breadcrumb-list) {
-  font-size: 0.8125rem;
-}
-</style>

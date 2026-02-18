@@ -24,12 +24,13 @@ interface StudentRecord {
 const toast = useToast()
 
 const classGroups = ref<ClassGroup[]>([])
-const assignments = ref<TeacherAssignment[]>([])
+const assignments = ref<(TeacherAssignment & { label: string })[]>([])
 const selectedClassGroupId = ref<number | null>(null)
 const selectedAssignmentId = ref<number | null>(null)
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const students = ref<StudentRecord[]>([])
 const loading = ref(false)
+const loadingAssignments = ref(false)
 const submitting = ref(false)
 
 const statusOptions: { label: string; value: AttendanceStatus }[] = [
@@ -43,10 +44,17 @@ const canSubmit = computed(() =>
   selectedClassGroupId.value && selectedAssignmentId.value && selectedDate.value && students.value.length > 0
 )
 
+const assignmentPlaceholder = computed(() => {
+  if (!selectedClassGroupId.value) return 'Selecione a turma primeiro'
+  if (loadingAssignments.value) return 'Carregando...'
+  if (assignments.value.length === 0) return 'Nenhuma disciplina vinculada a esta turma'
+  return 'Selecione'
+})
+
 async function loadClassGroups() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
-    classGroups.value = response.data
+    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
   } catch {
     toast.error('Erro ao carregar turmas')
   }
@@ -54,11 +62,14 @@ async function loadClassGroups() {
 
 async function loadAssignments() {
   if (!selectedClassGroupId.value) return
+  loadingAssignments.value = true
   try {
     const response = await curriculumService.getAssignments({ class_group_id: selectedClassGroupId.value, per_page: 100 })
-    assignments.value = response.data
+    assignments.value = response.data.map(a => ({ ...a, label: a.curricular_component?.name ?? a.experience_field?.name ?? `Disciplina #${a.id}` }))
   } catch {
-    toast.error('Erro ao carregar atribuicoes')
+    toast.error('Erro ao carregar disciplinas')
+  } finally {
+    loadingAssignments.value = false
   }
 }
 
@@ -114,42 +125,38 @@ async function handleSubmit() {
   }
 }
 
-function assignmentLabel(assignment: TeacherAssignment): string {
-  return assignment.curricular_component?.name ?? assignment.experience_field?.name ?? `Atribuicao #${assignment.id}`
-}
-
 onMounted(loadClassGroups)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Registro de Frequencia</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Registro de Frequencia</h1>
 
-    <div class="card-section">
-      <div class="filter-bar">
-        <div class="field">
-          <label>Turma *</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" @change="onClassGroupChange" />
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
         </div>
-        <div class="field">
-          <label>Atribuicao *</label>
-          <Select v-model="selectedAssignmentId" :options="assignments" :optionLabel="assignmentLabel" optionValue="id" placeholder="Selecione" class="w-full" />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Disciplina *</label>
+          <Select v-model="selectedAssignmentId" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!selectedClassGroupId || assignments.length === 0" class="w-full" />
         </div>
-        <div class="field">
-          <label>Data *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data *</label>
           <InputText v-model="selectedDate" type="date" class="w-full" />
         </div>
       </div>
     </div>
 
-    <div class="card-section mt-3">
+    <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <EmptyState v-if="!loading && students.length === 0" message="Selecione uma turma para carregar os alunos" />
 
       <DataTable v-if="students.length > 0" :value="students" :loading="loading" stripedRows responsiveLayout="scroll">
         <Column field="student_name" header="Aluno" sortable />
         <Column header="Presenca" :style="{ width: '200px' }">
           <template #body="{ data }">
-            <div class="status-buttons">
+            <div class="flex gap-1.5">
               <Button
                 v-for="opt in statusOptions"
                 :key="opt.value"
@@ -164,19 +171,9 @@ onMounted(loadClassGroups)
         </Column>
       </DataTable>
 
-      <div v-if="students.length > 0" class="submit-bar">
+      <div v-if="students.length > 0" class="mt-4 flex justify-end border-t border-[#E0E0E0] pt-4">
         <Button label="Salvar Frequencia" icon="pi pi-check" :loading="submitting" :disabled="!canSubmit" @click="handleSubmit" />
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.filter-bar { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-.mt-3 { margin-top: 1.5rem; }
-.status-buttons { display: flex; gap: 0.375rem; }
-.submit-bar { display: flex; justify-content: flex-end; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
-</style>

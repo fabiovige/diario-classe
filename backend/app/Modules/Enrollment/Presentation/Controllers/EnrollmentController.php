@@ -21,11 +21,12 @@ class EnrollmentController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
-        $enrollments = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup'])
+        $enrollments = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup.gradeLevel', 'classAssignments.classGroup.shift'])
             ->when($request->query('school_id'), fn ($q, $id) => $q->where('school_id', $id))
             ->when($request->query('academic_year_id'), fn ($q, $id) => $q->where('academic_year_id', $id))
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
+            ->when($request->query('class_group_id'), fn ($q, $id) => $q->whereHas('classAssignments', fn ($sub) => $sub->where('class_group_id', $id)))
             ->orderByDesc('enrollment_date')
             ->paginate($request->query('per_page', 15));
 
@@ -47,7 +48,7 @@ class EnrollmentController extends ApiController
 
     public function show(int $id): JsonResponse
     {
-        $enrollment = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup', 'movements'])->findOrFail($id);
+        $enrollment = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup.gradeLevel', 'classAssignments.classGroup.shift', 'movements'])->findOrFail($id);
 
         return $this->success(new EnrollmentResource($enrollment));
     }
@@ -60,7 +61,7 @@ class EnrollmentController extends ApiController
             startDate: $request->validated('start_date'),
         ));
 
-        return $this->created(new ClassAssignmentResource($assignment->load('classGroup')));
+        return $this->created(new ClassAssignmentResource($assignment->load('classGroup.gradeLevel', 'classGroup.shift')));
     }
 
     public function transfer(TransferEnrollmentRequest $request, int $enrollmentId, TransferEnrollmentUseCase $useCase): JsonResponse

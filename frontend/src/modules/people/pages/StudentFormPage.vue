@@ -86,41 +86,41 @@ onMounted(loadStudent)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">{{ isEdit ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
 
-    <div class="card-section form-card">
-      <form @submit.prevent="handleSubmit" class="form-grid">
-        <div class="field">
-          <label>Nome *</label>
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Nome Social</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Nome Social</label>
           <InputText v-model="form.social_name" class="w-full" />
         </div>
-        <div class="field">
-          <label>Data de Nascimento *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data de Nascimento *</label>
           <InputText v-model="form.birth_date" type="date" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Genero *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Genero *</label>
           <Select v-model="form.gender" :options="genderOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
-        <div class="field">
-          <label>Raca/Cor *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Raca/Cor *</label>
           <Select v-model="form.race_color" :options="raceColorOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
-        <div class="field">
-          <label>CPF</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">CPF</label>
           <InputText v-model="form.cpf" class="w-full" />
         </div>
-        <div class="field-check">
+        <div class="flex items-center gap-2">
           <Checkbox v-model="form.has_disability" :binary="true" inputId="has_disability" />
           <label for="has_disability">Possui deficiencia</label>
         </div>
 
-        <div class="form-actions">
+        <div class="mt-4 flex justify-end gap-3">
           <Button label="Cancelar" severity="secondary" @click="router.push('/people/students')" />
           <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
         </div>
@@ -128,13 +128,3 @@ onMounted(loadStudent)
     </div>
   </div>
 </template>
-
-<style scoped>
-.form-card { max-width: 700px; }
-.form-grid { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.field-check { display: flex; align-items: center; gap: 0.5rem; }
-.w-full { width: 100%; }
-.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
-</style>

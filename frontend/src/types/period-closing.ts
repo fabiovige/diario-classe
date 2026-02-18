@@ -1,5 +1,7 @@
 import type { PeriodClosingStatus, FinalResultStatus } from './enums'
 import type { AssessmentPeriod } from './academic-calendar'
+import type { ClassGroup } from './school-structure'
+import type { TeacherAssignment } from './curriculum'
 import type { Student } from './people'
 
 export interface PeriodClosing {
@@ -19,6 +21,8 @@ export interface PeriodClosing {
   all_attendance_complete: boolean
   all_lesson_records_complete: boolean
   assessment_period?: AssessmentPeriod
+  class_group?: ClassGroup
+  teacher_assignment?: TeacherAssignment
   created_at: string
   updated_at: string
 }

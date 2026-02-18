@@ -29,6 +29,8 @@ class PeriodClosingResource extends JsonResource
             'all_attendance_complete' => $this->all_attendance_complete,
             'all_lesson_records_complete' => $this->all_lesson_records_complete,
             'assessment_period' => new AssessmentPeriodResource($this->whenLoaded('assessmentPeriod')),
+            'class_group' => $this->whenLoaded('classGroup'),
+            'teacher_assignment' => $this->whenLoaded('teacherAssignment'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

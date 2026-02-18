@@ -50,7 +50,7 @@ async function loadEnrollment() {
 async function openAssignDialog() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
-    classGroups.value = response.data
+    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
     selectedClassGroupId.value = null
     assignDialogVisible.value = true
   } catch {
@@ -77,51 +77,51 @@ onMounted(loadEnrollment)
 </script>
 
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <h1 class="page-title">Detalhes da Matricula</h1>
-      <div class="header-actions">
+  <div class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold text-[#0078D4]">Detalhes da Matricula</h1>
+      <div class="flex gap-2">
         <Button label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
         <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/enrollment/enrollments')" />
       </div>
     </div>
 
-    <div v-if="enrollment" class="card-section">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Numero</span>
-          <span class="info-value">{{ enrollment.enrollment_number }}</span>
+    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Numero</span>
+          <span class="text-[0.9375rem]">{{ enrollment.enrollment_number }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Aluno</span>
-          <span class="info-value">{{ enrollment.student?.name ?? '--' }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Aluno</span>
+          <span class="text-[0.9375rem]">{{ enrollment.student?.name ?? '--' }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Escola</span>
-          <span class="info-value">{{ enrollment.school?.name ?? '--' }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Escola</span>
+          <span class="text-[0.9375rem]">{{ enrollment.school?.name ?? '--' }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Ano Letivo</span>
-          <span class="info-value">{{ enrollment.academic_year?.year ?? '--' }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Ano Letivo</span>
+          <span class="text-[0.9375rem]">{{ enrollment.academic_year?.year ?? '--' }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Status</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Status</span>
           <StatusBadge :status="enrollment.status" :label="enrollmentStatusLabel(enrollment.status)" />
         </div>
-        <div class="info-item">
-          <span class="info-label">Data Matricula</span>
-          <span class="info-value">{{ formatDate(enrollment.enrollment_date) }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Data Matricula</span>
+          <span class="text-[0.9375rem]">{{ formatDate(enrollment.enrollment_date) }}</span>
         </div>
       </div>
     </div>
 
-    <div v-if="enrollment" class="card-section mt-3">
-      <h2 class="section-title">Enturmacoes</h2>
+    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm mt-6">
+      <h2 class="text-lg font-semibold mb-4">Enturmacoes</h2>
       <EmptyState v-if="!enrollment.class_assignments || enrollment.class_assignments.length === 0" message="Nenhuma enturmacao registrada" />
       <DataTable v-if="enrollment.class_assignments && enrollment.class_assignments.length > 0" :value="enrollment.class_assignments" stripedRows responsiveLayout="scroll">
         <Column header="Turma">
           <template #body="{ data }">
-            {{ data.class_group?.name ?? '--' }}
+            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name].filter(Boolean).join(' - ') || '--' }}
           </template>
         </Column>
         <Column field="status" header="Status" />
@@ -138,8 +138,8 @@ onMounted(loadEnrollment)
       </DataTable>
     </div>
 
-    <div class="card-section mt-3">
-      <h2 class="section-title">Movimentacoes</h2>
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm mt-6">
+      <h2 class="text-lg font-semibold mb-4">Movimentacoes</h2>
       <EmptyState v-if="movements.length === 0" message="Nenhuma movimentacao registrada" />
       <DataTable v-if="movements.length > 0" :value="movements" stripedRows responsiveLayout="scroll">
         <Column header="Tipo">
@@ -162,27 +162,12 @@ onMounted(loadEnrollment)
     </div>
 
     <FormDialog v-model:visible="assignDialogVisible" title="Enturmar Aluno" :loading="assignLoading" @save="handleAssign">
-      <div class="dialog-form">
-        <div class="field">
-          <label>Turma *</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter />
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
       </div>
     </FormDialog>
   </div>
 </template>
-
-<style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.header-actions { display: flex; gap: 0.5rem; }
-.info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; }
-.info-item { display: flex; flex-direction: column; gap: 0.25rem; }
-.info-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
-.info-value { font-size: 0.9375rem; }
-.section-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-.dialog-form { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-</style>

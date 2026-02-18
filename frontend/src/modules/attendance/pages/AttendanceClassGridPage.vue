@@ -71,7 +71,7 @@ function getStatusShort(status: string): string {
 }
 
 function getStatusColor(status: string): string {
-  const map: Record<string, string> = { present: '#22c55e', absent: '#ef4444', justified: '#3b82f6', dispensed: '#94a3b8' }
+  const map: Record<string, string> = { present: '#0F7B0F', absent: '#C42B1C', justified: '#0078D4', dispensed: '#94a3b8' }
   return map[status] ?? '#94a3b8'
 }
 
@@ -79,35 +79,48 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <h1 class="page-title">Mapa de Frequencia</h1>
+  <div class="p-6">
+    <div class="mb-4 flex items-center justify-between">
+      <h1 class="text-2xl font-semibold text-[#0078D4]">Mapa de Frequencia</h1>
       <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
     </div>
 
-    <div class="card-section">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <EmptyState v-if="!loading && groupedData.length === 0" message="Nenhum registro de frequencia encontrado" />
 
-      <div v-if="groupedData.length > 0" class="grid-wrapper">
-        <table class="attendance-grid">
+      <div v-if="groupedData.length > 0" class="overflow-x-auto">
+        <table class="w-full border-collapse text-[0.8125rem]">
           <thead>
             <tr>
-              <th class="student-col">Aluno</th>
-              <th v-for="date in dates" :key="date" class="date-col">{{ formatDate(date) }}</th>
+              <th class="border border-[#E0E0E0] p-2 text-center bg-[#f9fafb] font-semibold whitespace-nowrap sticky left-0 z-[1] min-w-[200px] text-left">Aluno</th>
+              <th
+                v-for="date in dates"
+                :key="date"
+                class="border border-[#E0E0E0] p-2 text-center bg-[#f9fafb] font-semibold whitespace-nowrap min-w-[70px]"
+              >
+                {{ formatDate(date) }}
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="row in groupedData" :key="row.student_id">
-              <td class="student-col">
-                <a class="student-link" @click="router.push(`/attendance/student/${row.student_id}`)">
+              <td class="border border-[#E0E0E0] p-2 text-center sticky left-0 z-[1] min-w-[200px] bg-white text-left">
+                <a
+                  class="cursor-pointer text-[#0078D4] underline"
+                  @click="router.push(`/attendance/student/${row.student_id}`)"
+                >
                   {{ row.student_name }}
                 </a>
               </td>
-              <td v-for="date in dates" :key="date" class="date-col">
-                <span v-if="row.records[date]" class="status-cell" :style="{ color: getStatusColor(row.records[date].status) }">
+              <td
+                v-for="date in dates"
+                :key="date"
+                class="border border-[#E0E0E0] p-2 text-center min-w-[70px]"
+              >
+                <span v-if="row.records[date]" class="font-bold" :style="{ color: getStatusColor(row.records[date].status) }">
                   {{ getStatusShort(row.records[date].status) }}
                 </span>
-                <span v-else class="status-cell empty">-</span>
+                <span v-else class="font-bold text-[#cbd5e1]">-</span>
               </td>
             </tr>
           </tbody>
@@ -116,18 +129,3 @@ onMounted(loadData)
     </div>
   </div>
 </template>
-
-<style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.grid-wrapper { overflow-x: auto; }
-.attendance-grid { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
-.attendance-grid th,
-.attendance-grid td { padding: 0.5rem; border: 1px solid #e2e8f0; text-align: center; }
-.attendance-grid th { background: #f8fafc; font-weight: 600; white-space: nowrap; }
-.student-col { text-align: left !important; min-width: 200px; position: sticky; left: 0; background: #fff; z-index: 1; }
-.attendance-grid th.student-col { background: #f8fafc; }
-.date-col { min-width: 70px; }
-.status-cell { font-weight: 700; }
-.status-cell.empty { color: #cbd5e1; }
-.student-link { cursor: pointer; color: var(--jandira-primary, #2563eb); text-decoration: underline; }
-</style>

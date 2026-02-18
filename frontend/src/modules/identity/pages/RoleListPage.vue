@@ -47,11 +47,11 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Perfis</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Perfis</h1>
 
-    <div class="card-section">
-      <div class="toolbar-end mb-3">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="flex justify-end mb-4">
         <Button label="Novo Perfil" icon="pi pi-plus" @click="router.push('/identity/roles/new')" />
       </div>
 
@@ -79,9 +79,3 @@ onMounted(loadData)
     </div>
   </div>
 </template>
-
-<style scoped>
-.mb-3 { margin-bottom: 1rem; }
-.mr-1 { margin-right: 0.25rem; }
-.toolbar-end { display: flex; justify-content: flex-end; }
-</style>

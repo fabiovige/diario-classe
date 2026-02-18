@@ -84,11 +84,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('assessment-configs', [AssessmentController::class, 'storeConfig']);
 
     Route::get('period-closings', [PeriodClosingController::class, 'index']);
+    Route::get('period-closings/dashboard', [PeriodClosingController::class, 'dashboard']);
+    Route::get('period-closings/{id}', [PeriodClosingController::class, 'show']);
     Route::post('period-closings/{id}/check', [PeriodClosingController::class, 'check']);
     Route::post('period-closings/{id}/submit', [PeriodClosingController::class, 'submit']);
     Route::post('period-closings/{id}/validate', [PeriodClosingController::class, 'validate']);
     Route::post('period-closings/{id}/close', [PeriodClosingController::class, 'close']);
-    Route::get('period-closings/dashboard', [PeriodClosingController::class, 'dashboard']);
     Route::post('rectifications', [PeriodClosingController::class, 'storeRectification']);
     Route::post('rectifications/{id}/approve', [PeriodClosingController::class, 'approveRectification']);
     Route::post('final-results/calculate', [PeriodClosingController::class, 'calculateFinalResult']);

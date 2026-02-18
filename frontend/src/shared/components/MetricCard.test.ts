@@ -27,9 +27,10 @@ describe('MetricCard', () => {
       },
     })
 
-    const loadingEl = wrapper.find('.metric-loading')
-    expect(loadingEl.exists()).toBe(true)
-    expect(loadingEl.text()).toBe('...')
+    const divs = wrapper.findAll('div')
+    const loadingDiv = divs.find(d => d.text() === '...')
+    expect(loadingDiv).toBeDefined()
+    expect(loadingDiv!.text()).toBe('...')
   })
 
   it('shows value when loading is false', () => {
@@ -42,8 +43,10 @@ describe('MetricCard', () => {
       },
     })
 
-    expect(wrapper.find('.metric-loading').exists()).toBe(false)
-    expect(wrapper.find('.metric-value').text()).toBe('42')
+    expect(wrapper.text()).not.toContain('...')
+    const valueDiv = wrapper.findAll('div').find(d => d.text() === '42' && d.attributes('style'))
+    expect(valueDiv).toBeDefined()
+    expect(valueDiv!.text()).toBe('42')
   })
 
   it('applies custom color to icon and value', () => {
@@ -59,8 +62,9 @@ describe('MetricCard', () => {
     const icon = wrapper.find('i')
     expect(icon.attributes('style')).toContain('color: rgb(255, 0, 0)')
 
-    const value = wrapper.find('.metric-value')
-    expect(value.attributes('style')).toContain('color: rgb(255, 0, 0)')
+    const valueDiv = wrapper.findAll('div').find(d => d.text() === '10' && d.attributes('style'))
+    expect(valueDiv).toBeDefined()
+    expect(valueDiv!.attributes('style')).toContain('color: rgb(255, 0, 0)')
   })
 
   it('uses default icon class', () => {

@@ -31,24 +31,43 @@ const form = ref({
   class_count: 1,
 })
 
-const classGroups = ref<ClassGroup[]>([])
-const assignments = ref<TeacherAssignment[]>([])
+const classGroups = ref<(ClassGroup & { label: string })[]>([])
+const assignments = ref<(TeacherAssignment & { label: string })[]>([])
+const loadingAssignments = ref(false)
 
-function assignmentLabel(a: TeacherAssignment): string {
-  return a.curricular_component?.name ?? a.experience_field?.name ?? `Atribuicao #${a.id}`
+const assignmentPlaceholder = computed(() => {
+  if (!form.value.class_group_id) return 'Selecione a turma primeiro'
+  if (loadingAssignments.value) return 'Carregando...'
+  if (assignments.value.length === 0) return 'Nenhuma disciplina vinculada'
+  return 'Selecione'
+})
+
+async function loadClassGroups() {
+  try {
+    const response = await schoolStructureService.getClassGroups({ per_page: 100 })
+    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
+  } catch {
+    toast.error('Erro ao carregar turmas')
+  }
 }
 
-async function loadAuxData() {
+async function loadAssignments() {
+  if (!form.value.class_group_id) return
+  loadingAssignments.value = true
   try {
-    const [cgRes, aRes] = await Promise.all([
-      schoolStructureService.getClassGroups({ per_page: 100 }),
-      curriculumService.getAssignments({ per_page: 100 }),
-    ])
-    classGroups.value = cgRes.data
-    assignments.value = aRes.data
+    const response = await curriculumService.getAssignments({ class_group_id: form.value.class_group_id, per_page: 100 })
+    assignments.value = response.data.map(a => ({ ...a, label: a.curricular_component?.name ?? a.experience_field?.name ?? `Disciplina #${a.id}` }))
   } catch {
-    toast.error('Erro ao carregar dados auxiliares')
+    toast.error('Erro ao carregar disciplinas')
+  } finally {
+    loadingAssignments.value = false
   }
+}
+
+function onClassGroupChange() {
+  assignments.value = []
+  form.value.teacher_assignment_id = null
+  loadAssignments()
 }
 
 async function loadRecord() {
@@ -63,6 +82,7 @@ async function loadRecord() {
     form.value.methodology = record.methodology
     form.value.observations = record.observations
     form.value.class_count = record.class_count
+    await loadAssignments()
   } catch {
     toast.error('Erro ao carregar registro')
     router.push('/class-record')
@@ -90,47 +110,47 @@ async function handleSubmit() {
 }
 
 onMounted(async () => {
-  await loadAuxData()
+  await loadClassGroups()
   await loadRecord()
 })
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">{{ isEdit ? 'Editar Registro de Aula' : 'Novo Registro de Aula' }}</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Registro de Aula' : 'Novo Registro de Aula' }}</h1>
 
-    <div class="card-section form-card">
-      <form @submit.prevent="handleSubmit" class="form-grid">
-        <div class="field">
-          <label>Turma *</label>
-          <Select v-model="form.class_group_id" :options="classGroups" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <Select v-model="form.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
         </div>
-        <div class="field">
-          <label>Atribuicao *</label>
-          <Select v-model="form.teacher_assignment_id" :options="assignments" :optionLabel="assignmentLabel" optionValue="id" placeholder="Selecione" class="w-full" />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Disciplina *</label>
+          <Select v-model="form.teacher_assignment_id" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!form.class_group_id || loadingAssignments || assignments.length === 0" class="w-full" />
         </div>
-        <div class="field">
-          <label>Data *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data *</label>
           <InputText v-model="form.date" type="date" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Conteudo *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Conteudo *</label>
           <Textarea v-model="form.content" rows="4" class="w-full" />
         </div>
-        <div class="field">
-          <label>Metodologia</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Metodologia</label>
           <Textarea v-model="form.methodology" rows="3" class="w-full" />
         </div>
-        <div class="field">
-          <label>Observacoes</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Observacoes</label>
           <Textarea v-model="form.observations" rows="3" class="w-full" />
         </div>
-        <div class="field">
-          <label>Quantidade de Aulas *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Quantidade de Aulas *</label>
           <InputNumber v-model="form.class_count" :min="1" :max="10" class="w-full" />
         </div>
 
-        <div class="form-actions">
+        <div class="mt-4 flex justify-end gap-3">
           <Button label="Cancelar" severity="secondary" @click="router.push('/class-record')" />
           <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
         </div>
@@ -138,12 +158,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.form-card { max-width: 700px; }
-.form-grid { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
-</style>

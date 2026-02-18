@@ -6,14 +6,17 @@ export const periodClosingService = {
   getClosings(params?: Record<string, unknown>): Promise<PaginatedData<PeriodClosing>> {
     return apiGet<PaginatedData<PeriodClosing>>('period-closings', params)
   },
+  getClosing(id: number): Promise<PeriodClosing> {
+    return apiGet<PeriodClosing>(`period-closings/${id}`)
+  },
   check(id: number): Promise<PeriodClosing> {
     return apiPost<PeriodClosing>(`period-closings/${id}/check`)
   },
   submit(id: number): Promise<PeriodClosing> {
     return apiPost<PeriodClosing>(`period-closings/${id}/submit`)
   },
-  validate(id: number): Promise<PeriodClosing> {
-    return apiPost<PeriodClosing>(`period-closings/${id}/validate`)
+  validate(id: number, data: { approve: boolean; rejection_reason?: string }): Promise<PeriodClosing> {
+    return apiPost<PeriodClosing>(`period-closings/${id}/validate`, data)
   },
   close(id: number): Promise<PeriodClosing> {
     return apiPost<PeriodClosing>(`period-closings/${id}/close`)

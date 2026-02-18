@@ -30,33 +30,11 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Dashboard - Professor(a)</h1>
-    <div class="dashboard-grid">
-      <MetricCard
-        title="Minhas Turmas"
-        :value="metrics.assignments"
-        label="Atribuicoes ativas"
-        icon="pi pi-th-large"
-        color="var(--jandira-primary)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Diarios"
-        :value="metrics.lessonRecords"
-        label="Registros de aula"
-        icon="pi pi-book"
-        color="var(--jandira-secondary)"
-        :loading="loading"
-      />
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Dashboard - Professor(a)</h1>
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+      <MetricCard title="Minhas Turmas" :value="metrics.assignments" label="Atribuicoes ativas" icon="pi pi-th-large" color="#0078D4" :loading="loading" />
+      <MetricCard title="Diarios" :value="metrics.lessonRecords" label="Registros de aula" icon="pi pi-book" color="#0F7B0F" :loading="loading" />
     </div>
   </div>
 </template>
-
-<style scoped>
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-</style>

@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class TeacherSeeder extends Seeder
 {
-    private const TOTAL_TEACHERS = 100;
+    private const TOTAL_TEACHERS = 300;
 
     private const SPECIALIZATIONS = [
         'Pedagogia',
@@ -36,7 +36,7 @@ class TeacherSeeder extends Seeder
         for ($i = 0; $i < self::TOTAL_TEACHERS; $i++) {
             $school = $schools[$i % $schoolCount];
             $name = $faker->name();
-            $email = Str::slug($name, '.').'@jandira.sp.gov.br';
+            $email = Str::slug($name, '.').'.'.($i + 1).'@jandira.sp.gov.br';
 
             $user = User::updateOrCreate(
                 ['email' => $email],

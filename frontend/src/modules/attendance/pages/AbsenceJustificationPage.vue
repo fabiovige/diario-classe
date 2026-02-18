@@ -35,8 +35,8 @@ const form = ref({
 async function loadData() {
   loading.value = true
   try {
-    await attendanceService.getConfigs()
-    items.value = []
+    const response = await attendanceService.getJustifications()
+    items.value = response.data
   } catch {
     toast.error('Erro ao carregar justificativas')
   } finally {
@@ -79,11 +79,11 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Justificativas de Falta</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Justificativas de Falta</h1>
 
-    <div class="card-section">
-      <Toolbar class="mb-3">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start />
         <template #end>
           <Button label="Nova Justificativa" icon="pi pi-plus" @click="openDialog" />
@@ -118,36 +118,28 @@ onMounted(loadData)
     </div>
 
     <FormDialog v-model:visible="dialogVisible" title="Nova Justificativa" :loading="dialogLoading" @save="handleSave">
-      <div class="dialog-form">
-        <div class="field">
-          <label>ID do Aluno *</label>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">ID do Aluno *</label>
           <InputText :modelValue="String(form.student_id ?? '')" @update:modelValue="form.student_id = $event ? Number($event) : null" type="number" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Data Inicio *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data Inicio *</label>
           <InputText v-model="form.start_date" type="date" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Data Fim *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data Fim *</label>
           <InputText v-model="form.end_date" type="date" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Motivo *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Motivo *</label>
           <Textarea v-model="form.reason" rows="3" class="w-full" />
         </div>
-        <div class="field">
-          <label>Caminho do Documento</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Caminho do Documento</label>
           <InputText v-model="form.document_path" class="w-full" />
         </div>
       </div>
     </FormDialog>
   </div>
 </template>
-
-<style scoped>
-.mb-3 { margin-bottom: 1rem; }
-.dialog-form { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-</style>

@@ -53,11 +53,11 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Responsaveis</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Responsaveis</h1>
 
-    <div class="card-section">
-      <Toolbar class="mb-3">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start>
           <InputText v-model="search" placeholder="Buscar responsavel..." @keyup.enter="onSearch" />
           <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
@@ -91,6 +91,7 @@ onMounted(loadData)
 
       <Paginator
         v-if="totalRecords > perPage"
+        class="mt-4 border-t border-[#E0E0E0] pt-3"
         :rows="perPage"
         :totalRecords="totalRecords"
         :first="(currentPage - 1) * perPage"
@@ -100,8 +101,3 @@ onMounted(loadData)
     </div>
   </div>
 </template>
-
-<style scoped>
-.mb-3 { margin-bottom: 1rem; }
-.ml-2 { margin-left: 0.5rem; }
-</style>

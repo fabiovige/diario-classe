@@ -24,6 +24,9 @@ export const attendanceService = {
   approveJustification(id: number): Promise<AbsenceJustification> {
     return apiPost<AbsenceJustification>(`absence-justifications/${id}/approve`)
   },
+  getJustifications(params?: Record<string, unknown>): Promise<PaginatedData<AbsenceJustification>> {
+    return apiGet<PaginatedData<AbsenceJustification>>('absence-justifications', params)
+  },
   getConfigs(params?: Record<string, unknown>): Promise<PaginatedData<AttendanceConfig>> {
     return apiGet<PaginatedData<AttendanceConfig>>('attendance-configs', params)
   },

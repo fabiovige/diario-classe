@@ -67,41 +67,41 @@ onMounted(loadSchool)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">{{ isEdit ? 'Editar Escola' : 'Nova Escola' }}</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Escola' : 'Nova Escola' }}</h1>
 
-    <div class="card-section form-card">
-      <form @submit.prevent="handleSubmit" class="form-grid">
-        <div class="field">
-          <label>Nome *</label>
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Codigo INEP *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Codigo INEP *</label>
           <InputText v-model="form.inep_code" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Tipo *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Tipo *</label>
           <InputText v-model="form.type" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Endereco</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Endereco</label>
           <InputText v-model="form.address" class="w-full" />
         </div>
-        <div class="field">
-          <label>Telefone</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Telefone</label>
           <InputText v-model="form.phone" class="w-full" />
         </div>
-        <div class="field">
-          <label>E-mail</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">E-mail</label>
           <InputText v-model="form.email" type="email" class="w-full" />
         </div>
-        <div class="field-check">
+        <div class="flex items-center gap-2">
           <Checkbox v-model="form.active" :binary="true" inputId="active" />
           <label for="active">Ativa</label>
         </div>
 
-        <div class="form-actions">
+        <div class="mt-4 flex justify-end gap-3">
           <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/schools')" />
           <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
         </div>
@@ -109,13 +109,3 @@ onMounted(loadSchool)
     </div>
   </div>
 </template>
-
-<style scoped>
-.form-card { max-width: 700px; }
-.form-grid { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.field-check { display: flex; align-items: center; gap: 0.5rem; }
-.w-full { width: 100%; }
-.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
-</style>

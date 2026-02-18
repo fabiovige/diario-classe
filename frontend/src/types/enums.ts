@@ -16,7 +16,7 @@ export type AttendanceStatus = 'present' | 'absent' | 'justified' | 'dispensed'
 
 export type GradeType = 'numeric' | 'conceptual' | 'descriptive'
 
-export type PeriodClosingStatus = 'pending' | 'submitted' | 'validated' | 'rejected' | 'closed'
+export type PeriodClosingStatus = 'pending' | 'in_validation' | 'approved' | 'closed'
 
 export type PeriodType = 'bimester' | 'trimester' | 'semester'
 

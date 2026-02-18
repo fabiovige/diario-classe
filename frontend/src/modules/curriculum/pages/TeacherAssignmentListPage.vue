@@ -30,7 +30,7 @@ const search = ref('')
 const dialogVisible = ref(false)
 const dialogLoading = ref(false)
 
-const teachers = ref<Teacher[]>([])
+const teachers = ref<(Teacher & { label: string })[]>([])
 const classGroups = ref<ClassGroup[]>([])
 const components = ref<CurricularComponent[]>([])
 const experienceFields = ref<ExperienceField[]>([])
@@ -65,8 +65,8 @@ async function loadAuxData() {
       curriculumService.getComponents({ per_page: 100 }),
       curriculumService.getExperienceFields({ per_page: 100 }),
     ])
-    teachers.value = teachersRes.data
-    classGroups.value = classGroupsRes.data
+    teachers.value = teachersRes.data.map((t: Teacher) => ({ ...t, label: t.user?.name ?? `Professor #${t.id}` }))
+    classGroups.value = classGroupsRes.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
     components.value = componentsRes.data
     experienceFields.value = fieldsRes.data
   } catch {
@@ -104,21 +104,17 @@ function onSearch() {
   loadData()
 }
 
-function teacherDisplayName(teacher: Teacher): string {
-  return teacher.user?.name ?? `Professor #${teacher.id}`
-}
-
 onMounted(async () => {
   await Promise.all([loadData(), loadAuxData()])
 })
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Atribuicoes de Professores</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Atribuicoes de Professores</h1>
 
-    <div class="card-section">
-      <Toolbar class="mb-3">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start>
           <InputText v-model="search" placeholder="Buscar atribuicao..." @keyup.enter="onSearch" />
           <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
@@ -138,7 +134,7 @@ onMounted(async () => {
         </Column>
         <Column header="Turma">
           <template #body="{ data }">
-            {{ data.class_group?.name ?? '--' }}
+            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name].filter(Boolean).join(' - ') || '--' }}
           </template>
         </Column>
         <Column header="Componente/Campo">
@@ -155,6 +151,7 @@ onMounted(async () => {
 
       <Paginator
         v-if="totalRecords > perPage"
+        class="mt-4 border-t border-[#E0E0E0] pt-3"
         :rows="perPage"
         :totalRecords="totalRecords"
         :first="(currentPage - 1) * perPage"
@@ -164,33 +161,24 @@ onMounted(async () => {
     </div>
 
     <FormDialog v-model:visible="dialogVisible" title="Nova Atribuicao" :loading="dialogLoading" @save="handleSave" width="600px">
-      <div class="dialog-form">
-        <div class="field">
-          <label>Professor *</label>
-          <Select v-model="form.teacher_id" :options="teachers" :optionLabel="teacherDisplayName" optionValue="id" placeholder="Selecione" class="w-full" filter />
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Professor *</label>
+          <Select v-model="form.teacher_id" :options="teachers" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
-        <div class="field">
-          <label>Turma *</label>
-          <Select v-model="form.class_group_id" :options="classGroups" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <Select v-model="form.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
-        <div class="field">
-          <label>Componente Curricular</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Componente Curricular</label>
           <Select v-model="form.curricular_component_id" :options="components" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" showClear />
         </div>
-        <div class="field">
-          <label>Campo de Experiencia</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Campo de Experiencia</label>
           <Select v-model="form.experience_field_id" :options="experienceFields" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" showClear />
         </div>
       </div>
     </FormDialog>
   </div>
 </template>
-
-<style scoped>
-.mb-3 { margin-bottom: 1rem; }
-.ml-2 { margin-left: 0.5rem; }
-.dialog-form { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-</style>

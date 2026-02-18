@@ -35,51 +35,51 @@ onMounted(loadStudent)
 </script>
 
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <h1 class="page-title">Detalhes do Aluno</h1>
+  <div class="p-6">
+    <div class="mb-4 flex items-center justify-between">
+      <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Detalhes do Aluno</h1>
       <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/people/students')" />
     </div>
 
-    <div v-if="student" class="card-section">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Nome</span>
-          <span class="info-value">{{ student.name }}</span>
+    <div v-if="student" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Nome</span>
+          <span class="text-[0.9375rem]">{{ student.name }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Nome Social</span>
-          <span class="info-value">{{ student.social_name ?? '--' }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Nome Social</span>
+          <span class="text-[0.9375rem]">{{ student.social_name ?? '--' }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">CPF</span>
-          <span class="info-value">{{ formatCpf(student.cpf) }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">CPF</span>
+          <span class="text-[0.9375rem]">{{ formatCpf(student.cpf) }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Data de Nascimento</span>
-          <span class="info-value">{{ formatDate(student.birth_date) }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Data de Nascimento</span>
+          <span class="text-[0.9375rem]">{{ formatDate(student.birth_date) }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Genero</span>
-          <span class="info-value">{{ student.gender }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Genero</span>
+          <span class="text-[0.9375rem]">{{ student.gender }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Raca/Cor</span>
-          <span class="info-value">{{ student.race_color }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Raca/Cor</span>
+          <span class="text-[0.9375rem]">{{ student.race_color }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Deficiencia</span>
-          <span class="info-value">{{ student.has_disability ? 'Sim' : 'Nao' }}</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Deficiencia</span>
+          <span class="text-[0.9375rem]">{{ student.has_disability ? 'Sim' : 'Nao' }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Status</span>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Status</span>
           <StatusBadge :status="student.active ? 'active' : 'inactive'" :label="student.active ? 'Ativo' : 'Inativo'" />
         </div>
       </div>
     </div>
 
-    <div v-if="student" class="card-section mt-3">
-      <h2 class="section-title">Responsaveis</h2>
+    <div v-if="student" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-lg font-semibold">Responsaveis</h2>
 
       <EmptyState v-if="!student.guardians || student.guardians.length === 0" message="Nenhum responsavel vinculado" />
 
@@ -107,13 +107,3 @@ onMounted(loadStudent)
     </div>
   </div>
 </template>
-
-<style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; }
-.info-item { display: flex; flex-direction: column; gap: 0.25rem; }
-.info-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
-.info-value { font-size: 0.9375rem; }
-.section-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-</style>

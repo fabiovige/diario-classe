@@ -38,41 +38,12 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Dashboard - Coordenador(a)</h1>
-    <div class="dashboard-grid">
-      <MetricCard
-        title="Turmas"
-        :value="metrics.classGroups"
-        label="Na escola"
-        icon="pi pi-th-large"
-        color="var(--jandira-primary)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Diarios"
-        :value="metrics.lessonRecords"
-        label="Registros de aula"
-        icon="pi pi-book"
-        color="var(--jandira-secondary)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Fechamentos"
-        :value="metrics.closingsPending"
-        label="A validar"
-        icon="pi pi-check-circle"
-        color="var(--jandira-warning)"
-        :loading="loading"
-      />
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Dashboard - Coordenador(a)</h1>
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+      <MetricCard title="Turmas" :value="metrics.classGroups" label="Na escola" icon="pi pi-th-large" color="#0078D4" :loading="loading" />
+      <MetricCard title="Diarios" :value="metrics.lessonRecords" label="Registros de aula" icon="pi pi-book" color="#0F7B0F" :loading="loading" />
+      <MetricCard title="Fechamentos" :value="metrics.closingsPending" label="A validar" icon="pi pi-check-circle" color="#9D5D00" :loading="loading" />
     </div>
   </div>
 </template>
-
-<style scoped>
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-</style>

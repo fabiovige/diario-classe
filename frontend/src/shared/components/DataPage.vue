@@ -42,16 +42,16 @@ const isEmpty = computed(() => !props.loading && props.items.length === 0)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">{{ title }}</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">{{ title }}</h1>
 
-    <div class="card-section">
-      <Toolbar class="data-toolbar">
+    <div class="rounded-lg border border-fluent-border bg-fluent-surface p-6 shadow-sm">
+      <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start>
           <InputText
             v-if="showSearch"
             :placeholder="searchPlaceholder"
-            class="toolbar-search"
+            class="w-[280px]"
             @input="emit('search', ($event.target as HTMLInputElement).value)"
           />
         </template>
@@ -75,7 +75,7 @@ const isEmpty = computed(() => !props.loading && props.items.length === 0)
         :loading="loading"
         stripedRows
         responsiveLayout="scroll"
-        class="data-table"
+        class="mb-4"
       >
         <slot />
       </DataTable>
@@ -87,30 +87,8 @@ const isEmpty = computed(() => !props.loading && props.items.length === 0)
         :first="(currentPage - 1) * perPage"
         :rowsPerPageOptions="[10, 15, 25, 50]"
         @page="emit('pageChange', $event)"
-        class="data-paginator"
+        class="border-t border-fluent-border pt-3"
       />
     </div>
   </div>
 </template>
-
-<style scoped>
-.data-toolbar {
-  margin-bottom: 1rem;
-  border: none;
-  padding: 0;
-  background: transparent;
-}
-
-.toolbar-search {
-  width: 280px;
-}
-
-.data-table {
-  margin-bottom: 1rem;
-}
-
-.data-paginator {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 0.75rem;
-}
-</style>

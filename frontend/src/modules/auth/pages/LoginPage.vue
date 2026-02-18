@@ -33,94 +33,25 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="login-card">
-    <h2 class="login-title">Entrar</h2>
+  <div class="rounded-xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
+    <h2 class="mb-6 text-center text-xl font-semibold text-[#0078D4]">Entrar</h2>
 
-    <Message v-if="errorMessage" severity="error" :closable="false" class="login-error">
+    <Message v-if="errorMessage" severity="error" :closable="false" class="mb-4">
       {{ errorMessage }}
     </Message>
 
-    <form @submit.prevent="handleLogin" class="login-form">
-      <div class="field">
-        <label for="email">E-mail</label>
-        <InputText
-          id="email"
-          v-model="email"
-          type="email"
-          placeholder="seu@email.com"
-          class="w-full"
-          required
-          autofocus
-        />
+    <form @submit.prevent="handleLogin" class="flex flex-col gap-5">
+      <div class="flex flex-col gap-1.5">
+        <label for="email" class="text-[0.8125rem] font-medium text-[#1A1A1A]">E-mail</label>
+        <InputText id="email" v-model="email" type="email" placeholder="seu@email.com" class="w-full" required autofocus />
       </div>
 
-      <div class="field">
-        <label for="password">Senha</label>
-        <Password
-          id="password"
-          v-model="password"
-          :feedback="false"
-          toggleMask
-          class="w-full"
-          inputClass="w-full"
-          required
-        />
+      <div class="flex flex-col gap-1.5">
+        <label for="password" class="text-[0.8125rem] font-medium text-[#1A1A1A]">Senha</label>
+        <Password id="password" v-model="password" :feedback="false" toggleMask class="w-full" inputClass="w-full" required />
       </div>
 
-      <Button
-        type="submit"
-        label="Entrar"
-        icon="pi pi-sign-in"
-        class="w-full login-btn"
-        :loading="loading"
-      />
+      <Button type="submit" label="Entrar" icon="pi pi-sign-in" class="mt-2 w-full" :loading="loading" />
     </form>
   </div>
 </template>
-
-<style scoped>
-.login-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-}
-
-.login-title {
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--jandira-primary);
-  margin-bottom: 1.5rem;
-}
-
-.login-error {
-  margin-bottom: 1rem;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.field label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--jandira-text);
-}
-
-.w-full {
-  width: 100%;
-}
-
-.login-btn {
-  margin-top: 0.5rem;
-}
-</style>

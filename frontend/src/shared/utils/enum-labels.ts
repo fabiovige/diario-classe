@@ -77,9 +77,8 @@ const GRADE_TYPE_LABELS: Record<GradeType, string> = {
 
 const PERIOD_CLOSING_STATUS_LABELS: Record<PeriodClosingStatus, string> = {
   pending: 'Pendente',
-  submitted: 'Enviado',
-  validated: 'Validado',
-  rejected: 'Rejeitado',
+  in_validation: 'Em Validacao',
+  approved: 'Aprovado',
   closed: 'Fechado',
 }
 

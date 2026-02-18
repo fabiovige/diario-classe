@@ -60,69 +60,51 @@ onMounted(loadStudents)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Resultado Final</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Resultado Final</h1>
 
-    <div class="card-section">
-      <div class="filter-bar">
-        <div class="field">
-          <label>Aluno *</label>
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="grid grid-cols-[1fr_auto] items-end gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Aluno *</label>
           <Select v-model="selectedStudentId" :options="students" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter @change="loadResult" />
         </div>
-        <div class="field action-field">
+        <div class="flex items-end gap-2">
           <Button label="Buscar" icon="pi pi-search" @click="loadResult" :disabled="!selectedStudentId" />
           <Button label="Calcular" icon="pi pi-calculator" severity="info" @click="calculateResult" :disabled="!selectedStudentId" :loading="loading" />
         </div>
       </div>
     </div>
 
-    <div class="card-section mt-3">
+    <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <EmptyState v-if="!loading && !result" message="Selecione um aluno para visualizar o resultado final" />
 
-      <div v-if="result" class="result-card">
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Aluno</span>
-            <span class="info-value">{{ result.student?.name ?? `Aluno #${result.student_id}` }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Resultado</span>
-            <StatusBadge :status="result.result" :label="finalResultStatusLabel(result.result)" />
-          </div>
-          <div class="info-item">
-            <span class="info-label">Media Geral</span>
-            <span class="info-value result-average">{{ result.overall_average ?? '--' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Frequencia Geral</span>
-            <span class="info-value">{{ formatPercentage(result.overall_frequency) }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Conselho</span>
-            <span class="info-value">{{ result.council_override ? 'Sim' : 'Nao' }}</span>
-          </div>
-          <div v-if="result.observations" class="info-item info-full">
-            <span class="info-label">Observacoes</span>
-            <span class="info-value">{{ result.observations }}</span>
-          </div>
+      <div v-if="result" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Aluno</span>
+          <span class="text-[0.9375rem]">{{ result.student?.name ?? `Aluno #${result.student_id}` }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Resultado</span>
+          <StatusBadge :status="result.result" :label="finalResultStatusLabel(result.result)" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Media Geral</span>
+          <span class="text-2xl font-bold">{{ result.overall_average ?? '--' }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Frequencia Geral</span>
+          <span class="text-[0.9375rem]">{{ formatPercentage(result.overall_frequency) }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Conselho</span>
+          <span class="text-[0.9375rem]">{{ result.council_override ? 'Sim' : 'Nao' }}</span>
+        </div>
+        <div v-if="result.observations" class="col-span-full flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Observacoes</span>
+          <span class="text-[0.9375rem]">{{ result.observations }}</span>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.filter-bar { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: end; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.action-field { display: flex; gap: 0.5rem; align-items: flex-end; }
-.w-full { width: 100%; }
-.mt-3 { margin-top: 1.5rem; }
-.result-card { padding: 1rem 0; }
-.info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; }
-.info-item { display: flex; flex-direction: column; gap: 0.25rem; }
-.info-full { grid-column: 1 / -1; }
-.info-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
-.info-value { font-size: 0.9375rem; }
-.result-average { font-size: 1.5rem; font-weight: 700; }
-</style>

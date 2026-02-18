@@ -62,25 +62,25 @@ onMounted(loadRole)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">{{ isEdit ? 'Editar Perfil' : 'Novo Perfil' }}</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Perfil' : 'Novo Perfil' }}</h1>
 
-    <div class="card-section form-card">
-      <form @submit.prevent="handleSubmit" class="form-grid">
-        <div class="field">
-          <label>Nome *</label>
+    <div class="max-w-[600px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
-        <div v-if="!isEdit" class="field">
-          <label>Slug *</label>
+        <div v-if="!isEdit" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Slug *</label>
           <InputText v-model="form.slug" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Permissoes</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Permissoes</label>
           <Chips v-model="form.permissions" placeholder="Digite e pressione Enter" class="w-full" />
         </div>
 
-        <div class="form-actions">
+        <div class="mt-4 flex justify-end gap-3">
           <Button label="Cancelar" severity="secondary" @click="router.push('/identity/roles')" />
           <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
         </div>
@@ -88,12 +88,3 @@ onMounted(loadRole)
     </div>
   </div>
 </template>
-
-<style scoped>
-.form-card { max-width: 600px; }
-.form-grid { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
-</style>

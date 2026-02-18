@@ -44,65 +44,15 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Dashboard - Administrador</h1>
-    <div class="dashboard-grid">
-      <MetricCard
-        title="Escolas"
-        :value="metrics.schools"
-        label="EMEBs cadastradas"
-        icon="pi pi-building"
-        color="var(--jandira-primary)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Alunos"
-        :value="metrics.students"
-        label="Cadastrados"
-        icon="pi pi-users"
-        color="var(--jandira-secondary)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Professores"
-        :value="metrics.teachers"
-        label="Cadastrados"
-        icon="pi pi-user"
-        color="var(--jandira-primary-light)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Usuarios"
-        :value="metrics.users"
-        label="No sistema"
-        icon="pi pi-id-card"
-        color="var(--jandira-info)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Turmas"
-        :value="metrics.classGroups"
-        label="Ativas"
-        icon="pi pi-th-large"
-        color="var(--jandira-tertiary)"
-        :loading="loading"
-      />
-      <MetricCard
-        title="Fechamentos"
-        :value="metrics.closingsPending"
-        label="Pendentes"
-        icon="pi pi-clock"
-        color="var(--jandira-warning)"
-        :loading="loading"
-      />
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Dashboard - Administrador</h1>
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+      <MetricCard title="Escolas" :value="metrics.schools" label="EMEBs cadastradas" icon="pi pi-building" color="#0078D4" :loading="loading" />
+      <MetricCard title="Alunos" :value="metrics.students" label="Cadastrados" icon="pi pi-users" color="#0F7B0F" :loading="loading" />
+      <MetricCard title="Professores" :value="metrics.teachers" label="Cadastrados" icon="pi pi-user" color="#60CDFF" :loading="loading" />
+      <MetricCard title="Usuarios" :value="metrics.users" label="No sistema" icon="pi pi-id-card" color="#0078D4" :loading="loading" />
+      <MetricCard title="Turmas" :value="metrics.classGroups" label="Ativas" icon="pi pi-th-large" color="#9D5D00" :loading="loading" />
+      <MetricCard title="Fechamentos" :value="metrics.closingsPending" label="Pendentes" icon="pi pi-clock" color="#9D5D00" :loading="loading" />
     </div>
   </div>
 </template>
-
-<style scoped>
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-</style>

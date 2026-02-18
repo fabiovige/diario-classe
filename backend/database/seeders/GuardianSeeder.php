@@ -56,7 +56,7 @@ class GuardianSeeder extends Seeder
     ): Guardian {
         $isFemale = in_array($relationship, ['mae', 'avoa', 'tia'], true);
         $name = $isFemale ? $faker->name('female') : $faker->name('male');
-        $email = Str::slug($name, '.').'.'.$faker->unique()->numerify('###').'@email.com';
+        $email = Str::slug($name, '.').'.'.mt_rand(10000, 99999).'@email.com';
 
         $user = User::create([
             'name' => $name,

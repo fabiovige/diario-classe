@@ -22,9 +22,17 @@ use Illuminate\Http\Request;
 
 class PeriodClosingController extends ApiController
 {
+    private const EAGER_RELATIONS = [
+        'assessmentPeriod',
+        'classGroup.gradeLevel',
+        'classGroup.shift',
+        'teacherAssignment.curricularComponent',
+        'teacherAssignment.experienceField',
+    ];
+
     public function index(Request $request): JsonResponse
     {
-        $closings = PeriodClosing::with(['assessmentPeriod', 'classGroup', 'teacherAssignment'])
+        $closings = PeriodClosing::with(self::EAGER_RELATIONS)
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('assessment_period_id'), fn ($q, $id) => $q->where('assessment_period_id', $id))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
@@ -34,18 +42,25 @@ class PeriodClosingController extends ApiController
         return $this->success(PeriodClosingResource::collection($closings)->response()->getData(true));
     }
 
+    public function show(int $id): JsonResponse
+    {
+        $closing = PeriodClosing::with(self::EAGER_RELATIONS)->findOrFail($id);
+
+        return $this->success(new PeriodClosingResource($closing));
+    }
+
     public function check(int $id, RunCompletenessCheckUseCase $useCase): JsonResponse
     {
         $closing = $useCase->execute($id);
 
-        return $this->success(new PeriodClosingResource($closing));
+        return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
     }
 
     public function submit(int $id, SubmitPeriodClosingUseCase $useCase): JsonResponse
     {
         $closing = $useCase->execute($id);
 
-        return $this->success(new PeriodClosingResource($closing));
+        return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
     }
 
     public function validate(ValidatePeriodClosingRequest $request, int $id, ValidatePeriodClosingUseCase $useCase): JsonResponse
@@ -56,14 +71,14 @@ class PeriodClosingController extends ApiController
             rejectionReason: $request->validated('rejection_reason'),
         );
 
-        return $this->success(new PeriodClosingResource($closing));
+        return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
     }
 
     public function close(int $id, ClosePeriodUseCase $useCase): JsonResponse
     {
         $closing = $useCase->execute($id);
 
-        return $this->success(new PeriodClosingResource($closing));
+        return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
     }
 
     public function dashboard(Request $request): JsonResponse

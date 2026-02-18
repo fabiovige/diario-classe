@@ -18,6 +18,8 @@ class EnrollmentSeeder extends Seeder
 
     private const TRANSFER_PERCENTAGE = 5;
 
+    private const MAX_STUDENTS_PER_SCHOOL = 100;
+
     public function run(): void
     {
         $faker = FakerFactory::create('pt_BR');
@@ -33,19 +35,27 @@ class EnrollmentSeeder extends Seeder
         $totalStudents = $students->count();
 
         foreach ($schoolClassGroups as $schoolData) {
+            $schoolCount = 0;
+
             foreach ($schoolData['classGroups'] as $classGroup) {
+                if ($studentIndex >= $totalStudents || $schoolCount >= self::MAX_STUDENTS_PER_SCHOOL) {
+                    break;
+                }
+
                 $spotsToFill = min(
                     (int) ceil($classGroup->max_students * 0.8),
                     $totalStudents - $studentIndex,
+                    self::MAX_STUDENTS_PER_SCHOOL - $schoolCount,
                 );
 
                 if ($spotsToFill <= 0) {
-                    break 2;
+                    break;
                 }
 
                 for ($s = 0; $s < $spotsToFill; $s++) {
                     $student = $students[$studentIndex];
                     $studentIndex++;
+                    $schoolCount++;
 
                     $enrollment = Enrollment::create([
                         'student_id' => $student->id,
@@ -79,6 +89,10 @@ class EnrollmentSeeder extends Seeder
 
                     $this->applyTransfer($faker, $enrollment, $createdBy);
                 }
+            }
+
+            if ($studentIndex >= $totalStudents) {
+                break;
             }
         }
     }

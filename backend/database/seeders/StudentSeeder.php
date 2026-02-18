@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class StudentSeeder extends Seeder
 {
-    private const TOTAL_STUDENTS = 500;
+    private const TOTAL_STUDENTS = 2000;
 
     private const RACE_COLOR_DISTRIBUTION = [
         'parda' => 43,

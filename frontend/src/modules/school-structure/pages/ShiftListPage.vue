@@ -86,11 +86,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-container">
-    <h1 class="page-title">Turnos</h1>
+  <div class="p-6">
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Turnos</h1>
 
-    <div class="card-section">
-      <Toolbar class="mb-3">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start />
         <template #end>
           <Button label="Novo Turno" icon="pi pi-plus" @click="openDialog" />
@@ -112,6 +112,7 @@ onMounted(async () => {
 
       <Paginator
         v-if="totalRecords > perPage"
+        class="mt-4 border-t border-[#E0E0E0] pt-3"
         :rows="perPage"
         :totalRecords="totalRecords"
         :first="(currentPage - 1) * perPage"
@@ -121,32 +122,24 @@ onMounted(async () => {
     </div>
 
     <FormDialog v-model:visible="dialogVisible" title="Novo Turno" :loading="dialogLoading" @save="handleSave">
-      <div class="dialog-form">
-        <div class="field">
-          <label>Nome *</label>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
-        <div class="field">
-          <label>Escola *</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola *</label>
           <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
-        <div class="field">
-          <label>Horario Inicio</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Horario Inicio</label>
           <InputText v-model="form.start_time" type="time" class="w-full" />
         </div>
-        <div class="field">
-          <label>Horario Fim</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Horario Fim</label>
           <InputText v-model="form.end_time" type="time" class="w-full" />
         </div>
       </div>
     </FormDialog>
   </div>
 </template>
-
-<style scoped>
-.mb-3 { margin-bottom: 1rem; }
-.dialog-form { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.375rem; }
-.field label { font-size: 0.8125rem; font-weight: 500; }
-.w-full { width: 100%; }
-</style>
