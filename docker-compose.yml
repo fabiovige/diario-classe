@@ -42,6 +42,16 @@ services:
     networks:
       - diario-network
 
+  frontend:
+    build: ./frontend
+    container_name: diario-frontend
+    ports:
+      - "3015:80"
+    depends_on:
+      - app
+    networks:
+      - diario-network
+
 volumes:
   mysql_data:
 
