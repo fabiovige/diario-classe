@@ -360,13 +360,13 @@ const router = createRouter({
       path: '/class-record/new',
       name: 'lesson-record-create',
       component: () => import('@/modules/class-record/pages/LessonRecordFormPage.vue'),
-      meta: { requiresAuth: true, roles: ['teacher'], breadcrumb: 'Novo Registro' },
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Novo Registro' },
     },
     {
       path: '/class-record/:id/edit',
       name: 'lesson-record-edit',
       component: () => import('@/modules/class-record/pages/LessonRecordFormPage.vue'),
-      meta: { requiresAuth: true, roles: ['teacher'], breadcrumb: 'Editar Registro' },
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Editar Registro' },
     },
 
     // Assessment
