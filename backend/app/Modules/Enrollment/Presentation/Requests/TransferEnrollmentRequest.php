@@ -20,6 +20,8 @@ class TransferEnrollmentRequest extends FormRequest
             'type' => ['required', 'string', Rule::enum(MovementType::class)],
             'movement_date' => ['required', 'date'],
             'reason' => ['nullable', 'string', 'max:500'],
+            'origin_school_id' => ['nullable', 'integer', 'exists:schools,id'],
+            'destination_school_id' => ['nullable', 'integer', 'exists:schools,id'],
         ];
     }
 }

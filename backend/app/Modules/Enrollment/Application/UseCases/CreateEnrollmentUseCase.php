@@ -18,6 +18,7 @@ final class CreateEnrollmentUseCase
                 'academic_year_id' => $dto->academicYearId,
                 'school_id' => $dto->schoolId,
                 'enrollment_number' => $dto->enrollmentNumber,
+                'enrollment_type' => $dto->enrollmentType,
                 'enrollment_date' => $dto->enrollmentDate,
                 'status' => 'active',
             ]);

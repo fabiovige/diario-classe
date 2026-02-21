@@ -20,6 +20,8 @@ class EnrollmentResource extends JsonResource
             'academic_year_id' => $this->academic_year_id,
             'school_id' => $this->school_id,
             'enrollment_number' => $this->enrollment_number,
+            'enrollment_type' => $this->enrollment_type->value,
+            'enrollment_type_label' => $this->enrollment_type->label(),
             'status' => $this->status,
             'enrollment_date' => $this->enrollment_date?->format('Y-m-d'),
             'exit_date' => $this->exit_date?->format('Y-m-d'),
@@ -28,6 +30,7 @@ class EnrollmentResource extends JsonResource
             'school' => new SchoolResource($this->whenLoaded('school')),
             'class_assignments' => ClassAssignmentResource::collection($this->whenLoaded('classAssignments')),
             'movements' => EnrollmentMovementResource::collection($this->whenLoaded('movements')),
+            'documents' => EnrollmentDocumentResource::collection($this->whenLoaded('documents')),
         ];
     }
 }

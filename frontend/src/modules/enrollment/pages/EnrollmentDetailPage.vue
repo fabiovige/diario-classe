@@ -5,17 +5,21 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
+import DatePicker from 'primevue/datepicker'
+import InputText from 'primevue/inputtext'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import FormDialog from '@/shared/components/FormDialog.vue'
+import EnrollmentDocumentsSection from './EnrollmentDocumentsSection.vue'
 import { enrollmentService } from '@/services/enrollment.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { extractApiError } from '@/shared/utils/api-error'
-import { enrollmentStatusLabel, movementTypeLabel } from '@/shared/utils/enum-labels'
+import { enrollmentStatusLabel, movementTypeLabel, classAssignmentStatusLabel } from '@/shared/utils/enum-labels'
 import { formatDate, formatDateTime } from '@/shared/utils/formatters'
 import type { Enrollment, EnrollmentMovement } from '@/types/enrollment'
-import type { ClassGroup } from '@/types/school-structure'
+import type { ClassGroup, School } from '@/types/school-structure'
+import type { MovementType } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,7 +33,33 @@ const loading = ref(false)
 const assignDialogVisible = ref(false)
 const assignLoading = ref(false)
 const classGroups = ref<ClassGroup[]>([])
-const selectedClassGroupId = ref<number | null>(null)
+const assignForm = ref({ class_group_id: null as number | null, start_date: null as Date | null })
+
+const movementDialogVisible = ref(false)
+const movementLoading = ref(false)
+const schools = ref<School[]>([])
+const movementForm = ref({
+  type: null as MovementType | null,
+  movement_date: null as Date | null,
+  reason: '' as string,
+  destination_school_id: null as number | null,
+})
+const movementTypeOptions = [
+  { value: 'transferencia_interna' as MovementType, label: 'Transferencia Interna' },
+  { value: 'transferencia_externa' as MovementType, label: 'Transferencia Externa' },
+  { value: 'abandono' as MovementType, label: 'Abandono' },
+  { value: 'cancelamento' as MovementType, label: 'Cancelamento' },
+]
+
+const isTransferType = (type: MovementType | null) =>
+  type === 'transferencia_interna' || type === 'transferencia_externa'
+
+function toISODate(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
 
 async function loadEnrollment() {
   loading.value = true
@@ -51,8 +81,14 @@ async function loadEnrollment() {
 async function openAssignDialog() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
-    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
-    selectedClassGroupId.value = null
+    classGroups.value = response.data.map(cg => {
+      const baseName = [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ')
+      const active = cg.active_students_count ?? 0
+      const max = cg.max_students ?? 0
+      const vacancy = max > 0 ? ` (${active}/${max} vagas)` : ''
+      return { ...cg, label: baseName + vacancy }
+    })
+    assignForm.value = { class_group_id: null, start_date: null }
     assignDialogVisible.value = true
   } catch {
     toast.error('Erro ao carregar turmas')
@@ -60,10 +96,17 @@ async function openAssignDialog() {
 }
 
 async function handleAssign() {
-  if (!selectedClassGroupId.value) return
+  if (!assignForm.value.class_group_id || !assignForm.value.start_date) return
   assignLoading.value = true
   try {
-    await enrollmentService.assignToClass(enrollmentId, { class_group_id: selectedClassGroupId.value })
+    const result = await enrollmentService.assignToClass(enrollmentId, {
+      class_group_id: assignForm.value.class_group_id,
+      start_date: toISODate(assignForm.value.start_date!),
+    }) as unknown as Record<string, unknown>
+    const warnings = (result?.warnings ?? []) as string[]
+    if (warnings.length > 0) {
+      warnings.forEach(w => toast.warn(w))
+    }
     toast.success('Aluno enturmado')
     assignDialogVisible.value = false
     loadEnrollment()
@@ -71,6 +114,37 @@ async function handleAssign() {
     toast.error(extractApiError(error, 'Erro ao enturmar'))
   } finally {
     assignLoading.value = false
+  }
+}
+
+async function openMovementDialog() {
+  try {
+    const response = await schoolStructureService.getSchools({ per_page: 100 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+  movementForm.value = { type: null, movement_date: null, reason: '', destination_school_id: null }
+  movementDialogVisible.value = true
+}
+
+async function handleMovement() {
+  if (!movementForm.value.type || !movementForm.value.movement_date) return
+  movementLoading.value = true
+  try {
+    await enrollmentService.transfer(enrollmentId, {
+      type: movementForm.value.type,
+      movement_date: toISODate(movementForm.value.movement_date!),
+      reason: movementForm.value.reason || undefined,
+      destination_school_id: movementForm.value.destination_school_id ?? undefined,
+    })
+    toast.success('Movimentacao registrada')
+    movementDialogVisible.value = false
+    loadEnrollment()
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao registrar movimentacao'))
+  } finally {
+    movementLoading.value = false
   }
 }
 
@@ -82,7 +156,8 @@ onMounted(loadEnrollment)
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-semibold text-[#0078D4]">Detalhes da Matricula</h1>
       <div class="flex gap-2">
-        <Button label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
+        <Button v-if="enrollment?.status === 'active'" label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
+        <Button v-if="enrollment?.status === 'active'" label="Movimentar" icon="pi pi-arrow-right-arrow-left" severity="warning" @click="openMovementDialog" />
         <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/enrollment/enrollments')" />
       </div>
     </div>
@@ -106,6 +181,10 @@ onMounted(loadEnrollment)
           <span class="text-[0.9375rem]">{{ enrollment.academic_year?.year ?? '--' }}</span>
         </div>
         <div class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase text-[#616161]">Tipo</span>
+          <span class="text-[0.9375rem]">{{ enrollment.enrollment_type_label ?? '--' }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase text-[#616161]">Status</span>
           <StatusBadge :status="enrollment.status" :label="enrollmentStatusLabel(enrollment.status)" />
         </div>
@@ -125,7 +204,11 @@ onMounted(loadEnrollment)
             {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name].filter(Boolean).join(' - ') || '--' }}
           </template>
         </Column>
-        <Column field="status" header="Status" />
+        <Column header="Status">
+          <template #body="{ data }">
+            <StatusBadge :status="data.status" :label="classAssignmentStatusLabel(data.status)" />
+          </template>
+        </Column>
         <Column header="Inicio">
           <template #body="{ data }">
             {{ formatDate(data.start_date) }}
@@ -154,6 +237,16 @@ onMounted(loadEnrollment)
           </template>
         </Column>
         <Column field="reason" header="Motivo" />
+        <Column header="Escola Origem">
+          <template #body="{ data }">
+            {{ data.origin_school?.name ?? '--' }}
+          </template>
+        </Column>
+        <Column header="Escola Destino">
+          <template #body="{ data }">
+            {{ data.destination_school?.name ?? '--' }}
+          </template>
+        </Column>
         <Column header="Criado em">
           <template #body="{ data }">
             {{ formatDateTime(data.created_at) }}
@@ -162,11 +255,38 @@ onMounted(loadEnrollment)
       </DataTable>
     </div>
 
+    <EnrollmentDocumentsSection v-if="enrollment" :enrollmentId="enrollmentId" />
+
     <FormDialog v-model:visible="assignDialogVisible" title="Enturmar Aluno" :loading="assignLoading" @save="handleAssign">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Turma *</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
+          <Select v-model="assignForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data de Inicio *</label>
+          <DatePicker v-model="assignForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+        </div>
+      </div>
+    </FormDialog>
+
+    <FormDialog v-model:visible="movementDialogVisible" title="Registrar Movimentacao" :loading="movementLoading" @save="handleMovement">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Tipo *</label>
+          <Select v-model="movementForm.type" :options="movementTypeOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data *</label>
+          <DatePicker v-model="movementForm.movement_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+        </div>
+        <div v-if="isTransferType(movementForm.type)" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola Destino</label>
+          <Select v-model="movementForm.destination_school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Motivo</label>
+          <InputText v-model="movementForm.reason" placeholder="Motivo da movimentacao" class="w-full" />
         </div>
       </div>
     </FormDialog>

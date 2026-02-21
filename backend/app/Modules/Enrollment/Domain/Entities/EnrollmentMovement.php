@@ -3,6 +3,7 @@
 namespace App\Modules\Enrollment\Domain\Entities;
 
 use App\Modules\Enrollment\Domain\Enums\MovementType;
+use App\Modules\SchoolStructure\Domain\Entities\School;
 use App\Modules\Shared\Audit\Infrastructure\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,8 @@ class EnrollmentMovement extends Model
         'type',
         'movement_date',
         'reason',
+        'origin_school_id',
+        'destination_school_id',
         'created_by',
     ];
 
@@ -34,6 +37,18 @@ class EnrollmentMovement extends Model
     public function enrollment(): BelongsTo
     {
         return $this->belongsTo(Enrollment::class);
+    }
+
+    /** @return BelongsTo<School, $this> */
+    public function originSchool(): BelongsTo
+    {
+        return $this->belongsTo(School::class, 'origin_school_id');
+    }
+
+    /** @return BelongsTo<School, $this> */
+    public function destinationSchool(): BelongsTo
+    {
+        return $this->belongsTo(School::class, 'destination_school_id');
     }
 
     /** @return BelongsTo<\App\Models\User, $this> */

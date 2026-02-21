@@ -44,6 +44,11 @@ export async function apiPut<T>(url: string, data?: unknown): Promise<T> {
   return response.data.data
 }
 
+export async function apiPatch<T>(url: string, data?: unknown): Promise<T> {
+  const response = await api.patch<ApiResponse<T>>(url, data)
+  return response.data.data
+}
+
 export async function apiDelete(url: string): Promise<void> {
   await api.delete(url)
 }

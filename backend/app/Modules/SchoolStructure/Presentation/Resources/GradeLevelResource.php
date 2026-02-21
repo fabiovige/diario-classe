@@ -17,6 +17,7 @@ class GradeLevelResource extends JsonResource
             'type' => $this->type->value,
             'type_label' => $this->type->label(),
             'order' => $this->order,
+            'min_age_months' => $this->min_age_months,
         ];
     }
 }

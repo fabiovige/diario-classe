@@ -9,6 +9,8 @@ final readonly class CreateMovementDTO
         public string $type,
         public string $movementDate,
         public ?string $reason = null,
+        public ?int $originSchoolId = null,
+        public ?int $destinationSchoolId = null,
         public ?int $createdBy = null,
     ) {}
 }

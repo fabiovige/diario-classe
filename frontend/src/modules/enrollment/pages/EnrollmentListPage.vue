@@ -83,6 +83,11 @@ onMounted(loadData)
             {{ data.school?.name ?? '--' }}
           </template>
         </Column>
+        <Column header="Tipo">
+          <template #body="{ data }">
+            {{ data.enrollment_type_label ?? '--' }}
+          </template>
+        </Column>
         <Column header="Status">
           <template #body="{ data }">
             <StatusBadge :status="data.status" :label="enrollmentStatusLabel(data.status)" />

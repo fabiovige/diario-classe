@@ -52,6 +52,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('enrollments/{enrollment}/assign-class', [EnrollmentController::class, 'assignToClass']);
     Route::post('enrollments/{enrollment}/transfer', [EnrollmentController::class, 'transfer']);
     Route::get('enrollments/{enrollment}/movements', [EnrollmentController::class, 'movements']);
+    Route::get('enrollments/{enrollment}/documents', [EnrollmentController::class, 'documents']);
+    Route::patch('enrollments/{enrollment}/documents/{documentType}', [EnrollmentController::class, 'toggleDocument']);
 
     Route::apiResource('assessment-periods', AssessmentPeriodController::class);
 

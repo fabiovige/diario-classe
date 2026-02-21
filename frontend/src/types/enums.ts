@@ -8,9 +8,13 @@ export type ShiftPeriod = 'morning' | 'afternoon' | 'evening' | 'full_time'
 
 export type EducationLevel = 'early_childhood' | 'elementary' | 'high_school'
 
-export type EnrollmentStatus = 'active' | 'transferred' | 'cancelled' | 'completed'
+export type EnrollmentStatus = 'active' | 'transferred' | 'cancelled' | 'completed' | 'abandoned'
 
-export type MovementType = 'enrollment' | 'transfer_in' | 'transfer_out' | 'class_assignment' | 'cancellation'
+export type MovementType = 'matricula_inicial' | 'transferencia_interna' | 'transferencia_externa' | 'abandono' | 'falecimento' | 'reclassificacao' | 'cancelamento'
+
+export type ClassAssignmentStatus = 'active' | 'transferred' | 'cancelled'
+
+export type EnrollmentType = 'new_enrollment' | 're_enrollment' | 'transfer_received'
 
 export type AttendanceStatus = 'present' | 'absent' | 'justified_absence' | 'excused'
 
@@ -23,3 +27,5 @@ export type PeriodType = 'bimester' | 'trimester' | 'semester'
 export type FinalResultStatus = 'approved' | 'retained' | 'retained_by_absence' | 'council_approved'
 
 export type DisabilityType = 'visual' | 'hearing' | 'physical' | 'intellectual' | 'autism' | 'gifted_talented' | 'multiple' | 'deafblind'
+
+export type DocumentType = 'birth_certificate' | 'id_card' | 'proof_of_address' | 'school_transcript' | 'transfer_declaration' | 'vaccination_card' | 'photo_3x4' | 'sus_card' | 'nis_number' | 'medical_report'

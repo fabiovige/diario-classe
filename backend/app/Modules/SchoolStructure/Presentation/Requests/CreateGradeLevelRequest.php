@@ -20,6 +20,7 @@ class CreateGradeLevelRequest extends FormRequest
             'name' => ['required', 'string', 'max:100'],
             'type' => ['required', 'string', Rule::enum(GradeLevelType::class)],
             'order' => ['required', 'integer', 'min:1'],
+            'min_age_months' => ['nullable', 'integer', 'min:0', 'max:300'],
         ];
     }
 }

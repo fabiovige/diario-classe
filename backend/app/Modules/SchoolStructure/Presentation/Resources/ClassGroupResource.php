@@ -18,6 +18,7 @@ class ClassGroupResource extends JsonResource
             'shift_id' => $this->shift_id,
             'name' => $this->name,
             'max_students' => $this->max_students,
+            'active_students_count' => $this->whenCounted('activeClassAssignments', $this->active_class_assignments_count ?? null),
             'academic_year' => new AcademicYearResource($this->whenLoaded('academicYear')),
             'grade_level' => new GradeLevelResource($this->whenLoaded('gradeLevel')),
             'shift' => new ShiftResource($this->whenLoaded('shift')),

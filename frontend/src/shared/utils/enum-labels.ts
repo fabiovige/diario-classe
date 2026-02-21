@@ -6,12 +6,15 @@ import type {
   EducationLevel,
   EnrollmentStatus,
   MovementType,
+  ClassAssignmentStatus,
+  EnrollmentType,
   AttendanceStatus,
   GradeType,
   PeriodClosingStatus,
   PeriodType,
   FinalResultStatus,
   DisabilityType,
+  DocumentType,
 } from '@/types/enums'
 
 const ROLE_LABELS: Record<RoleSlug, string> = {
@@ -54,14 +57,29 @@ const ENROLLMENT_STATUS_LABELS: Record<EnrollmentStatus, string> = {
   transferred: 'Transferida',
   cancelled: 'Cancelada',
   completed: 'Concluida',
+  abandoned: 'Abandonada',
 }
 
 const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
-  enrollment: 'Matricula',
-  transfer_in: 'Transferencia (entrada)',
-  transfer_out: 'Transferencia (saida)',
-  class_assignment: 'Enturmacao',
-  cancellation: 'Cancelamento',
+  matricula_inicial: 'Matricula Inicial',
+  transferencia_interna: 'Transferencia Interna',
+  transferencia_externa: 'Transferencia Externa',
+  abandono: 'Abandono',
+  falecimento: 'Falecimento',
+  reclassificacao: 'Reclassificacao',
+  cancelamento: 'Cancelamento',
+}
+
+const CLASS_ASSIGNMENT_STATUS_LABELS: Record<ClassAssignmentStatus, string> = {
+  active: 'Ativa',
+  transferred: 'Transferida',
+  cancelled: 'Cancelada',
+}
+
+const ENROLLMENT_TYPE_LABELS: Record<EnrollmentType, string> = {
+  new_enrollment: 'Matricula Nova',
+  re_enrollment: 'Rematricula',
+  transfer_received: 'Transferencia Recebida',
 }
 
 const ATTENDANCE_STATUS_LABELS: Record<AttendanceStatus, string> = {
@@ -156,6 +174,31 @@ const DISABILITY_TYPE_LABELS: Record<DisabilityType, string> = {
   deafblind: 'Surdocegueira',
 }
 
+export function classAssignmentStatusLabel(status: ClassAssignmentStatus): string {
+  return CLASS_ASSIGNMENT_STATUS_LABELS[status] ?? status
+}
+
+export function enrollmentTypeLabel(type: EnrollmentType): string {
+  return ENROLLMENT_TYPE_LABELS[type] ?? type
+}
+
 export function disabilityTypeLabel(type: DisabilityType): string {
   return DISABILITY_TYPE_LABELS[type] ?? type
+}
+
+const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  birth_certificate: 'Certidao de Nascimento',
+  id_card: 'RG / Documento de Identidade',
+  proof_of_address: 'Comprovante de Endereco',
+  school_transcript: 'Historico Escolar',
+  transfer_declaration: 'Declaracao de Transferencia',
+  vaccination_card: 'Carteira de Vacinacao',
+  photo_3x4: 'Foto 3x4',
+  sus_card: 'Cartao SUS',
+  nis_number: 'Numero NIS',
+  medical_report: 'Laudo Medico',
+}
+
+export function documentTypeLabel(type: DocumentType): string {
+  return DOCUMENT_TYPE_LABELS[type] ?? type
 }

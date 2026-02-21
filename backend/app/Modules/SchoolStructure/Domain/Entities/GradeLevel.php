@@ -24,6 +24,7 @@ class GradeLevel extends Model
         'name',
         'type',
         'order',
+        'min_age_months',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class GradeLevel extends Model
         return [
             'type' => GradeLevelType::class,
             'order' => 'integer',
+            'min_age_months' => 'integer',
         ];
     }
 }

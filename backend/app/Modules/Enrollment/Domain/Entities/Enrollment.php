@@ -3,6 +3,7 @@
 namespace App\Modules\Enrollment\Domain\Entities;
 
 use App\Modules\Enrollment\Domain\Enums\EnrollmentStatus;
+use App\Modules\Enrollment\Domain\Enums\EnrollmentType;
 use App\Modules\People\Domain\Entities\Student;
 use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
 use App\Modules\SchoolStructure\Domain\Entities\School;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property \App\Modules\Enrollment\Domain\Enums\EnrollmentStatus $status
+ * @property \App\Modules\Enrollment\Domain\Enums\EnrollmentType $enrollment_type
  * @property \Illuminate\Support\Carbon|null $enrollment_date
  * @property \Illuminate\Support\Carbon|null $exit_date
  */
@@ -32,6 +34,7 @@ class Enrollment extends Model
         'academic_year_id',
         'school_id',
         'enrollment_number',
+        'enrollment_type',
         'status',
         'enrollment_date',
         'exit_date',
@@ -41,6 +44,7 @@ class Enrollment extends Model
     {
         return [
             'status' => EnrollmentStatus::class,
+            'enrollment_type' => EnrollmentType::class,
             'enrollment_date' => 'date',
             'exit_date' => 'date',
         ];
@@ -74,6 +78,12 @@ class Enrollment extends Model
     public function movements(): HasMany
     {
         return $this->hasMany(EnrollmentMovement::class);
+    }
+
+    /** @return HasMany<EnrollmentDocument, $this> */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(EnrollmentDocument::class);
     }
 
     public function isActive(): bool

@@ -47,6 +47,7 @@ export interface ClassGroup {
   shift_id: number
   name: string
   max_students: number
+  active_students_count?: number
   academic_year?: AcademicYear
   grade_level?: GradeLevel
   shift?: Shift

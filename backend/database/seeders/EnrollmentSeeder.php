@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
 use App\Modules\Enrollment\Domain\Entities\Enrollment;
 use App\Modules\Enrollment\Domain\Entities\EnrollmentMovement;
+use App\Modules\Enrollment\Domain\Enums\EnrollmentType;
 use App\Modules\People\Domain\Entities\Student;
 use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
 use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
@@ -62,6 +63,7 @@ class EnrollmentSeeder extends Seeder
                         'academic_year_id' => $schoolData['academicYear']->id,
                         'school_id' => $schoolData['school']->id,
                         'enrollment_number' => sprintf('MAT%06d', $enrollmentNumber),
+                        'enrollment_type' => EnrollmentType::NewEnrollment->value,
                         'status' => 'active',
                         'enrollment_date' => self::ENROLLMENT_DATE,
                     ]);

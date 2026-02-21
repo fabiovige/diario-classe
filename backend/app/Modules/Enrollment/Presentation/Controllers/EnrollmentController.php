@@ -8,10 +8,14 @@ use App\Modules\Enrollment\Application\UseCases\AssignToClassUseCase;
 use App\Modules\Enrollment\Application\UseCases\CreateEnrollmentUseCase;
 use App\Modules\Enrollment\Application\UseCases\TransferEnrollmentUseCase;
 use App\Modules\Enrollment\Domain\Entities\Enrollment;
+use App\Modules\Enrollment\Domain\Entities\EnrollmentDocument;
+use App\Modules\Enrollment\Domain\Enums\DocumentType;
 use App\Modules\Enrollment\Presentation\Requests\AssignToClassRequest;
 use App\Modules\Enrollment\Presentation\Requests\CreateEnrollmentRequest;
 use App\Modules\Enrollment\Presentation\Requests\TransferEnrollmentRequest;
 use App\Modules\Enrollment\Presentation\Resources\ClassAssignmentResource;
+use App\Modules\Enrollment\Presentation\Resources\EnrollmentDocumentResource;
+use App\Modules\Enrollment\Presentation\Resources\EnrollmentMovementResource;
 use App\Modules\Enrollment\Presentation\Resources\EnrollmentResource;
 use App\Modules\Shared\Presentation\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
@@ -41,6 +45,7 @@ class EnrollmentController extends ApiController
             academicYearId: $request->validated('academic_year_id'),
             schoolId: $request->validated('school_id'),
             enrollmentDate: $request->validated('enrollment_date'),
+            enrollmentType: $request->validated('enrollment_type', 'new_enrollment'),
             enrollmentNumber: $request->validated('enrollment_number'),
         ));
 
@@ -49,20 +54,26 @@ class EnrollmentController extends ApiController
 
     public function show(int $id): JsonResponse
     {
-        $enrollment = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup.gradeLevel', 'classAssignments.classGroup.shift', 'movements'])->findOrFail($id);
+        $enrollment = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup.gradeLevel', 'classAssignments.classGroup.shift', 'movements.originSchool', 'movements.destinationSchool', 'documents'])->findOrFail($id);
 
         return $this->success(new EnrollmentResource($enrollment));
     }
 
     public function assignToClass(AssignToClassRequest $request, int $enrollmentId, AssignToClassUseCase $useCase): JsonResponse
     {
-        $assignment = $useCase->execute(new AssignToClassDTO(
+        $result = $useCase->execute(new AssignToClassDTO(
             enrollmentId: $enrollmentId,
             classGroupId: $request->validated('class_group_id'),
             startDate: $request->validated('start_date'),
         ));
 
-        return $this->created(new ClassAssignmentResource($assignment->load('classGroup.gradeLevel', 'classGroup.shift')));
+        $data = (new ClassAssignmentResource($result->assignment->load('classGroup.gradeLevel', 'classGroup.shift')))->toArray(request());
+
+        if ($result->warnings !== []) {
+            $data['warnings'] = $result->warnings;
+        }
+
+        return $this->created($data);
     }
 
     public function transfer(TransferEnrollmentRequest $request, int $enrollmentId, TransferEnrollmentUseCase $useCase): JsonResponse
@@ -72,15 +83,60 @@ class EnrollmentController extends ApiController
             type: $request->validated('type'),
             date: $request->validated('movement_date'),
             reason: $request->validated('reason'),
+            originSchoolId: $request->validated('origin_school_id'),
+            destinationSchoolId: $request->validated('destination_school_id'),
         );
 
-        return $this->success(new EnrollmentResource($enrollment->load(['student', 'movements'])));
+        return $this->success(new EnrollmentResource($enrollment->load(['student', 'movements.originSchool', 'movements.destinationSchool'])));
     }
 
     public function movements(int $enrollmentId): JsonResponse
     {
-        $enrollment = Enrollment::with('movements')->findOrFail($enrollmentId);
+        $enrollment = Enrollment::with(['movements.originSchool', 'movements.destinationSchool'])->findOrFail($enrollmentId);
 
-        return $this->success($enrollment->movements);
+        return $this->success(EnrollmentMovementResource::collection($enrollment->movements));
+    }
+
+    public function documents(int $enrollmentId): JsonResponse
+    {
+        $enrollment = Enrollment::findOrFail($enrollmentId);
+        $documents = $enrollment->documents()->orderBy('document_type')->get();
+
+        $allDocuments = collect();
+
+        foreach (DocumentType::cases() as $type) {
+            $existing = $documents->first(fn ($d) => $d->document_type === $type);
+            if ($existing) {
+                $allDocuments->push($existing);
+                continue;
+            }
+
+            $doc = new EnrollmentDocument;
+            $doc->enrollment_id = $enrollmentId;
+            $doc->document_type = $type;
+            $doc->delivered = false;
+            $allDocuments->push($doc);
+        }
+
+        return $this->success(EnrollmentDocumentResource::collection($allDocuments));
+    }
+
+    public function toggleDocument(Request $request, int $enrollmentId, string $documentType): JsonResponse
+    {
+        Enrollment::findOrFail($enrollmentId);
+
+        $document = EnrollmentDocument::updateOrCreate(
+            [
+                'enrollment_id' => $enrollmentId,
+                'document_type' => $documentType,
+            ],
+            [
+                'delivered' => $request->boolean('delivered'),
+                'delivered_at' => $request->boolean('delivered') ? now()->toDateString() : null,
+                'notes' => $request->input('notes'),
+            ],
+        );
+
+        return $this->success(new EnrollmentDocumentResource($document));
     }
 }

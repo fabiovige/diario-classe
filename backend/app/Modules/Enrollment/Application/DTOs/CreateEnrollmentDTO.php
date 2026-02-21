@@ -9,6 +9,7 @@ final readonly class CreateEnrollmentDTO
         public int $academicYearId,
         public int $schoolId,
         public string $enrollmentDate,
+        public string $enrollmentType = 'new_enrollment',
         public ?string $enrollmentNumber = null,
     ) {}
 }
