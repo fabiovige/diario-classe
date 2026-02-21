@@ -16,7 +16,7 @@ class GuardianController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $guardians = Guardian::with('students')
-            ->when($request->query('name'), fn ($q, $name) => $q->where('name', 'ilike', "%{$name}%"))
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));
 

@@ -103,7 +103,7 @@ onMounted(async () => {
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Turno *</label>
-          <Select v-model="form.shift_id" :options="shifts" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
+          <Select v-model="form.shift_id" :options="shifts" optionLabel="name_label" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Nome *</label>

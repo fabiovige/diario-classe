@@ -16,6 +16,7 @@ class TeacherController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $teachers = Teacher::with(['user', 'school'])
+            ->when($request->query('search'), fn ($q, $search) => $q->whereHas('user', fn ($sub) => $sub->where('name', 'like', "%{$search}%")))
             ->when($request->query('school_id'), fn ($q, $schoolId) => $q->where('school_id', $schoolId))
             ->when($request->query('active'), fn ($q, $active) => $q->where('active', $active === 'true'))
             ->paginate($request->query('per_page', 15));

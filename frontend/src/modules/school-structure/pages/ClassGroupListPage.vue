@@ -91,7 +91,7 @@ onMounted(loadData)
         </Column>
         <Column header="Turno">
           <template #body="{ data }">
-            {{ data.shift?.name ?? '--' }}
+            {{ data.shift?.name_label ?? '--' }}
           </template>
         </Column>
         <Column field="max_students" header="Max. Alunos" />

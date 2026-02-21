@@ -30,6 +30,9 @@ export const schoolStructureService = {
   updateAcademicYear(id: number, data: Record<string, unknown>): Promise<AcademicYear> {
     return apiPut<AcademicYear>(`academic-years/${id}`, data)
   },
+  deleteAcademicYear(id: number): Promise<void> {
+    return apiDelete(`academic-years/${id}`)
+  },
   getShifts(params?: Record<string, unknown>): Promise<PaginatedData<Shift>> {
     return apiGet<PaginatedData<Shift>>('shifts', params)
   },

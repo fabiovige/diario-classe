@@ -5,6 +5,7 @@ namespace App\Modules\SchoolStructure\Presentation\Controllers;
 use App\Modules\SchoolStructure\Application\DTOs\CreateShiftDTO;
 use App\Modules\SchoolStructure\Application\UseCases\CreateShiftUseCase;
 use App\Modules\SchoolStructure\Domain\Entities\Shift;
+use App\Modules\SchoolStructure\Domain\Enums\ShiftName;
 use App\Modules\SchoolStructure\Presentation\Requests\CreateShiftRequest;
 use App\Modules\SchoolStructure\Presentation\Resources\ShiftResource;
 use App\Modules\Shared\Presentation\Controllers\ApiController;
@@ -16,6 +17,14 @@ class ShiftController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $shifts = Shift::with('school')
+            ->when($request->query('search'), function ($q, $search) {
+                $matching = collect(ShiftName::cases())
+                    ->filter(fn ($case) => str_contains(mb_strtolower($case->label()), mb_strtolower($search)))
+                    ->map(fn ($case) => $case->value)
+                    ->values()
+                    ->toArray();
+                $q->whereIn('name', $matching);
+            })
             ->when($request->query('school_id'), fn ($q, $schoolId) => $q->where('school_id', $schoolId))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));

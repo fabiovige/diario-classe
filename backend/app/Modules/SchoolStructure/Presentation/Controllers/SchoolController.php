@@ -17,6 +17,7 @@ class SchoolController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $schools = School::query()
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('active'), fn ($q, $active) => $q->where('active', $active === 'true'))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));

@@ -19,6 +19,7 @@ class AssessmentPeriodController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $periods = AssessmentPeriod::with('academicYear')
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('academic_year_id'), fn ($q, $id) => $q->where('academic_year_id', $id))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
             ->when($request->query('type'), fn ($q, $type) => $q->where('type', $type))

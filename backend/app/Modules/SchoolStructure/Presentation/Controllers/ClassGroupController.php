@@ -16,6 +16,7 @@ class ClassGroupController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $groups = ClassGroup::with(['academicYear', 'gradeLevel', 'shift'])
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('academic_year_id'), fn ($q, $id) => $q->where('academic_year_id', $id))
             ->when($request->query('grade_level_id'), fn ($q, $id) => $q->where('grade_level_id', $id))
             ->when($request->query('shift_id'), fn ($q, $id) => $q->where('shift_id', $id))

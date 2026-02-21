@@ -22,6 +22,7 @@ class EnrollmentController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $enrollments = Enrollment::with(['student', 'academicYear', 'school', 'classAssignments.classGroup.gradeLevel', 'classAssignments.classGroup.shift'])
+            ->when($request->query('search'), fn ($q, $search) => $q->whereHas('student', fn ($sub) => $sub->where('name', 'like', "%{$search}%")))
             ->when($request->query('school_id'), fn ($q, $id) => $q->where('school_id', $id))
             ->when($request->query('academic_year_id'), fn ($q, $id) => $q->where('academic_year_id', $id))
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))

@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('roles', RoleController::class);
 
     Route::apiResource('schools', SchoolController::class);
-    Route::apiResource('academic-years', AcademicYearController::class)->except(['destroy']);
+    Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('shifts', ShiftController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::apiResource('class-groups', ClassGroupController::class);

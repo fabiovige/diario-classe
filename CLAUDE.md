@@ -71,6 +71,7 @@ Executar dentro do container (`docker compose exec app`) ou local em `backend/`:
 11. Toda lista deve ter coluna Acoes (editar/excluir) e busca
 12. Enums devem ter values em ingles (backend) mas exibicao SEMPRE em PT-BR (labels). Nunca mostrar o value cru ao usuario
 13. Sempre rodar rebuild do frontend (`docker compose up -d --build --force-recreate frontend`) apos alteracoes no frontend
+14. Campos de selecao multipla (permissoes, tags, etc) devem exibir opcoes explicitamente (checkboxes/listagem), NUNCA campo de digitacao livre (Chips/text). O usuario precisa ver todas as opcoes disponiveis
 
 ## Documentacao (docs/)
 

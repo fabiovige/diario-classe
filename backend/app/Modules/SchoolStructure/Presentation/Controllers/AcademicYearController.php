@@ -16,6 +16,7 @@ class AcademicYearController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $years = AcademicYear::with('school')
+            ->when($request->query('search'), fn ($q, $search) => $q->where('year', 'like', "%{$search}%"))
             ->when($request->query('school_id'), fn ($q, $schoolId) => $q->where('school_id', $schoolId))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
             ->orderByDesc('year')
@@ -50,5 +51,12 @@ class AcademicYearController extends ApiController
         $year->update($request->only(['status', 'start_date', 'end_date']));
 
         return $this->success(new AcademicYearResource($year->refresh()->load('school')));
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        AcademicYear::findOrFail($id)->delete();
+
+        return $this->noContent();
     }
 }

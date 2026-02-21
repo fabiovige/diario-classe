@@ -11,12 +11,14 @@ import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { academicYearStatusLabel } from '@/shared/utils/enum-labels'
 import { formatDate } from '@/shared/utils/formatters'
 import type { AcademicYear } from '@/types/school-structure'
 
 const router = useRouter()
 const toast = useToast()
+const { confirmDelete } = useConfirm()
 
 const items = ref<AcademicYear[]>([])
 const loading = ref(false)
@@ -49,6 +51,18 @@ function onPageChange(event: { page: number; rows: number }) {
 function onSearch() {
   currentPage.value = 1
   loadData()
+}
+
+function handleDelete(item: AcademicYear) {
+  confirmDelete(async () => {
+    try {
+      await schoolStructureService.deleteAcademicYear(item.id)
+      toast.success('Ano letivo excluido')
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir ano letivo')
+    }
+  })
 }
 
 onMounted(loadData)
@@ -93,9 +107,10 @@ onMounted(loadData)
             {{ formatDate(data.end_date) }}
           </template>
         </Column>
-        <Column header="Acoes" :style="{ width: '80px' }">
+        <Column header="Acoes" :style="{ width: '120px' }">
           <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded @click="router.push(`/school-structure/academic-years/${data.id}/edit`)" />
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/school-structure/academic-years/${data.id}/edit`)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
           </template>
         </Column>
       </DataTable>

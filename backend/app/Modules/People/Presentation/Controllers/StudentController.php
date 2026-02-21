@@ -20,7 +20,7 @@ class StudentController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $students = Student::with('guardians')
-            ->when($request->query('name'), fn ($q, $name) => $q->where('name', 'ilike', "%{$name}%"))
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('active'), fn ($q, $active) => $q->where('active', $active === 'true'))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));
