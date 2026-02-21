@@ -8,31 +8,30 @@ use Illuminate\Database\Seeder;
 
 class ShiftSeeder extends Seeder
 {
-    private const FIRST_TEN_LIMIT = 10;
+    private const SHIFTS = [
+        ['name' => 'Manhã', 'start_time' => '07:00', 'end_time' => '12:00'],
+        ['name' => 'Tarde', 'start_time' => '13:00', 'end_time' => '17:30'],
+    ];
+
+    private const INTEGRAL_SHIFT = ['name' => 'Integral', 'start_time' => '07:00', 'end_time' => '17:30'];
+
+    private const INTEGRAL_SCHOOL_LIMIT = 10;
 
     public function run(): void
     {
         $schools = School::orderBy('id')->get();
 
         foreach ($schools as $index => $school) {
-            Shift::updateOrCreate(
-                ['school_id' => $school->id, 'name' => 'Manhã'],
-                ['start_time' => '07:00', 'end_time' => '12:00'],
-            );
+            $shifts = $index < self::INTEGRAL_SCHOOL_LIMIT
+                ? [...self::SHIFTS, self::INTEGRAL_SHIFT]
+                : self::SHIFTS;
 
-            Shift::updateOrCreate(
-                ['school_id' => $school->id, 'name' => 'Tarde'],
-                ['start_time' => '13:00', 'end_time' => '17:30'],
-            );
-
-            if ($index >= self::FIRST_TEN_LIMIT) {
-                continue;
+            foreach ($shifts as $shift) {
+                Shift::updateOrCreate(
+                    ['school_id' => $school->id, 'name' => $shift['name']],
+                    ['start_time' => $shift['start_time'], 'end_time' => $shift['end_time']],
+                );
             }
-
-            Shift::updateOrCreate(
-                ['school_id' => $school->id, 'name' => 'Integral'],
-                ['start_time' => '07:00', 'end_time' => '17:30'],
-            );
         }
     }
 }

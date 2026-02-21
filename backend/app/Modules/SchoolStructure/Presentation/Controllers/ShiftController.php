@@ -18,9 +18,9 @@ class ShiftController extends ApiController
         $shifts = Shift::with('school')
             ->when($request->query('school_id'), fn ($q, $schoolId) => $q->where('school_id', $schoolId))
             ->orderBy('name')
-            ->get();
+            ->paginate($request->query('per_page', 15));
 
-        return $this->success(ShiftResource::collection($shifts));
+        return $this->success(ShiftResource::collection($shifts)->response()->getData(true));
     }
 
     public function store(CreateShiftRequest $request, CreateShiftUseCase $useCase): JsonResponse
