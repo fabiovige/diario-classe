@@ -31,6 +31,7 @@ class AttendanceRecord extends Model
         'student_id',
         'date',
         'status',
+        'notes',
         'recorded_by',
     ];
 

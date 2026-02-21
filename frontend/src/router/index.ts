@@ -309,6 +309,20 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Periodo' },
     },
 
+    // MyClasses (Teacher workspace)
+    {
+      path: '/my-classes',
+      name: 'my-classes',
+      component: () => import('@/modules/curriculum/pages/MyClassesPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Minhas Aulas' },
+    },
+    {
+      path: '/my-classes/:assignmentId/session',
+      name: 'class-session',
+      component: () => import('@/modules/curriculum/pages/ClassSessionPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Sessao de Aula' },
+    },
+
     // Attendance
     {
       path: '/attendance',

@@ -8,6 +8,7 @@ export interface AttendanceRecord {
   student_id: number
   date: string | null
   status: AttendanceStatus
+  notes: string | null
   recorded_by: number
   student?: Student
   created_at: string
@@ -44,7 +45,7 @@ export interface BulkAttendanceRequest {
   class_group_id: number
   teacher_assignment_id: number
   date: string
-  records: { student_id: number; status: AttendanceStatus }[]
+  records: { student_id: number; status: AttendanceStatus; notes?: string | null }[]
 }
 
 export interface StudentFrequency {

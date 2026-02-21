@@ -95,6 +95,6 @@ Executar dentro do container (`docker compose exec app`) ou local em `backend/`:
 | [enturmacao.md](docs/pedagogia/enturmacao.md) | Regras de enturmacao: alocacao em turma, vagas, movimentacoes |
 | [frequencia-faltas.md](docs/pedagogia/frequencia-faltas.md) | Controle de frequencia, limiares de alerta, compensacao, busca ativa |
 | [avaliacao-notas.md](docs/pedagogia/avaliacao-notas.md) | Modelos avaliativos por nivel, instrumentos, recuperacao, conselho de classe |
-| [etapas-series.md](docs/pedagogia/etapas-series.md) | Etapas educacionais, faixas etarias, data de corte, progressao |
+| [etapas-series.md](docs/pedagogia/etapas-series.md) | Etapas educacionais, faixas etarias, data de corte, progressao, modelo de docencia (polivalente vs especialista) |
 | [fechamento-periodo.md](docs/pedagogia/fechamento-periodo.md) | Workflow de fechamento, imutabilidade, retificacao, resultado final |
 | [documentacao-escolar.md](docs/pedagogia/documentacao-escolar.md) | Documentos obrigatorios, matricula condicional, LGPD |

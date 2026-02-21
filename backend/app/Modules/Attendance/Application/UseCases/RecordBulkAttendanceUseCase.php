@@ -22,6 +22,7 @@ final class RecordBulkAttendanceUseCase
                     'student_id' => $record['student_id'],
                     'date' => $dto->date,
                     'status' => $record['status'],
+                    'notes' => $record['notes'] ?? null,
                     'recorded_by' => auth()->id(),
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -31,7 +32,7 @@ final class RecordBulkAttendanceUseCase
             AttendanceRecord::upsert(
                 $rows,
                 ['class_group_id', 'teacher_assignment_id', 'student_id', 'date'],
-                ['status', 'recorded_by', 'updated_at'],
+                ['status', 'notes', 'recorded_by', 'updated_at'],
             );
 
             return AttendanceRecord::where('class_group_id', $dto->classGroupId)

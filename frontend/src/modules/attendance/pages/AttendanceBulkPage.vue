@@ -3,6 +3,8 @@ import { onMounted, ref, computed, watch } from 'vue'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import Dialog from 'primevue/dialog'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import EmptyState from '@/shared/components/EmptyState.vue'
@@ -20,6 +22,7 @@ interface StudentRecord {
   student_id: number
   student_name: string
   status: AttendanceStatus
+  notes: string | null
 }
 
 const toast = useToast()
@@ -92,6 +95,7 @@ async function loadStudents() {
       student_id: enrollment.student_id,
       student_name: enrollment.student?.name ?? `Aluno #${enrollment.student_id}`,
       status: 'present' as AttendanceStatus,
+      notes: null,
     }))
   } catch {
     toast.error('Erro ao carregar alunos')
@@ -111,12 +115,16 @@ async function loadExistingRecords() {
       per_page: 200,
     })
 
-    const recordMap = new Map(response.data.map(r => [r.student_id, r.status]))
+    const recordMap = new Map(response.data.map(r => [r.student_id, { status: r.status, notes: r.notes }]))
 
-    students.value = students.value.map(s => ({
-      ...s,
-      status: (recordMap.get(s.student_id) as AttendanceStatus) ?? 'present',
-    }))
+    students.value = students.value.map(s => {
+      const existing = recordMap.get(s.student_id)
+      return {
+        ...s,
+        status: (existing?.status as AttendanceStatus) ?? 'present',
+        notes: existing?.notes ?? null,
+      }
+    })
   } catch {
     toast.error('Erro ao carregar registros existentes')
   } finally {
@@ -145,6 +153,53 @@ function getStatusSeverity(status: AttendanceStatus): string {
   return map[status]
 }
 
+const notesDialogVisible = ref(false)
+const notesDialogStudent = ref<StudentRecord | null>(null)
+const notesDialogStatus = ref<AttendanceStatus | null>(null)
+const notesDialogText = ref('')
+
+const notesDialogTitle = computed(() => {
+  if (!notesDialogStudent.value || !notesDialogStatus.value) return ''
+  const statusLabel = notesDialogStatus.value === 'justified_absence' ? 'Falta Justificada' : 'Dispensado'
+  return `${statusLabel} — ${notesDialogStudent.value.student_name}`
+})
+
+const notesDialogPlaceholder = computed(() =>
+  notesDialogStatus.value === 'justified_absence'
+    ? 'Ex: Atestado medico, consulta odontologica...'
+    : 'Ex: Participacao em evento escolar, dispensa medica...',
+)
+
+function handleStatusClick(student: StudentRecord, status: AttendanceStatus) {
+  if (status === 'justified_absence' || status === 'excused') {
+    notesDialogStudent.value = student
+    notesDialogStatus.value = status
+    notesDialogText.value = (student.status === status && student.notes) ? student.notes : ''
+    notesDialogVisible.value = true
+    return
+  }
+  student.status = status
+  student.notes = null
+}
+
+function confirmNotes() {
+  if (!notesDialogStudent.value || !notesDialogStatus.value) return
+  notesDialogStudent.value.status = notesDialogStatus.value
+  notesDialogStudent.value.notes = notesDialogText.value.trim() || null
+  notesDialogVisible.value = false
+}
+
+function cancelNotes() {
+  notesDialogVisible.value = false
+}
+
+function openNotesEdit(student: StudentRecord) {
+  notesDialogStudent.value = student
+  notesDialogStatus.value = student.status
+  notesDialogText.value = student.notes ?? ''
+  notesDialogVisible.value = true
+}
+
 async function handleSubmit() {
   if (!selectedClassGroupId.value || !selectedAssignmentId.value) return
   submitting.value = true
@@ -153,7 +208,7 @@ async function handleSubmit() {
       class_group_id: selectedClassGroupId.value,
       teacher_assignment_id: selectedAssignmentId.value,
       date: selectedDate.value,
-      records: students.value.map(s => ({ student_id: s.student_id, status: s.status })),
+      records: students.value.map(s => ({ student_id: s.student_id, status: s.status, notes: s.notes })),
     })
     toast.success('Frequencia registrada')
   } catch (error: unknown) {
@@ -188,21 +243,53 @@ onMounted(loadClassGroups)
     </div>
 
     <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div v-if="students.length > 0" class="mb-4 rounded-md border border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3">
+        <p class="mb-2 text-[0.8125rem] font-semibold text-[#323130]">Legenda — clique no botao correspondente para cada aluno:</p>
+        <div class="flex flex-wrap gap-x-6 gap-y-1.5">
+          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-green-100 text-xs font-bold text-green-800">P</span>
+            Presente
+          </span>
+          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-red-100 text-xs font-bold text-red-800">A</span>
+            Ausente (falta)
+          </span>
+          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-bold text-blue-800">J</span>
+            Falta Justificada (com atestado)
+          </span>
+          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+            <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">D</span>
+            Dispensado
+          </span>
+        </div>
+      </div>
+
       <EmptyState v-if="!loading && !loadingRecords && students.length === 0" message="Selecione uma turma para carregar os alunos" />
 
       <DataTable v-if="students.length > 0" :value="students" :loading="loading || loadingRecords" stripedRows responsiveLayout="scroll">
         <Column field="student_name" header="Aluno" sortable />
-        <Column header="Presenca" :style="{ width: '200px' }">
+        <Column header="Presenca" :style="{ width: '240px' }">
           <template #body="{ data }">
-            <div class="flex gap-1.5">
+            <div class="flex items-center gap-1.5">
               <Button
                 v-for="opt in statusOptions"
                 :key="opt.value"
                 :label="opt.label"
-                :severity="data.status === opt.value ? getStatusSeverity(opt.value) as any : 'secondary'"
+                :severity="(data.status === opt.value ? getStatusSeverity(opt.value) : 'secondary') as any"
                 :outlined="data.status !== opt.value"
                 size="small"
-                @click="data.status = opt.value"
+                @click="handleStatusClick(data, opt.value)"
+              />
+              <Button
+                v-if="data.notes && (data.status === 'justified_absence' || data.status === 'excused')"
+                icon="pi pi-comment"
+                severity="info"
+                text
+                rounded
+                size="small"
+                v-tooltip.top="data.notes"
+                @click="openNotesEdit(data)"
               />
             </div>
           </template>
@@ -212,6 +299,19 @@ onMounted(loadClassGroups)
       <div v-if="students.length > 0" class="mt-4 flex justify-end border-t border-[#E0E0E0] pt-4">
         <Button label="Salvar Frequencia" icon="pi pi-check" :loading="submitting" :disabled="!canSubmit" @click="handleSubmit" />
       </div>
+
+      <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: '480px' }" modal :draggable="false">
+        <div class="flex flex-col gap-3">
+          <p class="text-[0.8125rem] text-[#605E5C]">
+            {{ notesDialogStatus === 'justified_absence' ? 'Informe o motivo da falta justificada:' : 'Informe o motivo da dispensa:' }}
+          </p>
+          <Textarea v-model="notesDialogText" :placeholder="notesDialogPlaceholder" rows="3" class="w-full" autofocus />
+        </div>
+        <template #footer>
+          <Button label="Cancelar" icon="pi pi-times" text @click="cancelNotes" />
+          <Button label="Confirmar" icon="pi pi-check" @click="confirmNotes" />
+        </template>
+      </Dialog>
     </div>
   </div>
 </template>

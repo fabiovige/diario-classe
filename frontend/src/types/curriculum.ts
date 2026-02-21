@@ -37,3 +37,9 @@ export interface TeacherAssignment {
   created_at: string
   updated_at: string
 }
+
+export interface DailyAssignmentSummary extends TeacherAssignment {
+  has_attendance: boolean
+  has_lesson_record: boolean
+  has_open_period: boolean
+}

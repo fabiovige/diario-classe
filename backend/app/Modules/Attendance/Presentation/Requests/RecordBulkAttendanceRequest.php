@@ -23,6 +23,7 @@ class RecordBulkAttendanceRequest extends FormRequest
             'records' => ['required', 'array', 'min:1'],
             'records.*.student_id' => ['required', 'integer', 'exists:students,id'],
             'records.*.status' => ['required', 'string', Rule::in(array_column(AttendanceStatus::cases(), 'value'))],
+            'records.*.notes' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

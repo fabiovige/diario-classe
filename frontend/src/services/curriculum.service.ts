@@ -1,6 +1,6 @@
 import { apiGet, apiPost, apiPut, apiDelete } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
-import type { CurricularComponent, ExperienceField, TeacherAssignment } from '@/types/curriculum'
+import type { CurricularComponent, DailyAssignmentSummary, ExperienceField, TeacherAssignment } from '@/types/curriculum'
 
 export const curriculumService = {
   getComponents(params?: Record<string, unknown>): Promise<PaginatedData<CurricularComponent>> {
@@ -47,5 +47,12 @@ export const curriculumService = {
   },
   deleteAssignment(id: number): Promise<void> {
     return apiDelete(`teacher-assignments/${id}`)
+  },
+  getDailySummary(date: string, teacherId?: number | null): Promise<DailyAssignmentSummary[]> {
+    const params: Record<string, unknown> = { date }
+    if (teacherId) {
+      params.teacher_id = teacherId
+    }
+    return apiGet<DailyAssignmentSummary[]>('teacher-assignments/daily-summary', params)
   },
 }

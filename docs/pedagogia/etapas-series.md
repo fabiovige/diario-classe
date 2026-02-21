@@ -76,6 +76,41 @@ ter regra complementar via CME), mas o padrao e 31/03.
   - Frequencia abaixo de 75%
 - Conselho de Classe pode aprovar aluno abaixo da media (com justificativa)
 
+## Modelo de Docencia por Etapa
+
+### Educacao Infantil + Anos Iniciais (1o ao 5o ano) — Professor Polivalente
+
+- **Um unico professor** leciona todas (ou quase todas) as disciplinas da turma
+- Esse professor e chamado de **professor polivalente** ou **professor regente**
+- O mesmo professor ministra Portugues, Matematica, Ciencias, Historia, Geografia etc.
+- Pode haver professores especialistas para disciplinas especificas (Ed. Fisica, Arte, Ingles), mas o professor principal e um so
+- No sistema: uma turma dos anos iniciais tera **poucas atribuicoes** (teacher_assignments), normalmente 1 professor regente com multiplos componentes curriculares. Na Ed. Infantil usa-se campos de experiencia ao inves de componentes curriculares
+
+### Anos Finais (6o ao 9o ano) — Professor Especialista
+
+- **Um professor por disciplina/componente curricular**
+- Cada professor e especialista na sua area (Matematica, Portugues, Ciencias, Historia, Geografia, Ingles, Ed. Fisica, Arte etc.)
+- O professor circula entre varias turmas lecionando sua disciplina
+- No sistema: uma turma dos anos finais tera **muitas atribuicoes** (teacher_assignments), uma por componente curricular, cada uma com um professor diferente
+
+### Ensino Medio (referencia — nao atendido pela rede municipal)
+
+- Mesmo modelo dos anos finais: um professor por disciplina
+- Nao se aplica ao sistema atual (responsabilidade estadual)
+
+### Implicacoes no Sistema
+
+| Aspecto | Anos Iniciais (1o-5o) | Anos Finais (6o-9o) |
+|---------|----------------------|---------------------|
+| Professor por turma | 1 regente (+ especialistas) | 1 por disciplina |
+| Atribuicoes por turma | Poucas (1-3) | Muitas (8-12) |
+| Chamada | Professor regente faz para todas as aulas | Cada professor faz para sua aula |
+| Diario de classe | Professor regente registra multiplas disciplinas | Cada professor registra a sua |
+| "Minhas Aulas" | Professor regente ve poucas turmas, cada uma com varias disciplinas | Professor especialista ve varias turmas, cada uma com 1 disciplina |
+| Avaliacao | Professor regente avalia em todos os componentes | Cada professor avalia so no seu componente |
+
+Essa distincao e padrao nacional (LDB, Resolucoes CNE) e impacta diretamente a experiencia do professor no sistema.
+
 ## Rematricula
 
 - Realizada antes do inicio do ano letivo seguinte

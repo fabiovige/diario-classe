@@ -7,6 +7,7 @@ use App\Modules\PeriodClosing\Presentation\Controllers\PeriodClosingController;
 use App\Modules\ClassRecord\Presentation\Controllers\LessonRecordController;
 use App\Modules\Curriculum\Presentation\Controllers\CurricularComponentController;
 use App\Modules\Curriculum\Presentation\Controllers\ExperienceFieldController;
+use App\Modules\Curriculum\Presentation\Controllers\DailyClassController;
 use App\Modules\Curriculum\Presentation\Controllers\TeacherAssignmentController;
 use App\Modules\Enrollment\Presentation\Controllers\EnrollmentController;
 use App\Modules\Identity\Presentation\Controllers\AuthController;
@@ -64,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('curricular-components', CurricularComponentController::class);
     Route::apiResource('experience-fields', ExperienceFieldController::class);
+    Route::get('teacher-assignments/daily-summary', [DailyClassController::class, 'index']);
     Route::apiResource('teacher-assignments', TeacherAssignmentController::class);
 
     Route::post('attendance/bulk', [AttendanceController::class, 'bulkRecord']);
