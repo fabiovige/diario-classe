@@ -7,12 +7,19 @@ use App\Modules\Enrollment\Application\DTOs\CreateEnrollmentDTO;
 use App\Modules\Enrollment\Application\UseCases\AssignToClassUseCase;
 use App\Modules\Enrollment\Application\UseCases\CreateEnrollmentUseCase;
 use App\Modules\Enrollment\Application\UseCases\TransferEnrollmentUseCase;
+use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
 use App\Modules\Enrollment\Domain\Entities\Enrollment;
 use App\Modules\Enrollment\Domain\Entities\EnrollmentDocument;
+use App\Modules\Enrollment\Domain\Enums\ClassAssignmentStatus;
+use App\Modules\Enrollment\Domain\Enums\DocumentStatus;
 use App\Modules\Enrollment\Domain\Enums\DocumentType;
+use App\Modules\Enrollment\Domain\Enums\EnrollmentStatus;
 use App\Modules\Enrollment\Presentation\Requests\AssignToClassRequest;
 use App\Modules\Enrollment\Presentation\Requests\CreateEnrollmentRequest;
+use App\Modules\Enrollment\Presentation\Requests\ReviewDocumentRequest;
 use App\Modules\Enrollment\Presentation\Requests\TransferEnrollmentRequest;
+use App\Modules\Enrollment\Presentation\Requests\UpdateClassAssignmentRequest;
+use App\Modules\Enrollment\Presentation\Requests\UploadDocumentRequest;
 use App\Modules\Enrollment\Presentation\Resources\ClassAssignmentResource;
 use App\Modules\Enrollment\Presentation\Resources\EnrollmentDocumentResource;
 use App\Modules\Enrollment\Presentation\Resources\EnrollmentMovementResource;
@@ -20,6 +27,8 @@ use App\Modules\Enrollment\Presentation\Resources\EnrollmentResource;
 use App\Modules\Shared\Presentation\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EnrollmentController extends ApiController
 {
@@ -97,6 +106,65 @@ class EnrollmentController extends ApiController
         return $this->success(EnrollmentMovementResource::collection($enrollment->movements));
     }
 
+    public function destroy(int $id): JsonResponse
+    {
+        $enrollment = Enrollment::findOrFail($id);
+
+        if (! $enrollment->isActive()) {
+            return $this->error('Apenas matriculas ativas podem ser canceladas', 422);
+        }
+
+        $enrollment->update([
+            'status' => EnrollmentStatus::Cancelled,
+            'exit_date' => now()->toDateString(),
+        ]);
+
+        $enrollment->classAssignments()
+            ->where('status', ClassAssignmentStatus::Active)
+            ->update([
+                'status' => ClassAssignmentStatus::Cancelled,
+                'end_date' => now()->toDateString(),
+            ]);
+
+        return $this->noContent();
+    }
+
+    public function reactivate(int $id): JsonResponse
+    {
+        $enrollment = Enrollment::findOrFail($id);
+
+        if ($enrollment->status !== EnrollmentStatus::Cancelled) {
+            return $this->error('Apenas matriculas canceladas podem ser reativadas', 422);
+        }
+
+        $enrollment->update([
+            'status' => EnrollmentStatus::Active,
+            'exit_date' => null,
+        ]);
+
+        return $this->success(new EnrollmentResource($enrollment->load(['student', 'academicYear', 'school'])));
+    }
+
+    public function updateClassAssignment(UpdateClassAssignmentRequest $request, int $enrollmentId, int $classAssignmentId): JsonResponse
+    {
+        Enrollment::findOrFail($enrollmentId);
+
+        $assignment = ClassAssignment::where('enrollment_id', $enrollmentId)->findOrFail($classAssignmentId);
+        $assignment->update($request->validated());
+
+        return $this->success(new ClassAssignmentResource($assignment->load('classGroup.gradeLevel', 'classGroup.shift')));
+    }
+
+    public function destroyClassAssignment(int $enrollmentId, int $classAssignmentId): JsonResponse
+    {
+        Enrollment::findOrFail($enrollmentId);
+
+        $assignment = ClassAssignment::where('enrollment_id', $enrollmentId)->findOrFail($classAssignmentId);
+        $assignment->delete();
+
+        return $this->noContent();
+    }
+
     public function documents(int $enrollmentId): JsonResponse
     {
         $enrollment = Enrollment::findOrFail($enrollmentId);
@@ -114,16 +182,32 @@ class EnrollmentController extends ApiController
             $doc = new EnrollmentDocument;
             $doc->enrollment_id = $enrollmentId;
             $doc->document_type = $type;
-            $doc->delivered = false;
+            $doc->status = DocumentStatus::NotUploaded;
             $allDocuments->push($doc);
         }
 
         return $this->success(EnrollmentDocumentResource::collection($allDocuments));
     }
 
-    public function toggleDocument(Request $request, int $enrollmentId, string $documentType): JsonResponse
+    public function uploadDocument(UploadDocumentRequest $request, int $enrollmentId): JsonResponse
     {
-        Enrollment::findOrFail($enrollmentId);
+        $enrollment = Enrollment::findOrFail($enrollmentId);
+        $documentType = $request->validated('document_type');
+
+        $existing = $enrollment->documents()
+            ->where('document_type', $documentType)
+            ->first();
+
+        if ($existing && ! $existing->canUpload()) {
+            return $this->error('Este documento não pode receber upload no status atual', 422);
+        }
+
+        if ($existing?->hasFile()) {
+            Storage::disk('local')->delete($existing->file_path);
+        }
+
+        $file = $request->file('file');
+        $path = $file->store("enrollment-documents/{$enrollmentId}", 'local');
 
         $document = EnrollmentDocument::updateOrCreate(
             [
@@ -131,12 +215,67 @@ class EnrollmentController extends ApiController
                 'document_type' => $documentType,
             ],
             [
-                'delivered' => $request->boolean('delivered'),
-                'delivered_at' => $request->boolean('delivered') ? now()->toDateString() : null,
-                'notes' => $request->input('notes'),
+                'status' => DocumentStatus::PendingReview,
+                'file_path' => $path,
+                'original_filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getClientMimeType(),
+                'file_size' => $file->getSize(),
+                'notes' => $request->validated('notes'),
+                'reviewed_by' => null,
+                'reviewed_at' => null,
+                'rejection_reason' => null,
             ],
         );
 
         return $this->success(new EnrollmentDocumentResource($document));
+    }
+
+    public function downloadDocument(int $enrollmentId, string $documentType): StreamedResponse
+    {
+        Enrollment::findOrFail($enrollmentId);
+
+        $document = EnrollmentDocument::where('enrollment_id', $enrollmentId)
+            ->where('document_type', $documentType)
+            ->firstOrFail();
+
+        if (! $document->hasFile()) {
+            abort(404, 'Arquivo não encontrado');
+        }
+
+        return Storage::disk('local')->download($document->file_path, $document->original_filename);
+    }
+
+    public function reviewDocument(ReviewDocumentRequest $request, int $enrollmentId, string $documentType): JsonResponse
+    {
+        Enrollment::findOrFail($enrollmentId);
+
+        $document = EnrollmentDocument::where('enrollment_id', $enrollmentId)
+            ->where('document_type', $documentType)
+            ->firstOrFail();
+
+        if (! $document->canReview()) {
+            return $this->error('Este documento não está aguardando revisão', 422);
+        }
+
+        $action = $request->validated('action');
+
+        $updateData = [
+            'reviewed_by' => $request->user()?->id,
+            'reviewed_at' => now(),
+            'rejection_reason' => null,
+        ];
+
+        if ($action === 'approve') {
+            $updateData['status'] = DocumentStatus::Approved;
+        }
+
+        if ($action === 'reject') {
+            $updateData['status'] = DocumentStatus::Rejected;
+            $updateData['rejection_reason'] = $request->validated('rejection_reason');
+        }
+
+        $document->update($updateData);
+
+        return $this->success(new EnrollmentDocumentResource($document->fresh()));
     }
 }

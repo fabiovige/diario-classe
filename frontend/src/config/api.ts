@@ -53,4 +53,28 @@ export async function apiDelete(url: string): Promise<void> {
   await api.delete(url)
 }
 
+export async function apiUpload<T>(url: string, formData: FormData): Promise<T> {
+  const response = await api.post<ApiResponse<T>>(url, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return response.data.data
+}
+
+export async function apiDownload(url: string, filename: string): Promise<void> {
+  const response = await api.get(url, { responseType: 'blob' })
+  const blobUrl = window.URL.createObjectURL(response.data)
+  const link = document.createElement('a')
+  link.href = blobUrl
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(blobUrl)
+}
+
+export async function apiPreview(url: string): Promise<string> {
+  const response = await api.get(url, { responseType: 'blob' })
+  return window.URL.createObjectURL(response.data)
+}
+
 export default api

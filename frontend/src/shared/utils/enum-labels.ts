@@ -15,6 +15,7 @@ import type {
   FinalResultStatus,
   DisabilityType,
   DocumentType,
+  DocumentStatus,
 } from '@/types/enums'
 
 const ROLE_LABELS: Record<RoleSlug, string> = {
@@ -201,4 +202,15 @@ const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
 
 export function documentTypeLabel(type: DocumentType): string {
   return DOCUMENT_TYPE_LABELS[type] ?? type
+}
+
+const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
+  not_uploaded: 'Nao Enviado',
+  pending_review: 'Aguardando Revisao',
+  approved: 'Aprovado',
+  rejected: 'Rejeitado',
+}
+
+export function documentStatusLabel(status: DocumentStatus): string {
+  return DOCUMENT_STATUS_LABELS[status] ?? status
 }

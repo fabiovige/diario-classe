@@ -26,6 +26,8 @@ const severityMap: Record<string, string> = {
   submitted: 'warn',
   planning: 'warn',
   pending: 'warn',
+  pending_review: 'warn',
+  not_uploaded: 'secondary',
   inactive: 'secondary',
   blocked: 'danger',
   absent: 'danger',

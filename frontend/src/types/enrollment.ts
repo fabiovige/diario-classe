@@ -1,4 +1,4 @@
-import type { ClassAssignmentStatus, DocumentType, EnrollmentStatus, EnrollmentType, MovementType } from './enums'
+import type { ClassAssignmentStatus, DocumentStatus, DocumentType, EnrollmentStatus, EnrollmentType, MovementType } from './enums'
 import type { Student } from './people'
 import type { AcademicYear, ClassGroup, School } from './school-structure'
 
@@ -50,7 +50,18 @@ export interface EnrollmentDocument {
   enrollment_id: number
   document_type: DocumentType
   document_type_label: string
-  delivered: boolean
-  delivered_at: string | null
+  status: DocumentStatus
+  status_label: string
+  has_file: boolean
+  original_filename: string | null
+  mime_type: string | null
+  file_size: number | null
   notes: string | null
+  reviewed_by: number | null
+  reviewed_at: string | null
+  rejection_reason: string | null
+  can_upload: boolean
+  can_review: boolean
+  created_at: string | null
+  updated_at: string | null
 }

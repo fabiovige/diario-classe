@@ -48,12 +48,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('guardians', GuardianController::class);
     Route::apiResource('teachers', TeacherController::class);
 
-    Route::apiResource('enrollments', EnrollmentController::class)->only(['index', 'store', 'show']);
+    Route::apiResource('enrollments', EnrollmentController::class)->only(['index', 'store', 'show', 'destroy']);
+    Route::patch('enrollments/{enrollment}/reactivate', [EnrollmentController::class, 'reactivate']);
     Route::post('enrollments/{enrollment}/assign-class', [EnrollmentController::class, 'assignToClass']);
+    Route::put('enrollments/{enrollment}/class-assignments/{classAssignment}', [EnrollmentController::class, 'updateClassAssignment']);
+    Route::delete('enrollments/{enrollment}/class-assignments/{classAssignment}', [EnrollmentController::class, 'destroyClassAssignment']);
     Route::post('enrollments/{enrollment}/transfer', [EnrollmentController::class, 'transfer']);
     Route::get('enrollments/{enrollment}/movements', [EnrollmentController::class, 'movements']);
     Route::get('enrollments/{enrollment}/documents', [EnrollmentController::class, 'documents']);
-    Route::patch('enrollments/{enrollment}/documents/{documentType}', [EnrollmentController::class, 'toggleDocument']);
+    Route::post('enrollments/{enrollment}/documents/upload', [EnrollmentController::class, 'uploadDocument']);
+    Route::get('enrollments/{enrollment}/documents/{documentType}/download', [EnrollmentController::class, 'downloadDocument']);
+    Route::patch('enrollments/{enrollment}/documents/{documentType}/review', [EnrollmentController::class, 'reviewDocument']);
 
     Route::apiResource('assessment-periods', AssessmentPeriodController::class);
 

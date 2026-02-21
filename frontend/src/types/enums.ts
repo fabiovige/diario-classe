@@ -29,3 +29,5 @@ export type FinalResultStatus = 'approved' | 'retained' | 'retained_by_absence' 
 export type DisabilityType = 'visual' | 'hearing' | 'physical' | 'intellectual' | 'autism' | 'gifted_talented' | 'multiple' | 'deafblind'
 
 export type DocumentType = 'birth_certificate' | 'id_card' | 'proof_of_address' | 'school_transcript' | 'transfer_declaration' | 'vaccination_card' | 'photo_3x4' | 'sus_card' | 'nis_number' | 'medical_report'
+
+export type DocumentStatus = 'not_uploaded' | 'pending_review' | 'approved' | 'rejected'
