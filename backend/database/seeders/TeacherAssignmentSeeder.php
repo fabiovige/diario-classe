@@ -8,9 +8,9 @@ use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
 use App\Modules\People\Domain\Entities\Teacher;
 use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
 use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
-use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
-use App\Modules\SchoolStructure\Domain\Entities\School;
+use App\Modules\SchoolStructure\Domain\Enums\GradeLevelType;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class TeacherAssignmentSeeder extends Seeder
 {
@@ -20,9 +20,8 @@ class TeacherAssignmentSeeder extends Seeder
     {
         $components = CurricularComponent::where('active', true)->get();
         $experienceFields = ExperienceField::where('active', true)->get();
-        $infantilGradeLevelIds = GradeLevel::where('type', 'early_childhood')->pluck('id')->toArray();
 
-        $schools = School::orderBy('id')->get();
+        $schools = \App\Modules\SchoolStructure\Domain\Entities\School::orderBy('id')->get();
 
         foreach ($schools as $school) {
             $academicYear = AcademicYear::where('school_id', $school->id)
@@ -33,7 +32,9 @@ class TeacherAssignmentSeeder extends Seeder
                 continue;
             }
 
-            $classGroups = ClassGroup::where('academic_year_id', $academicYear->id)->get();
+            $classGroups = ClassGroup::with('gradeLevel')
+                ->where('academic_year_id', $academicYear->id)
+                ->get();
 
             if ($classGroups->isEmpty()) {
                 continue;
@@ -47,39 +48,47 @@ class TeacherAssignmentSeeder extends Seeder
                 continue;
             }
 
-            $this->assignSchool($classGroups, $teachers, $components, $experienceFields, $infantilGradeLevelIds);
+            $this->assignSchool($classGroups, $teachers, $components, $experienceFields);
         }
     }
 
-    private function assignSchool($classGroups, $teachers, $components, $experienceFields, array $infantilIds): void
-    {
-        $componentTeacherMap = [];
-        foreach ($components as $i => $component) {
-            $componentTeacherMap[$component->id] = $teachers[$i % $teachers->count()];
-        }
+    private function assignSchool(
+        Collection $classGroups,
+        Collection $teachers,
+        Collection $components,
+        Collection $experienceFields,
+    ): void {
+        $polivalentIndex = 0;
 
-        $fieldTeacherMap = [];
-        foreach ($experienceFields as $i => $field) {
-            $fieldTeacherMap[$field->id] = $teachers[$i % $teachers->count()];
+        $specialistMap = [];
+        foreach ($components as $i => $component) {
+            $specialistMap[$component->id] = $teachers[$i % $teachers->count()];
         }
 
         foreach ($classGroups as $classGroup) {
-            $isInfantil = in_array($classGroup->grade_level_id, $infantilIds, true);
+            $type = $classGroup->gradeLevel->type;
 
-            if ($isInfantil) {
-                $this->assignInfantil($classGroup, $experienceFields, $fieldTeacherMap);
+            if ($type === GradeLevelType::EarlyChildhood) {
+                $teacher = $teachers[$polivalentIndex % $teachers->count()];
+                $polivalentIndex++;
+                $this->assignPolivalentInfantil($classGroup, $teacher, $experienceFields);
                 continue;
             }
 
-            $this->assignFundamental($classGroup, $components, $componentTeacherMap);
+            if ($type === GradeLevelType::ElementaryEarly) {
+                $teacher = $teachers[$polivalentIndex % $teachers->count()];
+                $polivalentIndex++;
+                $this->assignPolivalentFundamental($classGroup, $teacher, $components);
+                continue;
+            }
+
+            $this->assignSpecialist($classGroup, $components, $specialistMap);
         }
     }
 
-    private function assignInfantil($classGroup, $experienceFields, array $fieldTeacherMap): void
+    private function assignPolivalentInfantil(ClassGroup $classGroup, Teacher $teacher, Collection $experienceFields): void
     {
         foreach ($experienceFields as $field) {
-            $teacher = $fieldTeacherMap[$field->id];
-
             TeacherAssignment::updateOrCreate(
                 [
                     'class_group_id' => $classGroup->id,
@@ -95,10 +104,28 @@ class TeacherAssignmentSeeder extends Seeder
         }
     }
 
-    private function assignFundamental($classGroup, $components, array $componentTeacherMap): void
+    private function assignPolivalentFundamental(ClassGroup $classGroup, Teacher $teacher, Collection $components): void
     {
         foreach ($components as $component) {
-            $teacher = $componentTeacherMap[$component->id];
+            TeacherAssignment::updateOrCreate(
+                [
+                    'class_group_id' => $classGroup->id,
+                    'curricular_component_id' => $component->id,
+                ],
+                [
+                    'teacher_id' => $teacher->id,
+                    'experience_field_id' => null,
+                    'start_date' => self::ENROLLMENT_START,
+                    'active' => true,
+                ],
+            );
+        }
+    }
+
+    private function assignSpecialist(ClassGroup $classGroup, Collection $components, array $specialistMap): void
+    {
+        foreach ($components as $component) {
+            $teacher = $specialistMap[$component->id];
 
             TeacherAssignment::updateOrCreate(
                 [
