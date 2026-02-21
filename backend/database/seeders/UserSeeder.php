@@ -15,10 +15,7 @@ class UserSeeder extends Seeder
     {
         $faker = FakerFactory::create('pt_BR');
 
-        $adminRole = Role::where('slug', 'admin')->firstOrFail();
-        $directorRole = Role::where('slug', 'director')->firstOrFail();
-        $secretaryRole = Role::where('slug', 'secretary')->firstOrFail();
-        $coordinatorRole = Role::where('slug', 'coordinator')->firstOrFail();
+        $roles = Role::all()->keyBy(fn (Role $r) => $r->slug->value);
 
         User::updateOrCreate(
             ['email' => 'admin@jandira.sp.gov.br'],
@@ -26,17 +23,18 @@ class UserSeeder extends Seeder
                 'name' => 'Administrador do Sistema',
                 'password' => 'admin123',
                 'status' => 'active',
-                'role_id' => $adminRole->id,
+                'role_id' => $roles['admin']->id,
                 'cpf' => $this->generateCpf($faker),
             ],
         );
 
+        $schoolRoleSlugs = ['director', 'secretary', 'coordinator', 'teacher', 'guardian'];
         $schools = School::orderBy('id')->get();
 
         foreach ($schools as $school) {
-            $this->createSchoolUser($faker, $school, $directorRole);
-            $this->createSchoolUser($faker, $school, $secretaryRole);
-            $this->createSchoolUser($faker, $school, $coordinatorRole);
+            foreach ($schoolRoleSlugs as $slug) {
+                $this->createSchoolUser($faker, $school, $roles[$slug]);
+            }
         }
     }
 
