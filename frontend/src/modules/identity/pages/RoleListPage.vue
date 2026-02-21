@@ -22,8 +22,8 @@ const loading = ref(false)
 async function loadData() {
   loading.value = true
   try {
-    const response = await identityService.getRoles({ per_page: 100 })
-    items.value = response.data
+    const response = await identityService.getRoles()
+    items.value = response
   } catch {
     toast.error('Erro ao carregar perfis')
   } finally {

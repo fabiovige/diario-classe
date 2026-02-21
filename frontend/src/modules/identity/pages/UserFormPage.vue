@@ -8,6 +8,7 @@ import Button from 'primevue/button'
 import { identityService } from '@/services/identity.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { Role } from '@/types/auth'
 import type { School } from '@/types/school-structure'
 
@@ -41,10 +42,10 @@ const statusOptions = [
 async function loadAuxData() {
   try {
     const [rolesRes, schoolsRes] = await Promise.all([
-      identityService.getRoles({ per_page: 100 }),
+      identityService.getRoles(),
       schoolStructureService.getSchools({ per_page: 100 }),
     ])
-    roles.value = rolesRes.data
+    roles.value = rolesRes
     schools.value = schoolsRes.data
   } catch {
     toast.error('Erro ao carregar dados auxiliares')
@@ -85,8 +86,8 @@ async function handleSubmit() {
       toast.success('Usuario criado')
     }
     router.push('/identity/users')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar usuario')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar usuario'))
   } finally {
     loading.value = false
   }
