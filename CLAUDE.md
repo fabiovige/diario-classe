@@ -42,7 +42,9 @@ docker compose exec app composer test     # rodar testes
 docker compose down                       # parar ambiente
 ```
 
-Acesso: http://localhost:5015
+Acesso:
+- **Frontend**: http://localhost:3015
+- **Backend API**: http://localhost:5015
 
 ## Scripts Backend
 
@@ -65,6 +67,8 @@ Executar dentro do container (`docker compose exec app`) ou local em `backend/`:
 7. Sem `else` — early return e guard clauses
 8. Executar todos os testes apos qualquer alteracao
 9. Nunca implementar sem autorizacao do usuario
+10. CRUD sempre em pagina separada (*FormPage.vue), NUNCA popup/dialog
+11. Toda lista deve ter coluna Acoes (editar/excluir) e busca
 
 ## Documentacao (docs/)
 
@@ -78,3 +82,4 @@ Executar dentro do container (`docker compose exec app`) ou local em `backend/`:
 | [passos-implementacao.md](docs/passos-implementacao.md) | Roadmap de implementacao por fase |
 | [diario-classe.md](docs/diario-classe.md) | Visao geral original do sistema |
 | [diretrizes-educacionais-sp.md](docs/diretrizes-educacionais-sp.md) | Referencia legado de legislacao (usar apenas como contexto) |
+| [design-ui.md](docs/design-ui.md) | Padronizacao de layout: regras UI, tokens Fluent, status de cada pagina |
