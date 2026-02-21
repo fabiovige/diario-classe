@@ -2,6 +2,7 @@
 
 namespace App\Modules\People\Domain\Entities;
 
+use App\Modules\People\Domain\Enums\DisabilityType;
 use App\Modules\People\Domain\Enums\Gender;
 use App\Modules\People\Domain\Enums\RaceColor;
 use App\Modules\Shared\Audit\Infrastructure\Traits\Auditable;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property \Illuminate\Support\Carbon|null $birth_date
+ * @property DisabilityType|null $disability_type
  */
 class Student extends Model
 {
@@ -48,6 +50,7 @@ class Student extends Model
             'gender' => Gender::class,
             'race_color' => RaceColor::class,
             'has_disability' => 'boolean',
+            'disability_type' => DisabilityType::class,
             'active' => 'boolean',
         ];
     }

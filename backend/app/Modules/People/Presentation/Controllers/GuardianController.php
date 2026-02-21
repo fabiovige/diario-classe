@@ -53,4 +53,11 @@ class GuardianController extends ApiController
 
         return $this->success(new GuardianResource($guardian->refresh()));
     }
+
+    public function destroy(int $id): JsonResponse
+    {
+        Guardian::findOrFail($id)->delete();
+
+        return $this->noContent();
+    }
 }

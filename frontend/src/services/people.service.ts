@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from '@/config/api'
+import { apiGet, apiPost, apiPut, apiDelete } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
 import type { Student, Guardian, Teacher } from '@/types/people'
 
@@ -15,6 +15,9 @@ export const peopleService = {
   updateStudent(id: number, data: Partial<Student>): Promise<Student> {
     return apiPut<Student>(`students/${id}`, data)
   },
+  deleteStudent(id: number): Promise<void> {
+    return apiDelete(`students/${id}`)
+  },
   attachGuardian(studentId: number, data: { guardian_id: number; relationship: string; is_primary: boolean }): Promise<void> {
     return apiPost(`students/${studentId}/guardians`, data)
   },
@@ -30,6 +33,9 @@ export const peopleService = {
   updateGuardian(id: number, data: Partial<Guardian>): Promise<Guardian> {
     return apiPut<Guardian>(`guardians/${id}`, data)
   },
+  deleteGuardian(id: number): Promise<void> {
+    return apiDelete(`guardians/${id}`)
+  },
   getTeachers(params?: Record<string, unknown>): Promise<PaginatedData<Teacher>> {
     return apiGet<PaginatedData<Teacher>>('teachers', params)
   },
@@ -41,5 +47,8 @@ export const peopleService = {
   },
   updateTeacher(id: number, data: Record<string, unknown>): Promise<Teacher> {
     return apiPut<Teacher>(`teachers/${id}`, data)
+  },
+  deleteTeacher(id: number): Promise<void> {
+    return apiDelete(`teachers/${id}`)
   },
 }

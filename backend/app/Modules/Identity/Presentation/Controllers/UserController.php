@@ -23,6 +23,7 @@ class UserController extends ApiController
             ->when($request->query('search'), fn ($q, $search) => $q->where(fn ($sub) => $sub->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))
             ->when($request->query('school_id'), fn ($q, $schoolId) => $q->where('school_id', $schoolId))
             ->when($request->query('role_id'), fn ($q, $roleId) => $q->where('role_id', $roleId))
+            ->when($request->query('role'), fn ($q, $slug) => $q->whereHas('role', fn ($sub) => $sub->where('slug', $slug)))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));

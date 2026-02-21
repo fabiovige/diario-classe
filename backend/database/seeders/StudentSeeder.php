@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Modules\People\Domain\Entities\Student;
+use App\Modules\People\Domain\Enums\DisabilityType;
 use Faker\Factory as FakerFactory;
 use Illuminate\Database\Seeder;
 
@@ -19,28 +20,22 @@ class StudentSeeder extends Seeder
         'nao_declarada' => 2,
     ];
 
-    private const DISABILITY_TYPES = [
-        'Visual',
-        'Auditiva',
-        'Física',
-        'Intelectual',
-        'TEA',
-        'Altas Habilidades',
-    ];
-
     public function run(): void
     {
         $faker = FakerFactory::create('pt_BR');
         $racePool = $this->buildRacePool();
+        $disabilityTypes = DisabilityType::cases();
 
         for ($i = 0; $i < self::TOTAL_STUDENTS; $i++) {
             $gender = $faker->randomElement(['male', 'female']);
             $firstName = $gender === 'male' ? $faker->firstNameMale() : $faker->firstNameFemale();
             $name = "{$firstName} {$faker->lastName()} {$faker->lastName()}";
             $hasDisability = $faker->boolean(5);
+            $hasSocialName = $faker->boolean(10);
 
             Student::create([
                 'name' => $name,
+                'social_name' => $hasSocialName ? $faker->firstName() . ' ' . $faker->lastName() : null,
                 'birth_date' => $faker->dateTimeBetween('-14 years', '-4 years')->format('Y-m-d'),
                 'gender' => $gender,
                 'race_color' => $racePool[array_rand($racePool)],
@@ -50,7 +45,7 @@ class StudentSeeder extends Seeder
                 'birth_state' => 'SP',
                 'nationality' => 'brasileira',
                 'has_disability' => $hasDisability,
-                'disability_type' => $hasDisability ? $faker->randomElement(self::DISABILITY_TYPES) : null,
+                'disability_type' => $hasDisability ? $faker->randomElement($disabilityTypes) : null,
                 'active' => true,
             ]);
         }

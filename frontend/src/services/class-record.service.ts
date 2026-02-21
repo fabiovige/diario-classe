@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from '@/config/api'
+import { apiGet, apiPost, apiPut, apiDelete } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
 import type { LessonRecord } from '@/types/class-record'
 
@@ -14,5 +14,8 @@ export const classRecordService = {
   },
   updateRecord(id: number, data: Record<string, unknown>): Promise<LessonRecord> {
     return apiPut<LessonRecord>(`lesson-records/${id}`, data)
+  },
+  deleteRecord(id: number): Promise<void> {
+    return apiDelete(`lesson-records/${id}`)
   },
 }

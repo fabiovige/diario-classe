@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
@@ -8,6 +8,7 @@ import Button from 'primevue/button'
 import { peopleService } from '@/services/people.service'
 import { useToast } from '@/composables/useToast'
 import { extractApiError } from '@/shared/utils/api-error'
+import type { DisabilityType } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,12 +26,14 @@ const form = ref({
   race_color: '',
   cpf: '',
   has_disability: false,
+  disability_type: null as DisabilityType | null,
 })
 
 const genderOptions = [
-  { label: 'Masculino', value: 'masculino' },
-  { label: 'Feminino', value: 'feminino' },
-  { label: 'Outro', value: 'outro' },
+  { label: 'Masculino', value: 'male' },
+  { label: 'Feminino', value: 'female' },
+  { label: 'Outro', value: 'other' },
+  { label: 'Prefere nao informar', value: 'prefer_not_to_say' },
 ]
 
 const raceColorOptions = [
@@ -41,6 +44,23 @@ const raceColorOptions = [
   { label: 'Indigena', value: 'indigena' },
   { label: 'Nao declarada', value: 'nao_declarada' },
 ]
+
+const disabilityTypeOptions = [
+  { label: 'Deficiencia Visual', value: 'visual' },
+  { label: 'Deficiencia Auditiva', value: 'hearing' },
+  { label: 'Deficiencia Fisica', value: 'physical' },
+  { label: 'Deficiencia Intelectual', value: 'intellectual' },
+  { label: 'Transtorno do Espectro Autista (TEA)', value: 'autism' },
+  { label: 'Altas Habilidades/Superdotacao', value: 'gifted_talented' },
+  { label: 'Deficiencia Multipla', value: 'multiple' },
+  { label: 'Surdocegueira', value: 'deafblind' },
+]
+
+watch(() => form.value.has_disability, (hasDisability) => {
+  if (!hasDisability) {
+    form.value.disability_type = null
+  }
+})
 
 async function loadStudent() {
   if (!id.value) return
@@ -54,6 +74,7 @@ async function loadStudent() {
     form.value.race_color = student.race_color
     form.value.cpf = student.cpf
     form.value.has_disability = student.has_disability
+    form.value.disability_type = student.disability_type
   } catch {
     toast.error('Erro ao carregar aluno')
     router.push('/people/students')
@@ -119,6 +140,17 @@ onMounted(loadStudent)
         <div class="flex items-center gap-2">
           <Checkbox v-model="form.has_disability" :binary="true" inputId="has_disability" />
           <label for="has_disability">Possui deficiencia</label>
+        </div>
+        <div v-if="form.has_disability" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Tipo de Deficiencia *</label>
+          <Select
+            v-model="form.disability_type"
+            :options="disabilityTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Selecione o tipo"
+            class="w-full"
+          />
         </div>
 
         <div class="mt-4 flex justify-end gap-3">

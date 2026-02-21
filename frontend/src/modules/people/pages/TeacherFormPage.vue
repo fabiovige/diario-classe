@@ -34,7 +34,7 @@ const schools = ref<School[]>([])
 async function loadAuxData() {
   try {
     const [usersRes, schoolsRes] = await Promise.all([
-      identityService.getUsers({ per_page: 100, role: 'teacher' }),
+      identityService.getUsers({ per_page: 500, role: 'teacher' }),
       schoolStructureService.getSchools({ per_page: 100 }),
     ])
     users.value = usersRes.data

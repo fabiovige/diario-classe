@@ -66,6 +66,13 @@ class StudentController extends ApiController
         return $this->success(new StudentResource($student->refresh()->load('guardians')));
     }
 
+    public function destroy(int $id): JsonResponse
+    {
+        Student::findOrFail($id)->delete();
+
+        return $this->noContent();
+    }
+
     public function attachGuardian(AttachGuardianRequest $request, int $studentId, AttachGuardianUseCase $useCase): JsonResponse
     {
         $useCase->execute(new AttachGuardianDTO(

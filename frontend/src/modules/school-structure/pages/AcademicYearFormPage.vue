@@ -31,6 +31,7 @@ const schools = ref<School[]>([])
 const statusOptions = [
   { label: 'Planejamento', value: 'planning' },
   { label: 'Ativo', value: 'active' },
+  { label: 'Em Encerramento', value: 'closing' },
   { label: 'Encerrado', value: 'closed' },
 ]
 

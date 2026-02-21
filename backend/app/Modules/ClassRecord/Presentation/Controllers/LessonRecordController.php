@@ -64,4 +64,11 @@ class LessonRecordController extends ApiController
 
         return $this->success(new LessonRecordResource($record->load(['classGroup.gradeLevel', 'classGroup.shift', 'teacherAssignment'])));
     }
+
+    public function destroy(int $id): JsonResponse
+    {
+        LessonRecord::findOrFail($id)->delete();
+
+        return $this->noContent();
+    }
 }

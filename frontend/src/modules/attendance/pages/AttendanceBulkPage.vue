@@ -38,8 +38,8 @@ const submitting = ref(false)
 const statusOptions: { label: string; value: AttendanceStatus }[] = [
   { label: 'P', value: 'present' },
   { label: 'A', value: 'absent' },
-  { label: 'J', value: 'justified' },
-  { label: 'D', value: 'dispensed' },
+  { label: 'J', value: 'justified_absence' },
+  { label: 'D', value: 'excused' },
 ]
 
 const canSubmit = computed(() =>
@@ -141,7 +141,7 @@ watch(
 )
 
 function getStatusSeverity(status: AttendanceStatus): string {
-  const map: Record<AttendanceStatus, string> = { present: 'success', absent: 'danger', justified: 'info', dispensed: 'secondary' }
+  const map: Record<AttendanceStatus, string> = { present: 'success', absent: 'danger', justified_absence: 'info', excused: 'secondary' }
   return map[status]
 }
 

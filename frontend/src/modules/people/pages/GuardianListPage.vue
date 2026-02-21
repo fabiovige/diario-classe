@@ -10,11 +10,13 @@ import Paginator from 'primevue/paginator'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { peopleService } from '@/services/people.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatCpf, formatPhone } from '@/shared/utils/formatters'
 import type { Guardian } from '@/types/people'
 
 const router = useRouter()
 const toast = useToast()
+const { confirmDelete } = useConfirm()
 
 const items = ref<Guardian[]>([])
 const loading = ref(false)
@@ -47,6 +49,18 @@ function onPageChange(event: { page: number; rows: number }) {
 function onSearch() {
   currentPage.value = 1
   loadData()
+}
+
+function handleDelete(guardian: Guardian) {
+  confirmDelete(async () => {
+    try {
+      await peopleService.deleteGuardian(guardian.id)
+      toast.success('Responsavel excluido')
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir responsavel')
+    }
+  })
 }
 
 onMounted(loadData)
@@ -82,9 +96,10 @@ onMounted(loadData)
           </template>
         </Column>
         <Column field="email" header="E-mail" />
-        <Column header="Acoes" :style="{ width: '80px' }">
+        <Column header="Acoes" :style="{ width: '120px' }">
           <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded @click="router.push(`/people/guardians/${data.id}/edit`)" />
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/people/guardians/${data.id}/edit`)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
           </template>
         </Column>
       </DataTable>

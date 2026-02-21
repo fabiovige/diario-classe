@@ -1,4 +1,5 @@
 import type { User } from './auth'
+import type { DisabilityType } from './enums'
 import type { School } from './school-structure'
 
 export interface Student {
@@ -11,6 +12,8 @@ export interface Student {
   race_color: string
   cpf: string
   has_disability: boolean
+  disability_type: DisabilityType | null
+  disability_type_label: string | null
   active: boolean
   guardians?: Guardian[]
   created_at: string

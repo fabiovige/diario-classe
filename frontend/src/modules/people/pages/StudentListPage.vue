@@ -11,11 +11,13 @@ import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { peopleService } from '@/services/people.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatCpf, formatDate } from '@/shared/utils/formatters'
 import type { Student } from '@/types/people'
 
 const router = useRouter()
 const toast = useToast()
+const { confirmDelete } = useConfirm()
 
 const items = ref<Student[]>([])
 const loading = ref(false)
@@ -48,6 +50,18 @@ function onPageChange(event: { page: number; rows: number }) {
 function onSearch() {
   currentPage.value = 1
   loadData()
+}
+
+function handleDelete(student: Student) {
+  confirmDelete(async () => {
+    try {
+      await peopleService.deleteStudent(student.id)
+      toast.success('Aluno excluido')
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir aluno')
+    }
+  })
 }
 
 onMounted(loadData)
@@ -88,10 +102,11 @@ onMounted(loadData)
             <StatusBadge :status="data.active ? 'active' : 'inactive'" :label="data.active ? 'Ativo' : 'Inativo'" />
           </template>
         </Column>
-        <Column header="Acoes" :style="{ width: '120px' }">
+        <Column header="Acoes" :style="{ width: '150px' }">
           <template #body="{ data }">
             <Button icon="pi pi-eye" text rounded class="mr-1" @click="router.push(`/people/students/${data.id}`)" />
-            <Button icon="pi pi-pencil" text rounded @click="router.push(`/people/students/${data.id}/edit`)" />
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/people/students/${data.id}/edit`)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
           </template>
         </Column>
       </DataTable>

@@ -2,7 +2,9 @@
 
 namespace App\Modules\People\Presentation\Requests;
 
+use App\Modules\People\Domain\Enums\DisabilityType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateStudentRequest extends FormRequest
 {
@@ -23,7 +25,7 @@ class UpdateStudentRequest extends FormRequest
             'cpf' => ['sometimes', 'nullable', 'string', 'size:11', 'unique:students,cpf,'.$this->route('student')],
             'medical_notes' => ['sometimes', 'nullable', 'string'],
             'has_disability' => ['sometimes', 'boolean'],
-            'disability_type' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'disability_type' => ['required_if:has_disability,true', 'nullable', Rule::enum(DisabilityType::class)],
             'active' => ['sometimes', 'boolean'],
         ];
     }

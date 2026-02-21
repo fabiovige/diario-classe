@@ -21,6 +21,8 @@ class StudentResource extends JsonResource
             'race_color' => $this->race_color,
             'cpf' => $this->cpf,
             'has_disability' => $this->has_disability,
+            'disability_type' => $this->disability_type?->value,
+            'disability_type_label' => $this->disability_type?->label(),
             'active' => $this->active,
             'guardians' => GuardianResource::collection($this->whenLoaded('guardians')),
             'created_at' => $this->created_at,

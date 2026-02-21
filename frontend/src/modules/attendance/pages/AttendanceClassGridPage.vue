@@ -66,12 +66,12 @@ async function loadData() {
 }
 
 function getStatusShort(status: string): string {
-  const map: Record<string, string> = { present: 'P', absent: 'A', justified: 'J', dispensed: 'D' }
+  const map: Record<string, string> = { present: 'P', absent: 'A', justified_absence: 'J', excused: 'D' }
   return map[status] ?? status
 }
 
 function getStatusColor(status: string): string {
-  const map: Record<string, string> = { present: '#0F7B0F', absent: '#C42B1C', justified: '#0078D4', dispensed: '#94a3b8' }
+  const map: Record<string, string> = { present: '#0F7B0F', absent: '#C42B1C', justified_absence: '#0078D4', excused: '#94a3b8' }
   return map[status] ?? '#94a3b8'
 }
 

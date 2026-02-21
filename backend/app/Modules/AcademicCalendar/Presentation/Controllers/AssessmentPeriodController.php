@@ -62,4 +62,11 @@ class AssessmentPeriodController extends ApiController
 
         return $this->success(new AssessmentPeriodResource($period->load('academicYear')));
     }
+
+    public function destroy(int $id): JsonResponse
+    {
+        AssessmentPeriod::findOrFail($id)->delete();
+
+        return $this->noContent();
+    }
 }

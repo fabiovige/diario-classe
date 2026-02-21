@@ -51,4 +51,11 @@ class TeacherController extends ApiController
 
         return $this->success(new TeacherResource($teacher->refresh()->load(['user', 'school'])));
     }
+
+    public function destroy(int $id): JsonResponse
+    {
+        Teacher::findOrFail($id)->delete();
+
+        return $this->noContent();
+    }
 }

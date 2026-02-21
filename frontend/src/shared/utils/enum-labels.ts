@@ -11,6 +11,7 @@ import type {
   PeriodClosingStatus,
   PeriodType,
   FinalResultStatus,
+  DisabilityType,
 } from '@/types/enums'
 
 const ROLE_LABELS: Record<RoleSlug, string> = {
@@ -31,6 +32,7 @@ const USER_STATUS_LABELS: Record<UserStatus, string> = {
 const ACADEMIC_YEAR_STATUS_LABELS: Record<AcademicYearStatus, string> = {
   planning: 'Planejamento',
   active: 'Ativo',
+  closing: 'Em Encerramento',
   closed: 'Encerrado',
 }
 
@@ -65,8 +67,8 @@ const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
 const ATTENDANCE_STATUS_LABELS: Record<AttendanceStatus, string> = {
   present: 'Presente',
   absent: 'Ausente',
-  justified: 'Justificado',
-  dispensed: 'Dispensado',
+  justified_absence: 'Falta Justificada',
+  excused: 'Dispensado',
 }
 
 const GRADE_TYPE_LABELS: Record<GradeType, string> = {
@@ -141,4 +143,19 @@ export function periodTypeLabel(type: PeriodType): string {
 
 export function finalResultStatusLabel(status: FinalResultStatus): string {
   return FINAL_RESULT_STATUS_LABELS[status] ?? status
+}
+
+const DISABILITY_TYPE_LABELS: Record<DisabilityType, string> = {
+  visual: 'Deficiencia Visual',
+  hearing: 'Deficiencia Auditiva',
+  physical: 'Deficiencia Fisica',
+  intellectual: 'Deficiencia Intelectual',
+  autism: 'Transtorno do Espectro Autista (TEA)',
+  gifted_talented: 'Altas Habilidades/Superdotacao',
+  multiple: 'Deficiencia Multipla',
+  deafblind: 'Surdocegueira',
+}
+
+export function disabilityTypeLabel(type: DisabilityType): string {
+  return DISABILITY_TYPE_LABELS[type] ?? type
 }

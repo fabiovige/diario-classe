@@ -43,17 +43,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::apiResource('class-groups', ClassGroupController::class);
 
-    Route::apiResource('students', StudentController::class)->except(['destroy']);
+    Route::apiResource('students', StudentController::class);
     Route::post('students/{student}/guardians', [StudentController::class, 'attachGuardian']);
-    Route::apiResource('guardians', GuardianController::class)->except(['destroy']);
-    Route::apiResource('teachers', TeacherController::class)->except(['destroy']);
+    Route::apiResource('guardians', GuardianController::class);
+    Route::apiResource('teachers', TeacherController::class);
 
     Route::apiResource('enrollments', EnrollmentController::class)->only(['index', 'store', 'show']);
     Route::post('enrollments/{enrollment}/assign-class', [EnrollmentController::class, 'assignToClass']);
     Route::post('enrollments/{enrollment}/transfer', [EnrollmentController::class, 'transfer']);
     Route::get('enrollments/{enrollment}/movements', [EnrollmentController::class, 'movements']);
 
-    Route::apiResource('assessment-periods', AssessmentPeriodController::class)->except(['destroy']);
+    Route::apiResource('assessment-periods', AssessmentPeriodController::class);
 
     Route::apiResource('curricular-components', CurricularComponentController::class);
     Route::apiResource('experience-fields', ExperienceFieldController::class);
@@ -69,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('attendance-configs', [AttendanceController::class, 'indexConfig']);
     Route::post('attendance-configs', [AttendanceController::class, 'storeConfig']);
 
-    Route::apiResource('lesson-records', LessonRecordController::class)->except(['destroy']);
+    Route::apiResource('lesson-records', LessonRecordController::class);
 
     Route::post('grades/bulk', [AssessmentController::class, 'bulkGrades']);
     Route::get('grades', [AssessmentController::class, 'indexGrades']);

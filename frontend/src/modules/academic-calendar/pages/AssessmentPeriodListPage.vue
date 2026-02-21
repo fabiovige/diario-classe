@@ -11,12 +11,14 @@ import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { academicCalendarService } from '@/services/academic-calendar.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { periodTypeLabel } from '@/shared/utils/enum-labels'
 import { formatDate } from '@/shared/utils/formatters'
 import type { AssessmentPeriod } from '@/types/academic-calendar'
 
 const router = useRouter()
 const toast = useToast()
+const { confirmDelete } = useConfirm()
 
 const items = ref<AssessmentPeriod[]>([])
 const loading = ref(false)
@@ -49,6 +51,18 @@ function onPageChange(event: { page: number; rows: number }) {
 function onSearch() {
   currentPage.value = 1
   loadData()
+}
+
+function handleDelete(period: AssessmentPeriod) {
+  confirmDelete(async () => {
+    try {
+      await academicCalendarService.deletePeriod(period.id)
+      toast.success('Periodo avaliativo excluido')
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir periodo avaliativo')
+    }
+  })
 }
 
 onMounted(loadData)
@@ -94,9 +108,10 @@ onMounted(loadData)
             <StatusBadge :status="data.status" :label="data.status" />
           </template>
         </Column>
-        <Column header="Acoes" :style="{ width: '80px' }">
+        <Column header="Acoes" :style="{ width: '120px' }">
           <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded @click="router.push(`/academic-calendar/periods/${data.id}/edit`)" />
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/academic-calendar/periods/${data.id}/edit`)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
           </template>
         </Column>
       </DataTable>

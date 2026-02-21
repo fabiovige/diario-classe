@@ -52,6 +52,6 @@ export interface StudentFrequency {
   present: number
   absent: number
   justified: number
-  dispensed: number
+  excused: number
   frequency_percentage: number
 }

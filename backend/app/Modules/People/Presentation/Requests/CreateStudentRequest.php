@@ -2,6 +2,7 @@
 
 namespace App\Modules\People\Presentation\Requests;
 
+use App\Modules\People\Domain\Enums\DisabilityType;
 use App\Modules\People\Domain\Enums\Gender;
 use App\Modules\People\Domain\Enums\RaceColor;
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,7 +33,7 @@ class CreateStudentRequest extends FormRequest
             'nationality' => ['sometimes', 'string', 'max:50'],
             'medical_notes' => ['nullable', 'string'],
             'has_disability' => ['sometimes', 'boolean'],
-            'disability_type' => ['nullable', 'string', 'max:255'],
+            'disability_type' => ['required_if:has_disability,true', 'nullable', Rule::enum(DisabilityType::class)],
         ];
     }
 }
