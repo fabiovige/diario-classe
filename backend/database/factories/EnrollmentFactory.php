@@ -14,13 +14,17 @@ class EnrollmentFactory extends Factory
 {
     protected $model = Enrollment::class;
 
+    private static int $sequence = 0;
+
     public function definition(): array
     {
+        self::$sequence++;
+
         return [
             'student_id' => Student::factory(),
             'academic_year_id' => AcademicYear::factory(),
             'school_id' => School::factory(),
-            'enrollment_number' => (string) fake()->unique()->numerify('MAT-######'),
+            'enrollment_number' => sprintf('2026-001-%05d', self::$sequence),
             'status' => EnrollmentStatus::Active->value,
             'enrollment_date' => '2026-02-09',
         ];

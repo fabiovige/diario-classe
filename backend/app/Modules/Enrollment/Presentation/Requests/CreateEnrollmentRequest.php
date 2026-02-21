@@ -22,7 +22,7 @@ class CreateEnrollmentRequest extends FormRequest
             'school_id' => ['required', 'integer', 'exists:schools,id'],
             'enrollment_date' => ['required', 'date'],
             'enrollment_type' => ['sometimes', 'string', Rule::enum(EnrollmentType::class)],
-            'enrollment_number' => ['nullable', 'string', 'max:50'],
+            'enrollment_number' => ['nullable', 'string', 'max:50', 'unique:enrollments,enrollment_number'],
         ];
     }
 }

@@ -14,16 +14,18 @@ import EnrollmentDocumentsSection from './EnrollmentDocumentsSection.vue'
 import { enrollmentService } from '@/services/enrollment.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { extractApiError } from '@/shared/utils/api-error'
 import { enrollmentStatusLabel, movementTypeLabel, classAssignmentStatusLabel } from '@/shared/utils/enum-labels'
 import { formatDate, formatDateTime } from '@/shared/utils/formatters'
-import type { Enrollment, EnrollmentMovement } from '@/types/enrollment'
+import type { ClassAssignment, Enrollment, EnrollmentMovement } from '@/types/enrollment'
 import type { ClassGroup, School } from '@/types/school-structure'
-import type { MovementType } from '@/types/enums'
+import type { ClassAssignmentStatus, MovementType } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const { confirmDelete, confirmAction } = useConfirm()
 
 const enrollmentId = Number(route.params.id)
 const enrollment = ref<Enrollment | null>(null)
@@ -49,6 +51,21 @@ const movementTypeOptions = [
   { value: 'transferencia_externa' as MovementType, label: 'Transferencia Externa' },
   { value: 'abandono' as MovementType, label: 'Abandono' },
   { value: 'cancelamento' as MovementType, label: 'Cancelamento' },
+]
+
+const editAssignmentDialogVisible = ref(false)
+const editAssignmentLoading = ref(false)
+const editAssignmentForm = ref({
+  id: null as number | null,
+  class_group_id: null as number | null,
+  start_date: null as Date | null,
+  end_date: null as Date | null,
+  status: null as ClassAssignmentStatus | null,
+})
+const classAssignmentStatusOptions = [
+  { value: 'active' as ClassAssignmentStatus, label: 'Ativa' },
+  { value: 'transferred' as ClassAssignmentStatus, label: 'Transferida' },
+  { value: 'cancelled' as ClassAssignmentStatus, label: 'Cancelada' },
 ]
 
 const isTransferType = (type: MovementType | null) =>
@@ -148,6 +165,75 @@ async function handleMovement() {
   }
 }
 
+async function openEditAssignment(assignment: ClassAssignment) {
+  try {
+    const response = await schoolStructureService.getClassGroups({ per_page: 100 })
+    classGroups.value = response.data.map(cg => {
+      const baseName = [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ')
+      const active = cg.active_students_count ?? 0
+      const max = cg.max_students ?? 0
+      const vacancy = max > 0 ? ` (${active}/${max} vagas)` : ''
+      return { ...cg, label: baseName + vacancy }
+    })
+  } catch {
+    toast.error('Erro ao carregar turmas')
+    return
+  }
+  editAssignmentForm.value = {
+    id: assignment.id,
+    class_group_id: assignment.class_group_id,
+    start_date: assignment.start_date ? new Date(assignment.start_date + 'T12:00:00') : null,
+    end_date: assignment.end_date ? new Date(assignment.end_date + 'T12:00:00') : null,
+    status: assignment.status,
+  }
+  editAssignmentDialogVisible.value = true
+}
+
+async function handleEditAssignment() {
+  if (!editAssignmentForm.value.id) return
+  editAssignmentLoading.value = true
+  try {
+    const data: Record<string, unknown> = {
+      class_group_id: editAssignmentForm.value.class_group_id,
+      status: editAssignmentForm.value.status,
+      start_date: editAssignmentForm.value.start_date ? toISODate(editAssignmentForm.value.start_date) : null,
+      end_date: editAssignmentForm.value.end_date ? toISODate(editAssignmentForm.value.end_date) : null,
+    }
+    await enrollmentService.updateClassAssignment(enrollmentId, editAssignmentForm.value.id, data)
+    toast.success('Enturmacao atualizada')
+    editAssignmentDialogVisible.value = false
+    loadEnrollment()
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao atualizar enturmacao'))
+  } finally {
+    editAssignmentLoading.value = false
+  }
+}
+
+function handleReactivate() {
+  confirmAction('Tem certeza que deseja reativar esta matricula?', async () => {
+    try {
+      await enrollmentService.reactivateEnrollment(enrollmentId)
+      toast.success('Matricula reativada')
+      loadEnrollment()
+    } catch (error: unknown) {
+      toast.error(extractApiError(error, 'Erro ao reativar matricula'))
+    }
+  }, 'Reativar Matricula')
+}
+
+function handleDeleteAssignment(assignment: ClassAssignment) {
+  confirmDelete(async () => {
+    try {
+      await enrollmentService.deleteClassAssignment(enrollmentId, assignment.id)
+      toast.success('Enturmacao excluida')
+      loadEnrollment()
+    } catch {
+      toast.error('Erro ao excluir enturmacao')
+    }
+  })
+}
+
 onMounted(loadEnrollment)
 </script>
 
@@ -158,6 +244,7 @@ onMounted(loadEnrollment)
       <div class="flex gap-2">
         <Button v-if="enrollment?.status === 'active'" label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
         <Button v-if="enrollment?.status === 'active'" label="Movimentar" icon="pi pi-arrow-right-arrow-left" severity="warning" @click="openMovementDialog" />
+        <Button v-if="enrollment?.status === 'cancelled'" label="Reativar" icon="pi pi-replay" severity="success" @click="handleReactivate" />
         <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/enrollment/enrollments')" />
       </div>
     </div>
@@ -217,6 +304,12 @@ onMounted(loadEnrollment)
         <Column header="Fim">
           <template #body="{ data }">
             {{ formatDate(data.end_date) }}
+          </template>
+        </Column>
+        <Column header="Acoes" :style="{ width: '120px' }">
+          <template #body="{ data }">
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="openEditAssignment(data)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDeleteAssignment(data)" />
           </template>
         </Column>
       </DataTable>
@@ -287,6 +380,27 @@ onMounted(loadEnrollment)
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Motivo</label>
           <InputText v-model="movementForm.reason" placeholder="Motivo da movimentacao" class="w-full" />
+        </div>
+      </div>
+    </FormDialog>
+
+    <FormDialog v-model:visible="editAssignmentDialogVisible" title="Editar Enturmacao" :loading="editAssignmentLoading" @save="handleEditAssignment">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <Select v-model="editAssignmentForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data de Inicio *</label>
+          <DatePicker v-model="editAssignmentForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Data de Fim</label>
+          <DatePicker v-model="editAssignmentForm.end_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon showButtonBar />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Status *</label>
+          <Select v-model="editAssignmentForm.status" :options="classAssignmentStatusOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
       </div>
     </FormDialog>

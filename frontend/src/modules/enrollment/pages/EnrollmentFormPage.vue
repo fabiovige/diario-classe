@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Select from 'primevue/select'
 import DatePicker from 'primevue/datepicker'
-import InputText from 'primevue/inputtext'
+
 import Button from 'primevue/button'
 import { enrollmentService } from '@/services/enrollment.service'
 import { peopleService } from '@/services/people.service'
@@ -25,7 +25,6 @@ const form = ref({
   school_id: null as number | null,
   enrollment_type: 'new_enrollment' as EnrollmentType,
   enrollment_date: null as Date | null,
-  enrollment_number: '' as string,
 })
 
 const enrollmentTypeOptions = [
@@ -106,11 +105,6 @@ onMounted(loadAuxData)
           <label class="text-[0.8125rem] font-medium">Data da Matricula *</label>
           <DatePicker v-model="form.enrollment_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Numero da Matricula</label>
-          <InputText v-model="form.enrollment_number" placeholder="Gerado automaticamente se vazio" class="w-full" />
-        </div>
-
         <div class="mt-4 flex justify-end gap-3">
           <Button label="Cancelar" severity="secondary" @click="router.push('/enrollment/enrollments')" />
           <Button type="submit" label="Matricular" icon="pi pi-check" :loading="loading" />

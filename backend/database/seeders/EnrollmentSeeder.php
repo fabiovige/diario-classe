@@ -32,11 +32,13 @@ class EnrollmentSeeder extends Seeder
         $createdBy = $adminUser?->id;
 
         $studentIndex = 0;
-        $enrollmentNumber = 1;
         $totalStudents = $students->count();
 
         foreach ($schoolClassGroups as $schoolData) {
             $schoolCount = 0;
+            $schoolSequential = 0;
+            $schoolId = $schoolData['school']->id;
+            $year = $schoolData['academicYear']->year;
 
             foreach ($schoolData['classGroups'] as $classGroup) {
                 if ($studentIndex >= $totalStudents || $schoolCount >= self::MAX_STUDENTS_PER_SCHOOL) {
@@ -57,18 +59,17 @@ class EnrollmentSeeder extends Seeder
                     $student = $students[$studentIndex];
                     $studentIndex++;
                     $schoolCount++;
+                    $schoolSequential++;
 
                     $enrollment = Enrollment::create([
                         'student_id' => $student->id,
                         'academic_year_id' => $schoolData['academicYear']->id,
-                        'school_id' => $schoolData['school']->id,
-                        'enrollment_number' => sprintf('MAT%06d', $enrollmentNumber),
+                        'school_id' => $schoolId,
+                        'enrollment_number' => sprintf('%d-%s-%s', $year, str_pad((string) $schoolId, 3, '0', STR_PAD_LEFT), str_pad((string) $schoolSequential, 5, '0', STR_PAD_LEFT)),
                         'enrollment_type' => EnrollmentType::NewEnrollment->value,
                         'status' => 'active',
                         'enrollment_date' => self::ENROLLMENT_DATE,
                     ]);
-
-                    $enrollmentNumber++;
 
                     ClassAssignment::create([
                         'enrollment_id' => $enrollment->id,

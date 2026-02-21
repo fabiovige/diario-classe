@@ -11,12 +11,14 @@ import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { enrollmentService } from '@/services/enrollment.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { enrollmentStatusLabel } from '@/shared/utils/enum-labels'
 import { formatDate } from '@/shared/utils/formatters'
 import type { Enrollment } from '@/types/enrollment'
 
 const router = useRouter()
 const toast = useToast()
+const { confirmDelete, confirmAction } = useConfirm()
 
 const items = ref<Enrollment[]>([])
 const loading = ref(false)
@@ -49,6 +51,30 @@ function onPageChange(event: { page: number; rows: number }) {
 function onSearch() {
   currentPage.value = 1
   loadData()
+}
+
+function handleCancel(enrollment: Enrollment) {
+  confirmDelete(async () => {
+    try {
+      await enrollmentService.cancelEnrollment(enrollment.id)
+      toast.success('Matricula cancelada')
+      loadData()
+    } catch {
+      toast.error('Erro ao cancelar matricula')
+    }
+  }, 'Tem certeza que deseja cancelar esta matricula? O status sera alterado para "Cancelada".')
+}
+
+function handleReactivate(enrollment: Enrollment) {
+  confirmAction('Tem certeza que deseja reativar esta matricula?', async () => {
+    try {
+      await enrollmentService.reactivateEnrollment(enrollment.id)
+      toast.success('Matricula reativada')
+      loadData()
+    } catch {
+      toast.error('Erro ao reativar matricula')
+    }
+  }, 'Reativar Matricula')
 }
 
 onMounted(loadData)
@@ -98,9 +124,11 @@ onMounted(loadData)
             {{ formatDate(data.enrollment_date) }}
           </template>
         </Column>
-        <Column header="Acoes" :style="{ width: '80px' }">
+        <Column header="Acoes" :style="{ width: '120px' }">
           <template #body="{ data }">
             <Button icon="pi pi-eye" text rounded @click="router.push(`/enrollment/enrollments/${data.id}`)" />
+            <Button v-if="data.status === 'active'" icon="pi pi-trash" text rounded severity="danger" @click="handleCancel(data)" />
+            <Button v-if="data.status === 'cancelled'" icon="pi pi-replay" text rounded severity="success" @click="handleReactivate(data)" />
           </template>
         </Column>
       </DataTable>
