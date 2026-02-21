@@ -33,10 +33,14 @@ async function loadResult() {
   if (!selectedStudentId.value) return
   loading.value = true
   try {
-    result.value = await periodClosingService.getStudentFinalResult(selectedStudentId.value)
+    const results = await periodClosingService.getStudentFinalResult(selectedStudentId.value)
+    result.value = results[0] ?? null
+    if (!result.value) {
+      toast.warn('Resultado final nao encontrado para este aluno')
+    }
   } catch {
     result.value = null
-    toast.warn('Resultado final nao encontrado para este aluno')
+    toast.error('Erro ao buscar resultado final')
   } finally {
     loading.value = false
   }

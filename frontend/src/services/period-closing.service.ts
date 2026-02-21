@@ -33,7 +33,7 @@ export const periodClosingService = {
   calculateFinalResult(data: Record<string, unknown>): Promise<FinalResult> {
     return apiPost<FinalResult>('final-results/calculate', data)
   },
-  getStudentFinalResult(studentId: number): Promise<FinalResult> {
-    return apiGet<FinalResult>(`final-results/student/${studentId}`)
+  getStudentFinalResult(studentId: number): Promise<FinalResult[]> {
+    return apiGet<FinalResult[]>(`final-results/student/${studentId}`)
   },
 }
