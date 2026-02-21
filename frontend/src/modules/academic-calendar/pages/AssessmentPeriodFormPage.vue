@@ -8,6 +8,7 @@ import Button from 'primevue/button'
 import { academicCalendarService } from '@/services/academic-calendar.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { AcademicYear } from '@/types/school-structure'
 
 const route = useRoute()
@@ -74,8 +75,8 @@ async function handleSubmit() {
       toast.success('Periodo criado')
     }
     router.push('/academic-calendar/periods')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar periodo')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar periodo'))
   } finally {
     loading.value = false
   }

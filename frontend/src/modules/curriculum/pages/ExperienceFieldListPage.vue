@@ -11,6 +11,7 @@ import EmptyState from '@/shared/components/EmptyState.vue'
 import FormDialog from '@/shared/components/FormDialog.vue'
 import { curriculumService } from '@/services/curriculum.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { ExperienceField } from '@/types/curriculum'
 
 const toast = useToast()
@@ -57,8 +58,8 @@ async function handleSave() {
     toast.success('Campo de experiencia criado')
     dialogVisible.value = false
     loadData()
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao criar campo')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao criar campo'))
   } finally {
     dialogLoading.value = false
   }

@@ -7,6 +7,7 @@ import Select from 'primevue/select'
 import Button from 'primevue/button'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { AcademicYear, GradeLevel, Shift } from '@/types/school-structure'
 
 const route = useRoute()
@@ -73,8 +74,8 @@ async function handleSubmit() {
       toast.success('Turma criada')
     }
     router.push('/school-structure/class-groups')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar turma')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar turma'))
   } finally {
     loading.value = false
   }

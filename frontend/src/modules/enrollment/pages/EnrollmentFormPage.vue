@@ -7,6 +7,7 @@ import { enrollmentService } from '@/services/enrollment.service'
 import { peopleService } from '@/services/people.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { Student } from '@/types/people'
 import type { School, AcademicYear } from '@/types/school-structure'
 
@@ -46,8 +47,8 @@ async function handleSubmit() {
     await enrollmentService.createEnrollment(form.value)
     toast.success('Matricula criada')
     router.push('/enrollment/enrollments')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao criar matricula')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao criar matricula'))
   } finally {
     loading.value = false
   }

@@ -5,6 +5,7 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import { peopleService } from '@/services/people.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -53,8 +54,8 @@ async function handleSubmit() {
       toast.success('Responsavel criado')
     }
     router.push('/people/guardians')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar responsavel')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar responsavel'))
   } finally {
     loading.value = false
   }

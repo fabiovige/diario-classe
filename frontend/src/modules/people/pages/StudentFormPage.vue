@@ -7,6 +7,7 @@ import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
 import { peopleService } from '@/services/people.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -75,8 +76,8 @@ async function handleSubmit() {
       toast.success('Aluno criado')
     }
     router.push('/people/students')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar aluno')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar aluno'))
   } finally {
     loading.value = false
   }

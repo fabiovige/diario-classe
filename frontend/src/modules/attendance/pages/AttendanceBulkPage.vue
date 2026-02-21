@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -11,6 +11,7 @@ import { schoolStructureService } from '@/services/school-structure.service'
 import { curriculumService } from '@/services/curriculum.service'
 import { enrollmentService } from '@/services/enrollment.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { ClassGroup } from '@/types/school-structure'
 import type { TeacherAssignment } from '@/types/curriculum'
 import type { AttendanceStatus } from '@/types/enums'
@@ -31,6 +32,7 @@ const selectedDate = ref(new Date().toISOString().split('T')[0])
 const students = ref<StudentRecord[]>([])
 const loading = ref(false)
 const loadingAssignments = ref(false)
+const loadingRecords = ref(false)
 const submitting = ref(false)
 
 const statusOptions: { label: string; value: AttendanceStatus }[] = [
@@ -41,6 +43,10 @@ const statusOptions: { label: string; value: AttendanceStatus }[] = [
 ]
 
 const canSubmit = computed(() =>
+  selectedClassGroupId.value && selectedAssignmentId.value && selectedDate.value && students.value.length > 0
+)
+
+const canLoadRecords = computed(() =>
   selectedClassGroupId.value && selectedAssignmentId.value && selectedDate.value && students.value.length > 0
 )
 
@@ -94,6 +100,30 @@ async function loadStudents() {
   }
 }
 
+async function loadExistingRecords() {
+  if (!canLoadRecords.value || !selectedClassGroupId.value) return
+
+  loadingRecords.value = true
+  try {
+    const response = await attendanceService.getByClass(selectedClassGroupId.value, {
+      teacher_assignment_id: selectedAssignmentId.value,
+      date: selectedDate.value,
+      per_page: 200,
+    })
+
+    const recordMap = new Map(response.data.map(r => [r.student_id, r.status]))
+
+    students.value = students.value.map(s => ({
+      ...s,
+      status: (recordMap.get(s.student_id) as AttendanceStatus) ?? 'present',
+    }))
+  } catch {
+    toast.error('Erro ao carregar registros existentes')
+  } finally {
+    loadingRecords.value = false
+  }
+}
+
 function onClassGroupChange() {
   assignments.value = []
   selectedAssignmentId.value = null
@@ -101,6 +131,14 @@ function onClassGroupChange() {
   loadAssignments()
   loadStudents()
 }
+
+watch(
+  () => [selectedAssignmentId.value, selectedDate.value],
+  () => {
+    if (!canLoadRecords.value) return
+    loadExistingRecords()
+  },
+)
 
 function getStatusSeverity(status: AttendanceStatus): string {
   const map: Record<AttendanceStatus, string> = { present: 'success', absent: 'danger', justified: 'info', dispensed: 'secondary' }
@@ -118,8 +156,8 @@ async function handleSubmit() {
       records: students.value.map(s => ({ student_id: s.student_id, status: s.status })),
     })
     toast.success('Frequencia registrada')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao registrar frequencia')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao registrar frequencia'))
   } finally {
     submitting.value = false
   }
@@ -150,9 +188,9 @@ onMounted(loadClassGroups)
     </div>
 
     <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-      <EmptyState v-if="!loading && students.length === 0" message="Selecione uma turma para carregar os alunos" />
+      <EmptyState v-if="!loading && !loadingRecords && students.length === 0" message="Selecione uma turma para carregar os alunos" />
 
-      <DataTable v-if="students.length > 0" :value="students" :loading="loading" stripedRows responsiveLayout="scroll">
+      <DataTable v-if="students.length > 0" :value="students" :loading="loading || loadingRecords" stripedRows responsiveLayout="scroll">
         <Column field="student_name" header="Aluno" sortable />
         <Column header="Presenca" :style="{ width: '200px' }">
           <template #body="{ data }">

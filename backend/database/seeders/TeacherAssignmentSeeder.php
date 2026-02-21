@@ -14,7 +14,7 @@ use Illuminate\Database\Seeder;
 
 class TeacherAssignmentSeeder extends Seeder
 {
-    private const ENROLLMENT_START = '2026-02-09';
+    private const ENROLLMENT_START = '2025-02-10';
 
     public function run(): void
     {
@@ -26,7 +26,7 @@ class TeacherAssignmentSeeder extends Seeder
 
         foreach ($schools as $school) {
             $academicYear = AcademicYear::where('school_id', $school->id)
-                ->where('year', 2026)
+                ->where('year', 2025)
                 ->first();
 
             if (! $academicYear) {

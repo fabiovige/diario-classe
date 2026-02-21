@@ -34,7 +34,7 @@ class PeriodClosingSeeder extends Seeder
         }
 
         $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academicYear->id)
-            ->whereIn('number', [1, 2])
+            ->whereIn('number', [1, 2, 3, 4])
             ->get()
             ->keyBy('number');
 
@@ -58,20 +58,28 @@ class PeriodClosingSeeder extends Seeder
         }
     }
 
+    private const APPROVED_DATES = [
+        1 => ['submitted' => '2025-04-18', 'validated' => '2025-04-19', 'approved' => '2025-04-20'],
+        2 => ['submitted' => '2025-07-01', 'validated' => '2025-07-02', 'approved' => '2025-07-03'],
+        3 => ['submitted' => '2025-10-01', 'validated' => '2025-10-02', 'approved' => '2025-10-03'],
+    ];
+
     private function resolveClosingData(int $periodNumber, ?\App\Models\User $admin): array
     {
-        if ($periodNumber === 1) {
+        if ($periodNumber <= 3) {
+            $dates = self::APPROVED_DATES[$periodNumber];
+
             return [
                 'status' => 'approved',
                 'all_grades_complete' => true,
                 'all_attendance_complete' => true,
                 'all_lesson_records_complete' => true,
                 'submitted_by' => $admin?->id,
-                'submitted_at' => '2026-04-18',
+                'submitted_at' => $dates['submitted'],
                 'validated_by' => $admin?->id,
-                'validated_at' => '2026-04-19',
+                'validated_at' => $dates['validated'],
                 'approved_by' => $admin?->id,
-                'approved_at' => '2026-04-20',
+                'approved_at' => $dates['approved'],
             ];
         }
 

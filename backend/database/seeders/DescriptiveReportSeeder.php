@@ -55,7 +55,7 @@ class DescriptiveReportSeeder extends Seeder
                 ->toArray();
 
             $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academic_year_id)
-                ->whereIn('number', [1, 2])
+                ->whereIn('number', [1, 2, 3, 4])
                 ->get();
 
             $firstTeacherAssignment = TeacherAssignment::where('class_group_id', $classGroup->id)

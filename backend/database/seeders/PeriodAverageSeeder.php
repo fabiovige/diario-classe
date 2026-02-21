@@ -57,7 +57,7 @@ class PeriodAverageSeeder extends Seeder
         }
 
         $periods = AssessmentPeriod::where('academic_year_id', $academicYear->id)
-            ->whereIn('number', [1, 2])
+            ->whereIn('number', [1, 2, 3, 4])
             ->get()
             ->keyBy('number');
 

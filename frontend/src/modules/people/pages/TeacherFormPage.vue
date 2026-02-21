@@ -8,6 +8,7 @@ import { peopleService } from '@/services/people.service'
 import { identityService } from '@/services/identity.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { User } from '@/types/auth'
 import type { School } from '@/types/school-structure'
 
@@ -72,8 +73,8 @@ async function handleSubmit() {
       toast.success('Professor criado')
     }
     router.push('/people/teachers')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar professor')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar professor'))
   } finally {
     loading.value = false
   }

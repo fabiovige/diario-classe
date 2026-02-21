@@ -25,7 +25,7 @@ class ClassGroupSeeder extends Seeder
 
         foreach ($schools as $index => $school) {
             $academicYear = AcademicYear::where('school_id', $school->id)
-                ->where('year', 2026)
+                ->where('year', 2025)
                 ->firstOrFail();
 
             $shifts = Shift::where('school_id', $school->id)

@@ -10,6 +10,7 @@ import { classRecordService } from '@/services/class-record.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { curriculumService } from '@/services/curriculum.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { ClassGroup } from '@/types/school-structure'
 import type { TeacherAssignment } from '@/types/curriculum'
 
@@ -102,8 +103,8 @@ async function handleSubmit() {
       toast.success('Registro criado')
     }
     router.push('/class-record')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar registro')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar registro'))
   } finally {
     loading.value = false
   }

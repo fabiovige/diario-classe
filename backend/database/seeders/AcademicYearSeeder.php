@@ -14,11 +14,11 @@ class AcademicYearSeeder extends Seeder
 
         foreach ($schools as $school) {
             AcademicYear::updateOrCreate(
-                ['school_id' => $school->id, 'year' => 2026],
+                ['school_id' => $school->id, 'year' => 2025],
                 [
                     'status' => 'active',
-                    'start_date' => '2026-02-09',
-                    'end_date' => '2026-12-18',
+                    'start_date' => '2025-02-10',
+                    'end_date' => '2025-12-19',
                 ],
             );
         }

@@ -6,6 +6,7 @@ import Button from 'primevue/button'
 import Chips from 'primevue/chips'
 import { identityService } from '@/services/identity.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -51,8 +52,8 @@ async function handleSubmit() {
       toast.success('Perfil criado')
     }
     router.push('/identity/roles')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar perfil')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar perfil'))
   } finally {
     loading.value = false
   }

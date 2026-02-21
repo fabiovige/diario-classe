@@ -6,6 +6,7 @@ import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -56,8 +57,8 @@ async function handleSubmit() {
       toast.success('Escola criada')
     }
     router.push('/school-structure/schools')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar escola')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar escola'))
   } finally {
     loading.value = false
   }

@@ -11,6 +11,7 @@ import EmptyState from '@/shared/components/EmptyState.vue'
 import FormDialog from '@/shared/components/FormDialog.vue'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { Shift, School } from '@/types/school-structure'
 
 const toast = useToast()
@@ -67,8 +68,8 @@ async function handleSave() {
     toast.success('Turno criado')
     dialogVisible.value = false
     loadData()
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao criar turno')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao criar turno'))
   } finally {
     dialogLoading.value = false
   }

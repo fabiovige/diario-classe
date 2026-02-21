@@ -51,7 +51,7 @@ class GradeSeeder extends Seeder
                 ->get();
 
             $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academic_year_id)
-                ->whereIn('number', [1, 2])
+                ->whereIn('number', [1, 2, 3, 4])
                 ->get();
 
             $studentIds = DB::table('class_assignments')

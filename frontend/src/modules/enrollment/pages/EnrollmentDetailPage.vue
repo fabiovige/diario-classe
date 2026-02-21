@@ -11,6 +11,7 @@ import FormDialog from '@/shared/components/FormDialog.vue'
 import { enrollmentService } from '@/services/enrollment.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import { enrollmentStatusLabel, movementTypeLabel } from '@/shared/utils/enum-labels'
 import { formatDate, formatDateTime } from '@/shared/utils/formatters'
 import type { Enrollment, EnrollmentMovement } from '@/types/enrollment'
@@ -66,8 +67,8 @@ async function handleAssign() {
     toast.success('Aluno enturmado')
     assignDialogVisible.value = false
     loadEnrollment()
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao enturmar')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao enturmar'))
   } finally {
     assignLoading.value = false
   }

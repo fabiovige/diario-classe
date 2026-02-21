@@ -46,6 +46,7 @@ class AssessmentController extends ApiController
         $grades = Grade::with('student')
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
+            ->when($request->query('teacher_assignment_id'), fn ($q, $id) => $q->where('teacher_assignment_id', $id))
             ->when($request->query('assessment_period_id'), fn ($q, $id) => $q->where('assessment_period_id', $id))
             ->when($request->query('assessment_instrument_id'), fn ($q, $id) => $q->where('assessment_instrument_id', $id))
             ->orderBy('student_id')
@@ -141,6 +142,7 @@ class AssessmentController extends ApiController
         $configs = AssessmentConfig::with(['conceptualScales', 'instruments'])
             ->when($request->query('school_id'), fn ($q, $id) => $q->where('school_id', $id))
             ->when($request->query('academic_year_id'), fn ($q, $id) => $q->where('academic_year_id', $id))
+            ->when($request->query('grade_level_id'), fn ($q, $id) => $q->where('grade_level_id', $id))
             ->paginate($request->query('per_page', 15));
 
         return $this->success(AssessmentConfigResource::collection($configs)->response()->getData(true));

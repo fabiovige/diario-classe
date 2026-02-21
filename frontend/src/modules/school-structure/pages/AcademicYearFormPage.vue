@@ -7,6 +7,7 @@ import Select from 'primevue/select'
 import Button from 'primevue/button'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { School } from '@/types/school-structure'
 
 const route = useRoute()
@@ -71,8 +72,8 @@ async function handleSubmit() {
       toast.success('Ano letivo criado')
     }
     router.push('/school-structure/academic-years')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar ano letivo')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar ano letivo'))
   } finally {
     loading.value = false
   }

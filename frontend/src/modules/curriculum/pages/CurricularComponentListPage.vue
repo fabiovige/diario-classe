@@ -11,6 +11,7 @@ import EmptyState from '@/shared/components/EmptyState.vue'
 import FormDialog from '@/shared/components/FormDialog.vue'
 import { curriculumService } from '@/services/curriculum.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { CurricularComponent } from '@/types/curriculum'
 
 const toast = useToast()
@@ -58,8 +59,8 @@ async function handleSave() {
     toast.success('Componente curricular criado')
     dialogVisible.value = false
     loadData()
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao criar componente')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao criar componente'))
   } finally {
     dialogLoading.value = false
   }

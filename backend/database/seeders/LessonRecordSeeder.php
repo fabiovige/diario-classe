@@ -10,12 +10,14 @@ use Illuminate\Database\Seeder;
 class LessonRecordSeeder extends Seeder
 {
     private const LESSON_DATES = [
-        '2026-02-16',
-        '2026-02-23',
-        '2026-03-02',
-        '2026-04-27',
-        '2026-05-04',
-        '2026-05-11',
+        '2025-02-17', '2025-02-24', '2025-03-03', '2025-03-10',
+        '2025-03-17', '2025-03-24', '2025-03-31', '2025-04-07',
+        '2025-04-28', '2025-05-05', '2025-05-12', '2025-05-19',
+        '2025-05-26', '2025-06-02', '2025-06-09', '2025-06-16',
+        '2025-08-04', '2025-08-11', '2025-08-18', '2025-08-25',
+        '2025-09-01', '2025-09-08', '2025-09-15', '2025-09-22',
+        '2025-10-06', '2025-10-13', '2025-10-20', '2025-10-27',
+        '2025-11-03', '2025-11-10', '2025-11-17', '2025-11-24',
     ];
 
     private const CONTENTS = [
@@ -25,6 +27,8 @@ class LessonRecordSeeder extends Seeder
         'Trabalho em grupo com apresentação oral',
         'Atividades de fixação e exercícios dirigidos',
         'Revisão geral e preparação para avaliação',
+        'Leitura compartilhada e interpretação de textos',
+        'Atividades de pesquisa e produção textual',
     ];
 
     private const METHODOLOGIES = [
@@ -34,6 +38,8 @@ class LessonRecordSeeder extends Seeder
         'Atividade prática com resolução de problemas',
         'Trabalho individual com acompanhamento do professor',
         'Jogos educativos e atividades lúdicas',
+        'Pesquisa orientada com uso de tecnologia',
+        'Atividade interdisciplinar com produção coletiva',
     ];
 
     public function run(): void

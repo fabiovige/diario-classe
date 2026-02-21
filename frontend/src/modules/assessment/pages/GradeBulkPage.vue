@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import Message from 'primevue/message'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { assessmentService } from '@/services/assessment.service'
 import { schoolStructureService } from '@/services/school-structure.service'
@@ -12,9 +13,11 @@ import { curriculumService } from '@/services/curriculum.service'
 import { academicCalendarService } from '@/services/academic-calendar.service'
 import { enrollmentService } from '@/services/enrollment.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { ClassGroup } from '@/types/school-structure'
 import type { TeacherAssignment } from '@/types/curriculum'
 import type { AssessmentPeriod } from '@/types/academic-calendar'
+import type { AssessmentConfig, AssessmentInstrument, ConceptualScale } from '@/types/assessment'
 
 interface StudentGrade {
   student_id: number
@@ -28,22 +31,35 @@ const toast = useToast()
 const classGroups = ref<(ClassGroup & { label: string })[]>([])
 const assignments = ref<(TeacherAssignment & { label: string })[]>([])
 const periods = ref<AssessmentPeriod[]>([])
+const instruments = ref<AssessmentInstrument[]>([])
+const conceptualScales = ref<ConceptualScale[]>([])
+const config = ref<AssessmentConfig | null>(null)
 
 const selectedClassGroupId = ref<number | null>(null)
 const selectedAssignmentId = ref<number | null>(null)
 const selectedPeriodId = ref<number | null>(null)
+const selectedInstrumentId = ref<number | null>(null)
 
 const students = ref<StudentGrade[]>([])
 const loading = ref(false)
 const loadingDeps = ref(false)
+const loadingGrades = ref(false)
 const submitting = ref(false)
 
 const selectedClassGroup = computed(() =>
   classGroups.value.find(cg => cg.id === selectedClassGroupId.value)
 )
 
+const isDescriptive = computed(() => config.value?.grade_type === 'descriptive')
+const isConceptual = computed(() => config.value?.grade_type === 'conceptual')
+const isNumeric = computed(() => !config.value || config.value.grade_type === 'numeric')
+
+const canLoadGrades = computed(() =>
+  selectedClassGroupId.value && selectedAssignmentId.value && selectedPeriodId.value && selectedInstrumentId.value
+)
+
 const canSubmit = computed(() =>
-  selectedClassGroupId.value && selectedAssignmentId.value && selectedPeriodId.value && students.value.length > 0
+  canLoadGrades.value && students.value.length > 0
 )
 
 const depsPlaceholder = computed(() => {
@@ -59,6 +75,17 @@ const assignmentPlaceholder = computed(() => {
   return 'Selecione'
 })
 
+const instrumentPlaceholder = computed(() => {
+  if (!selectedClassGroupId.value) return 'Selecione a turma primeiro'
+  if (loadingDeps.value) return 'Carregando...'
+  if (instruments.value.length === 0) return 'Nenhum instrumento configurado'
+  return 'Selecione'
+})
+
+const conceptualOptions = computed(() =>
+  conceptualScales.value.map(s => ({ label: `${s.code} - ${s.label}`, value: s.code }))
+)
+
 async function loadClassGroups() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
@@ -73,14 +100,23 @@ async function loadClassGroups() {
 
 async function loadDependencies() {
   if (!selectedClassGroupId.value) return
-  const academicYearId = selectedClassGroup.value?.academic_year_id
+  const cg = selectedClassGroup.value
+  if (!cg) return
+
   loadingDeps.value = true
   try {
-    const [assignmentsRes, periodsRes, studentsRes] = await Promise.all([
-      curriculumService.getAssignments({ class_group_id: selectedClassGroupId.value, per_page: 100 }),
-      academicCalendarService.getPeriods({ academic_year_id: academicYearId, per_page: 100 }),
-      enrollmentService.getEnrollments({ class_group_id: selectedClassGroupId.value, status: 'active', per_page: 100 }),
+    const [assignmentsRes, periodsRes, studentsRes, configsRes] = await Promise.all([
+      curriculumService.getAssignments({ class_group_id: cg.id, per_page: 100 }),
+      academicCalendarService.getPeriods({ academic_year_id: cg.academic_year_id, per_page: 100 }),
+      enrollmentService.getEnrollments({ class_group_id: cg.id, status: 'active', per_page: 100 }),
+      assessmentService.getConfigs({
+        school_id: cg.academic_year?.school_id,
+        academic_year_id: cg.academic_year_id,
+        grade_level_id: cg.grade_level_id,
+        per_page: 1,
+      }),
     ])
+
     assignments.value = assignmentsRes.data.map(a => ({
       ...a,
       label: a.curricular_component?.name ?? a.experience_field?.name ?? `Disciplina #${a.id}`,
@@ -92,6 +128,11 @@ async function loadDependencies() {
       numeric_value: null,
       conceptual_value: null,
     }))
+
+    const firstConfig = configsRes.data?.[0] ?? null
+    config.value = firstConfig
+    instruments.value = firstConfig?.instruments ?? []
+    conceptualScales.value = firstConfig?.conceptual_scales ?? []
   } catch {
     toast.error('Erro ao carregar dados da turma')
   } finally {
@@ -99,23 +140,67 @@ async function loadDependencies() {
   }
 }
 
+async function loadExistingGrades() {
+  if (!canLoadGrades.value) return
+
+  loadingGrades.value = true
+  try {
+    const response = await assessmentService.getGrades({
+      class_group_id: selectedClassGroupId.value,
+      teacher_assignment_id: selectedAssignmentId.value,
+      assessment_period_id: selectedPeriodId.value,
+      assessment_instrument_id: selectedInstrumentId.value,
+      per_page: 200,
+    })
+
+    const gradeMap = new Map(response.data.map(g => [g.student_id, g]))
+
+    students.value = students.value.map(s => {
+      const existing = gradeMap.get(s.student_id)
+      if (!existing) return { ...s, numeric_value: null, conceptual_value: null }
+      return {
+        ...s,
+        numeric_value: existing.numeric_value,
+        conceptual_value: existing.conceptual_value,
+      }
+    })
+  } catch {
+    toast.error('Erro ao carregar notas existentes')
+  } finally {
+    loadingGrades.value = false
+  }
+}
+
 function onClassGroupChange() {
   assignments.value = []
   periods.value = []
+  instruments.value = []
+  conceptualScales.value = []
+  config.value = null
   students.value = []
   selectedAssignmentId.value = null
   selectedPeriodId.value = null
+  selectedInstrumentId.value = null
   loadDependencies()
 }
 
+watch(
+  () => [selectedAssignmentId.value, selectedPeriodId.value, selectedInstrumentId.value],
+  () => {
+    if (!canLoadGrades.value) return
+    loadExistingGrades()
+  },
+)
+
 async function handleSubmit() {
-  if (!selectedClassGroupId.value || !selectedAssignmentId.value || !selectedPeriodId.value) return
+  if (!selectedClassGroupId.value || !selectedAssignmentId.value || !selectedPeriodId.value || !selectedInstrumentId.value) return
   submitting.value = true
   try {
     await assessmentService.bulkGrades({
       class_group_id: selectedClassGroupId.value,
       teacher_assignment_id: selectedAssignmentId.value,
       assessment_period_id: selectedPeriodId.value,
+      assessment_instrument_id: selectedInstrumentId.value,
       grades: students.value.map(s => ({
         student_id: s.student_id,
         numeric_value: s.numeric_value ?? undefined,
@@ -123,8 +208,8 @@ async function handleSubmit() {
       })),
     })
     toast.success('Notas registradas')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao registrar notas')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao registrar notas'))
   } finally {
     submitting.value = false
   }
@@ -151,22 +236,32 @@ onMounted(loadClassGroups)
           <label class="text-[0.8125rem] font-medium">Periodo *</label>
           <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" :placeholder="depsPlaceholder" :disabled="!selectedClassGroupId || loadingDeps" class="w-full" />
         </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Instrumento *</label>
+          <Select v-model="selectedInstrumentId" :options="instruments" optionLabel="name" optionValue="id" :placeholder="instrumentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || instruments.length === 0" class="w-full" />
+        </div>
       </div>
     </div>
 
-    <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-      <EmptyState v-if="!loading && students.length === 0" message="Selecione uma turma para carregar os alunos" />
+    <Message v-if="isDescriptive" severity="info" class="mt-4" :closable="false">
+      Esta turma utiliza avaliacao descritiva. Acesse a pagina de
+      <router-link to="/assessment/descriptive-reports" class="font-semibold underline">Relatorios Descritivos</router-link>
+      para registrar as avaliacoes.
+    </Message>
 
-      <DataTable v-if="students.length > 0" :value="students" :loading="loading" stripedRows responsiveLayout="scroll">
+    <div v-if="!isDescriptive" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <EmptyState v-if="!loading && !loadingGrades && students.length === 0" message="Selecione uma turma para carregar os alunos" />
+
+      <DataTable v-if="students.length > 0" :value="students" :loading="loading || loadingGrades" stripedRows responsiveLayout="scroll">
         <Column field="student_name" header="Aluno" sortable />
-        <Column header="Nota" :style="{ width: '150px' }">
+        <Column v-if="isNumeric" header="Nota" :style="{ width: '150px' }">
           <template #body="{ data }">
-            <InputNumber v-model="data.numeric_value" :min="0" :max="10" :maxFractionDigits="2" class="w-full" />
+            <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :maxFractionDigits="config?.rounding_precision ?? 2" class="w-full" />
           </template>
         </Column>
-        <Column header="Conceito" :style="{ width: '120px' }">
+        <Column v-if="isConceptual" header="Conceito" :style="{ width: '180px' }">
           <template #body="{ data }">
-            <Select v-model="data.conceptual_value" :options="['PS', 'S', 'NS']" placeholder="--" class="w-full" showClear />
+            <Select v-model="data.conceptual_value" :options="conceptualOptions" optionLabel="label" optionValue="value" placeholder="--" class="w-full" showClear />
           </template>
         </Column>
       </DataTable>

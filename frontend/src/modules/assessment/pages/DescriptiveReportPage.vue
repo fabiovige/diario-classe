@@ -9,6 +9,7 @@ import { academicCalendarService } from '@/services/academic-calendar.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { enrollmentService } from '@/services/enrollment.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { ExperienceField } from '@/types/curriculum'
 import type { AssessmentPeriod } from '@/types/academic-calendar'
 import type { ClassGroup } from '@/types/school-structure'
@@ -94,8 +95,8 @@ async function handleSubmit() {
     await assessmentService.createDescriptiveReport(form.value)
     toast.success('Relatorio descritivo salvo')
     form.value.content = ''
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao salvar relatorio')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao salvar relatorio'))
   } finally {
     loading.value = false
   }

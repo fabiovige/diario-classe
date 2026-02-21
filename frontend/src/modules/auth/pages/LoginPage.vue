@@ -7,6 +7,7 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/stores/auth'
+import { extractApiError } from '@/shared/utils/api-error'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -24,8 +25,8 @@ async function handleLogin() {
     const response = await authService.login({ email: email.value, password: password.value })
     authStore.setAuth(response.user, response.token)
     router.push('/dashboard')
-  } catch (error: any) {
-    errorMessage.value = error.response?.data?.error ?? 'Credenciais invalidas. Tente novamente.'
+  } catch (error: unknown) {
+    errorMessage.value = extractApiError(error, 'Credenciais invalidas. Tente novamente.')
   } finally {
     loading.value = false
   }

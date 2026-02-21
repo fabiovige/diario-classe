@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { apiGet, apiPost, apiPut, apiDelete } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
 import { useToast } from './useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 
 interface CrudOptions {
   baseUrl: string
@@ -55,8 +56,8 @@ export function useCrud<T extends { id: number }>(options: CrudOptions) {
       const result = await apiPost<T>(options.baseUrl, data)
       toast.success(`${options.resourceName} criado com sucesso`)
       return result
-    } catch (error: any) {
-      const message = error.response?.data?.error ?? `Erro ao criar ${options.resourceName}`
+    } catch (error: unknown) {
+      const message = extractApiError(error, `Erro ao criar ${options.resourceName}`)
       toast.error(message)
       return null
     } finally {
@@ -70,8 +71,8 @@ export function useCrud<T extends { id: number }>(options: CrudOptions) {
       const result = await apiPut<T>(`${options.baseUrl}/${id}`, data)
       toast.success(`${options.resourceName} atualizado com sucesso`)
       return result
-    } catch (error: any) {
-      const message = error.response?.data?.error ?? `Erro ao atualizar ${options.resourceName}`
+    } catch (error: unknown) {
+      const message = extractApiError(error, `Erro ao atualizar ${options.resourceName}`)
       toast.error(message)
       return null
     } finally {

@@ -7,6 +7,7 @@ import EmptyState from '@/shared/components/EmptyState.vue'
 import { periodClosingService } from '@/services/period-closing.service'
 import { peopleService } from '@/services/people.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import { finalResultStatusLabel } from '@/shared/utils/enum-labels'
 import { formatPercentage } from '@/shared/utils/formatters'
 import type { Student } from '@/types/people'
@@ -49,8 +50,8 @@ async function calculateResult() {
       student_id: selectedStudentId.value,
     })
     toast.success('Resultado calculado')
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao calcular resultado')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao calcular resultado'))
   } finally {
     loading.value = false
   }

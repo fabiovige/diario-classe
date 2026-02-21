@@ -14,6 +14,7 @@ import { curriculumService } from '@/services/curriculum.service'
 import { peopleService } from '@/services/people.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { extractApiError } from '@/shared/utils/api-error'
 import type { TeacherAssignment, CurricularComponent, ExperienceField } from '@/types/curriculum'
 import type { Teacher } from '@/types/people'
 import type { ClassGroup } from '@/types/school-structure'
@@ -86,8 +87,8 @@ async function handleSave() {
     toast.success('Atribuicao criada')
     dialogVisible.value = false
     loadData()
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao criar atribuicao')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao criar atribuicao'))
   } finally {
     dialogLoading.value = false
   }

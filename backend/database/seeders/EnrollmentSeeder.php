@@ -14,7 +14,7 @@ use Illuminate\Database\Seeder;
 
 class EnrollmentSeeder extends Seeder
 {
-    private const ENROLLMENT_DATE = '2026-02-09';
+    private const ENROLLMENT_DATE = '2025-02-10';
 
     private const TRANSFER_PERCENTAGE = 5;
 
@@ -79,7 +79,7 @@ class EnrollmentSeeder extends Seeder
                         'enrollment_id' => $enrollment->id,
                         'type' => 'matricula_inicial',
                         'movement_date' => self::ENROLLMENT_DATE,
-                        'reason' => 'Matrícula inicial ano letivo 2026',
+                        'reason' => 'Matrícula inicial ano letivo 2025',
                         'created_by' => $createdBy,
                     ]);
 
@@ -104,7 +104,7 @@ class EnrollmentSeeder extends Seeder
 
         foreach ($schools as $school) {
             $academicYear = AcademicYear::where('school_id', $school->id)
-                ->where('year', 2026)
+                ->where('year', 2025)
                 ->first();
 
             if (! $academicYear) {
@@ -141,7 +141,7 @@ class EnrollmentSeeder extends Seeder
             'transferencia_externa',
         ]);
 
-        $transferDate = $faker->dateTimeBetween('2026-03-01', '2026-06-30')->format('Y-m-d');
+        $transferDate = $faker->dateTimeBetween('2025-03-01', '2025-06-30')->format('Y-m-d');
 
         $enrollment->update([
             'status' => 'transferred',

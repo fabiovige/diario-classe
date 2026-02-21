@@ -16,11 +16,11 @@ class AbsenceJustificationSeeder extends Seeder
         'Motivos familiares',
     ];
 
-    private const START_DATE = '2026-03-01';
+    private const START_DATE = '2025-03-01';
 
-    private const END_DATE = '2026-03-03';
+    private const END_DATE = '2025-03-03';
 
-    private const APPROVED_AT = '2026-03-10';
+    private const APPROVED_AT = '2025-03-10';
 
     public function run(): void
     {

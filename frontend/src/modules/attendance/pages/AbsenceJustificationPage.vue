@@ -12,6 +12,7 @@ import FormDialog from '@/shared/components/FormDialog.vue'
 import { attendanceService } from '@/services/attendance.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { extractApiError } from '@/shared/utils/api-error'
 import { formatDate } from '@/shared/utils/formatters'
 import type { AbsenceJustification } from '@/types/attendance'
 
@@ -56,8 +57,8 @@ async function handleSave() {
     toast.success('Justificativa criada')
     dialogVisible.value = false
     loadData()
-  } catch (error: any) {
-    toast.error(error.response?.data?.error ?? 'Erro ao criar justificativa')
+  } catch (error: unknown) {
+    toast.error(extractApiError(error, 'Erro ao criar justificativa'))
   } finally {
     dialogLoading.value = false
   }

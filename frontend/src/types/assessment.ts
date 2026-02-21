@@ -84,6 +84,6 @@ export interface BulkGradeRequest {
   class_group_id: number
   teacher_assignment_id: number
   assessment_period_id: number
-  assessment_instrument_id?: number
+  assessment_instrument_id: number
   grades: { student_id: number; numeric_value?: number; conceptual_value?: string }[]
 }
