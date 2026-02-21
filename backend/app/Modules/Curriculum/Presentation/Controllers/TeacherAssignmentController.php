@@ -55,8 +55,7 @@ class TeacherAssignmentController extends ApiController
     {
         $assignment = TeacherAssignment::findOrFail($id);
 
-        $data = array_filter($request->validated(), fn ($value) => $value !== null);
-        $assignment->update($data);
+        $assignment->update($request->validated());
 
         return $this->success(new TeacherAssignmentResource(
             $assignment->refresh()->load(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])

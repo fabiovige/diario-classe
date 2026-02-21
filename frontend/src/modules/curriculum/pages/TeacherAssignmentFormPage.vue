@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Select from 'primevue/select'
+import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button'
 import { curriculumService } from '@/services/curriculum.service'
 import { peopleService } from '@/services/people.service'
@@ -30,7 +31,48 @@ const form = ref({
   class_group_id: null as number | null,
   curricular_component_id: null as number | null,
   experience_field_id: null as number | null,
+  start_date: null as Date | null,
+  end_date: null as Date | null,
 })
+
+const selectedClassGroup = computed(() =>
+  classGroups.value.find(cg => cg.id === form.value.class_group_id) ?? null
+)
+
+const isEarlyChildhood = computed(() =>
+  selectedClassGroup.value?.grade_level?.type === 'early_childhood'
+)
+
+const isElementary = computed(() => {
+  const type = selectedClassGroup.value?.grade_level?.type
+  return type === 'elementary' || type === 'high_school'
+})
+
+const hasClassGroupSelected = computed(() => !!form.value.class_group_id)
+
+watch(() => form.value.class_group_id, (newVal, oldVal) => {
+  if (newVal === oldVal) return
+  if (isEarlyChildhood.value) {
+    form.value.curricular_component_id = null
+  }
+  if (isElementary.value) {
+    form.value.experience_field_id = null
+  }
+})
+
+function formatPayloadDate(date: Date | null): string | null {
+  if (!date) return null
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function parseDate(dateStr: string | null): Date | null {
+  if (!dateStr) return null
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
 
 async function loadAuxData() {
   try {
@@ -58,6 +100,8 @@ async function loadAssignment() {
     form.value.class_group_id = assignment.class_group_id
     form.value.curricular_component_id = assignment.curricular_component_id
     form.value.experience_field_id = assignment.experience_field_id
+    form.value.start_date = parseDate(assignment.start_date)
+    form.value.end_date = parseDate(assignment.end_date)
   } catch {
     toast.error('Erro ao carregar atribuicao')
     router.push('/curriculum/assignments')
@@ -69,11 +113,19 @@ async function loadAssignment() {
 async function handleSubmit() {
   loading.value = true
   try {
+    const payload = {
+      teacher_id: form.value.teacher_id,
+      class_group_id: form.value.class_group_id,
+      curricular_component_id: form.value.curricular_component_id,
+      experience_field_id: form.value.experience_field_id,
+      start_date: formatPayloadDate(form.value.start_date),
+      end_date: formatPayloadDate(form.value.end_date),
+    }
     if (isEdit.value) {
-      await curriculumService.updateAssignment(id.value!, form.value)
+      await curriculumService.updateAssignment(id.value!, payload)
       toast.success('Atribuicao atualizada')
     } else {
-      await curriculumService.createAssignment(form.value)
+      await curriculumService.createAssignment(payload)
       toast.success('Atribuicao criada')
     }
     router.push('/curriculum/assignments')
@@ -104,13 +156,26 @@ onMounted(async () => {
           <label class="text-[0.8125rem] font-medium">Turma *</label>
           <Select v-model="form.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Componente Curricular</label>
+
+        <div v-if="hasClassGroupSelected && isElementary" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Componente Curricular *</label>
           <Select v-model="form.curricular_component_id" :options="components" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" showClear />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Campo de Experiencia</label>
+
+        <div v-if="hasClassGroupSelected && isEarlyChildhood" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Campo de Experiencia *</label>
           <Select v-model="form.experience_field_id" :options="experienceFields" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" showClear />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[0.8125rem] font-medium">Data de Inicio *</label>
+            <DatePicker v-model="form.start_date" dateFormat="dd/mm/yy" showIcon class="w-full" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[0.8125rem] font-medium">Data de Termino</label>
+            <DatePicker v-model="form.end_date" dateFormat="dd/mm/yy" showIcon showButtonBar class="w-full" />
+          </div>
         </div>
 
         <div class="mt-4 flex justify-end gap-3">

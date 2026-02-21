@@ -2,10 +2,12 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
 import Button from 'primevue/button'
 import { curriculumService } from '@/services/curriculum.service'
 import { useToast } from '@/composables/useToast'
 import { extractApiError } from '@/shared/utils/api-error'
+import { KNOWLEDGE_AREA_OPTIONS } from '@/shared/utils/enum-labels'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,7 +19,7 @@ const loading = ref(false)
 
 const form = ref({
   name: '',
-  knowledge_area: '',
+  knowledge_area: '' as string,
   code: '',
 })
 
@@ -70,11 +72,11 @@ onMounted(loadComponent)
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Area de Conhecimento *</label>
-          <InputText v-model="form.knowledge_area" required class="w-full" />
+          <Select v-model="form.knowledge_area" :options="KNOWLEDGE_AREA_OPTIONS" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Codigo *</label>
-          <InputText v-model="form.code" required class="w-full" />
+          <label class="text-[0.8125rem] font-medium">Codigo</label>
+          <InputText v-model="form.code" class="w-full" />
         </div>
 
         <div class="mt-4 flex justify-end gap-3">

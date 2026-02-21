@@ -16,6 +16,7 @@ import type {
   DisabilityType,
   DocumentType,
   DocumentStatus,
+  KnowledgeArea,
 } from '@/types/enums'
 
 const ROLE_LABELS: Record<RoleSlug, string> = {
@@ -213,4 +214,19 @@ const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
 
 export function documentStatusLabel(status: DocumentStatus): string {
   return DOCUMENT_STATUS_LABELS[status] ?? status
+}
+
+const KNOWLEDGE_AREA_LABELS: Record<KnowledgeArea, string> = {
+  linguagens: 'Linguagens',
+  matematica: 'Matematica',
+  ciencias_natureza: 'Ciencias da Natureza',
+  ciencias_humanas: 'Ciencias Humanas',
+  ensino_religioso: 'Ensino Religioso',
+  parte_diversificada: 'Parte Diversificada',
+}
+
+export const KNOWLEDGE_AREA_OPTIONS = Object.entries(KNOWLEDGE_AREA_LABELS).map(([value, label]) => ({ value, label }))
+
+export function knowledgeAreaLabel(area: KnowledgeArea): string {
+  return KNOWLEDGE_AREA_LABELS[area] ?? area
 }

@@ -5,6 +5,7 @@ export interface CurricularComponent {
   id: number
   name: string
   knowledge_area: string
+  knowledge_area_label: string
   code: string
   active: boolean
   created_at: string

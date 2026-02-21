@@ -8,9 +8,11 @@ import InputText from 'primevue/inputtext'
 import Toolbar from 'primevue/toolbar'
 import Paginator from 'primevue/paginator'
 import EmptyState from '@/shared/components/EmptyState.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { curriculumService } from '@/services/curriculum.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { formatDate } from '@/shared/utils/formatters'
 import type { TeacherAssignment } from '@/types/curriculum'
 
 const router = useRouter()
@@ -96,6 +98,16 @@ onMounted(loadData)
         <Column header="Componente/Campo">
           <template #body="{ data }">
             {{ data.curricular_component?.name ?? data.experience_field?.name ?? '--' }}
+          </template>
+        </Column>
+        <Column header="Inicio">
+          <template #body="{ data }">
+            {{ formatDate(data.start_date) }}
+          </template>
+        </Column>
+        <Column header="Status" :style="{ width: '100px' }">
+          <template #body="{ data }">
+            <StatusBadge :status="data.active ? 'active' : 'inactive'" :label="data.active ? 'Ativo' : 'Inativo'" />
           </template>
         </Column>
         <Column header="Acoes" :style="{ width: '120px' }">

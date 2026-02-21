@@ -84,7 +84,11 @@ onMounted(loadData)
 
       <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
         <Column field="name" header="Nome" sortable />
-        <Column field="knowledge_area" header="Area de Conhecimento" sortable />
+        <Column header="Area de Conhecimento" sortable>
+          <template #body="{ data }">
+            {{ data.knowledge_area_label ?? data.knowledge_area }}
+          </template>
+        </Column>
         <Column field="code" header="Codigo" sortable />
         <Column header="Acoes" :style="{ width: '120px' }">
           <template #body="{ data }">
