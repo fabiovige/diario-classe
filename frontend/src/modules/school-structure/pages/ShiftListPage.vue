@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -11,10 +11,12 @@ import EmptyState from '@/shared/components/EmptyState.vue'
 import FormDialog from '@/shared/components/FormDialog.vue'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { extractApiError } from '@/shared/utils/api-error'
 import type { Shift, School } from '@/types/school-structure'
 
 const toast = useToast()
+const { confirmDelete } = useConfirm()
 
 const items = ref<Shift[]>([])
 const loading = ref(false)
@@ -24,6 +26,7 @@ const perPage = ref(15)
 
 const dialogVisible = ref(false)
 const dialogLoading = ref(false)
+const editingId = ref<number | null>(null)
 const schools = ref<School[]>([])
 
 const form = ref({
@@ -32,6 +35,8 @@ const form = ref({
   start_time: '',
   end_time: '',
 })
+
+const dialogTitle = computed(() => editingId.value ? 'Editar Turno' : 'Novo Turno')
 
 async function loadData() {
   loading.value = true
@@ -57,22 +62,51 @@ async function loadSchools() {
 }
 
 function openDialog() {
+  editingId.value = null
   form.value = { name: '', school_id: null, start_time: '', end_time: '' }
+  dialogVisible.value = true
+}
+
+function openEditDialog(shift: Shift) {
+  editingId.value = shift.id
+  form.value = {
+    name: shift.name,
+    school_id: shift.school_id,
+    start_time: shift.start_time ?? '',
+    end_time: shift.end_time ?? '',
+  }
   dialogVisible.value = true
 }
 
 async function handleSave() {
   dialogLoading.value = true
   try {
-    await schoolStructureService.createShift(form.value)
-    toast.success('Turno criado')
+    if (editingId.value) {
+      await schoolStructureService.updateShift(editingId.value, form.value)
+      toast.success('Turno atualizado')
+    } else {
+      await schoolStructureService.createShift(form.value)
+      toast.success('Turno criado')
+    }
     dialogVisible.value = false
     loadData()
   } catch (error: unknown) {
-    toast.error(extractApiError(error, 'Erro ao criar turno'))
+    toast.error(extractApiError(error, 'Erro ao salvar turno'))
   } finally {
     dialogLoading.value = false
   }
+}
+
+function handleDelete(shift: Shift) {
+  confirmDelete(async () => {
+    try {
+      await schoolStructureService.deleteShift(shift.id)
+      toast.success('Turno excluido')
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir turno')
+    }
+  })
 }
 
 function onPageChange(event: { page: number; rows: number }) {
@@ -88,9 +122,9 @@ onMounted(async () => {
 
 <template>
   <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Turnos</h1>
+    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Turnos</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
       <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start />
         <template #end>
@@ -109,11 +143,17 @@ onMounted(async () => {
         </Column>
         <Column field="start_time" header="Inicio" />
         <Column field="end_time" header="Fim" />
+        <Column header="Acoes" :style="{ width: '120px' }">
+          <template #body="{ data }">
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="openEditDialog(data)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
+          </template>
+        </Column>
       </DataTable>
 
       <Paginator
         v-if="totalRecords > perPage"
-        class="mt-4 border-t border-[#E0E0E0] pt-3"
+        class="mt-4 border-t border-fluent-border pt-3"
         :rows="perPage"
         :totalRecords="totalRecords"
         :first="(currentPage - 1) * perPage"
@@ -122,7 +162,7 @@ onMounted(async () => {
       />
     </div>
 
-    <FormDialog v-model:visible="dialogVisible" title="Novo Turno" :loading="dialogLoading" @save="handleSave">
+    <FormDialog v-model:visible="dialogVisible" :title="dialogTitle" :loading="dialogLoading" @save="handleSave">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Nome *</label>
@@ -133,11 +173,11 @@ onMounted(async () => {
           <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Horario Inicio</label>
+          <label class="text-[0.8125rem] font-medium">Horario Inicio *</label>
           <InputText v-model="form.start_time" type="time" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Horario Fim</label>
+          <label class="text-[0.8125rem] font-medium">Horario Fim *</label>
           <InputText v-model="form.end_time" type="time" class="w-full" />
         </div>
       </div>

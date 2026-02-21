@@ -42,6 +42,20 @@ class ShiftController extends ApiController
         return $this->success(new ShiftResource($shift));
     }
 
+    public function update(CreateShiftRequest $request, int $id): JsonResponse
+    {
+        $shift = Shift::findOrFail($id);
+
+        $shift->update([
+            'school_id' => $request->validated('school_id'),
+            'name' => $request->validated('name'),
+            'start_time' => $request->validated('start_time'),
+            'end_time' => $request->validated('end_time'),
+        ]);
+
+        return $this->success(new ShiftResource($shift->load('school')));
+    }
+
     public function destroy(int $id): JsonResponse
     {
         Shift::findOrFail($id)->delete();

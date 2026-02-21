@@ -36,6 +36,12 @@ export const schoolStructureService = {
   createShift(data: Record<string, unknown>): Promise<Shift> {
     return apiPost<Shift>('shifts', data)
   },
+  updateShift(id: number, data: Record<string, unknown>): Promise<Shift> {
+    return apiPut<Shift>(`shifts/${id}`, data)
+  },
+  deleteShift(id: number): Promise<void> {
+    return apiDelete(`shifts/${id}`)
+  },
   getGradeLevels(params?: Record<string, unknown>): Promise<GradeLevel[]> {
     return apiGet<GradeLevel[]>('grade-levels', params)
   },
