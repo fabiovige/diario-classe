@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import Select from 'primevue/select'
 import Toolbar from 'primevue/toolbar'
 import Paginator from 'primevue/paginator'
 import EmptyState from '@/shared/components/EmptyState.vue'
-import FormDialog from '@/shared/components/FormDialog.vue'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
-import { extractApiError } from '@/shared/utils/api-error'
-import type { Shift, School } from '@/types/school-structure'
+import type { Shift } from '@/types/school-structure'
 
+const router = useRouter()
 const toast = useToast()
 const { confirmDelete } = useConfirm()
 
@@ -23,25 +22,13 @@ const loading = ref(false)
 const totalRecords = ref(0)
 const currentPage = ref(1)
 const perPage = ref(15)
-
-const dialogVisible = ref(false)
-const dialogLoading = ref(false)
-const editingId = ref<number | null>(null)
-const schools = ref<School[]>([])
-
-const form = ref({
-  name: '',
-  school_id: null as number | null,
-  start_time: '',
-  end_time: '',
-})
-
-const dialogTitle = computed(() => editingId.value ? 'Editar Turno' : 'Novo Turno')
+const search = ref('')
 
 async function loadData() {
   loading.value = true
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
+    if (search.value) params.search = search.value
     const response = await schoolStructureService.getShifts(params)
     items.value = response.data
     totalRecords.value = response.meta.total
@@ -49,51 +36,6 @@ async function loadData() {
     toast.error('Erro ao carregar turnos')
   } finally {
     loading.value = false
-  }
-}
-
-async function loadSchools() {
-  try {
-    const response = await schoolStructureService.getSchools({ per_page: 100 })
-    schools.value = response.data
-  } catch {
-    toast.error('Erro ao carregar escolas')
-  }
-}
-
-function openDialog() {
-  editingId.value = null
-  form.value = { name: '', school_id: null, start_time: '', end_time: '' }
-  dialogVisible.value = true
-}
-
-function openEditDialog(shift: Shift) {
-  editingId.value = shift.id
-  form.value = {
-    name: shift.name,
-    school_id: shift.school_id,
-    start_time: shift.start_time ?? '',
-    end_time: shift.end_time ?? '',
-  }
-  dialogVisible.value = true
-}
-
-async function handleSave() {
-  dialogLoading.value = true
-  try {
-    if (editingId.value) {
-      await schoolStructureService.updateShift(editingId.value, form.value)
-      toast.success('Turno atualizado')
-    } else {
-      await schoolStructureService.createShift(form.value)
-      toast.success('Turno criado')
-    }
-    dialogVisible.value = false
-    loadData()
-  } catch (error: unknown) {
-    toast.error(extractApiError(error, 'Erro ao salvar turno'))
-  } finally {
-    dialogLoading.value = false
   }
 }
 
@@ -115,9 +57,12 @@ function onPageChange(event: { page: number; rows: number }) {
   loadData()
 }
 
-onMounted(async () => {
-  await Promise.all([loadData(), loadSchools()])
-})
+function onSearch() {
+  currentPage.value = 1
+  loadData()
+}
+
+onMounted(loadData)
 </script>
 
 <template>
@@ -126,9 +71,12 @@ onMounted(async () => {
 
     <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
       <Toolbar class="mb-4 border-none bg-transparent p-0">
-        <template #start />
+        <template #start>
+          <InputText v-model="search" placeholder="Buscar turno..." @keyup.enter="onSearch" />
+          <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
+        </template>
         <template #end>
-          <Button label="Novo Turno" icon="pi pi-plus" @click="openDialog" />
+          <Button label="Novo Turno" icon="pi pi-plus" @click="router.push('/school-structure/shifts/new')" />
         </template>
       </Toolbar>
 
@@ -145,7 +93,7 @@ onMounted(async () => {
         <Column field="end_time" header="Fim" />
         <Column header="Acoes" :style="{ width: '120px' }">
           <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="openEditDialog(data)" />
+            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/school-structure/shifts/${data.id}/edit`)" />
             <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
           </template>
         </Column>
@@ -161,26 +109,5 @@ onMounted(async () => {
         @page="onPageChange"
       />
     </div>
-
-    <FormDialog v-model:visible="dialogVisible" :title="dialogTitle" :loading="dialogLoading" @save="handleSave">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Nome *</label>
-          <InputText v-model="form.name" required class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Escola *</label>
-          <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Horario Inicio *</label>
-          <InputText v-model="form.start_time" type="time" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Horario Fim *</label>
-          <InputText v-model="form.end_time" type="time" class="w-full" />
-        </div>
-      </div>
-    </FormDialog>
   </div>
 </template>

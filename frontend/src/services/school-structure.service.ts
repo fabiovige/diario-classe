@@ -33,6 +33,9 @@ export const schoolStructureService = {
   getShifts(params?: Record<string, unknown>): Promise<PaginatedData<Shift>> {
     return apiGet<PaginatedData<Shift>>('shifts', params)
   },
+  getShift(id: number): Promise<Shift> {
+    return apiGet<Shift>(`shifts/${id}`)
+  },
   createShift(data: Record<string, unknown>): Promise<Shift> {
     return apiPost<Shift>('shifts', data)
   },

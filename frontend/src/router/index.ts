@@ -103,6 +103,18 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Turnos' },
     },
     {
+      path: '/school-structure/shifts/new',
+      name: 'shift-create',
+      component: () => import('@/modules/school-structure/pages/ShiftFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Novo Turno' },
+    },
+    {
+      path: '/school-structure/shifts/:id/edit',
+      name: 'shift-edit',
+      component: () => import('@/modules/school-structure/pages/ShiftFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Turno' },
+    },
+    {
       path: '/school-structure/grade-levels',
       name: 'grade-levels',
       component: () => import('@/modules/school-structure/pages/GradeLevelListPage.vue'),
