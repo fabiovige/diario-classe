@@ -8,6 +8,7 @@ import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { extractApiError } from '@/shared/utils/api-error'
 import type { School } from '@/types/school-structure'
+import type { ShiftPeriod } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,8 +19,15 @@ const isEdit = computed(() => !!id.value)
 const loading = ref(false)
 const schools = ref<School[]>([])
 
+const shiftNameOptions = [
+  { label: 'Manhã', value: 'morning' },
+  { label: 'Tarde', value: 'afternoon' },
+  { label: 'Noite', value: 'evening' },
+  { label: 'Integral', value: 'full_time' },
+]
+
 const form = ref({
-  name: '',
+  name: null as ShiftPeriod | null,
   school_id: null as number | null,
   start_time: '',
   end_time: '',
@@ -83,7 +91,7 @@ onMounted(async () => {
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Nome *</label>
-          <InputText v-model="form.name" required class="w-full" />
+          <Select v-model="form.name" :options="shiftNameOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Escola *</label>

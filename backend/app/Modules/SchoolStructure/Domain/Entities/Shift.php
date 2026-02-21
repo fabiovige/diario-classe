@@ -2,12 +2,14 @@
 
 namespace App\Modules\SchoolStructure\Domain\Entities;
 
+use App\Modules\SchoolStructure\Domain\Enums\ShiftName;
 use App\Modules\Shared\Audit\Infrastructure\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property ShiftName $name
  * @property \Illuminate\Support\Carbon|null $start_time
  * @property \Illuminate\Support\Carbon|null $end_time
  */
@@ -31,6 +33,7 @@ class Shift extends Model
     protected function casts(): array
     {
         return [
+            'name' => ShiftName::class,
             'start_time' => 'datetime:H:i',
             'end_time' => 'datetime:H:i',
         ];

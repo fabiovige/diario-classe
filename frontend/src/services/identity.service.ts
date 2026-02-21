@@ -19,8 +19,8 @@ export const identityService = {
   deleteUser(id: number): Promise<void> {
     return apiDelete(`users/${id}`)
   },
-  getRoles(): Promise<Role[]> {
-    return apiGet<Role[]>('roles')
+  getRoles(params?: Record<string, unknown>): Promise<PaginatedData<Role>> {
+    return apiGet<PaginatedData<Role>>('roles', params)
   },
   getRole(id: number): Promise<Role> {
     return apiGet<Role>(`roles/${id}`)

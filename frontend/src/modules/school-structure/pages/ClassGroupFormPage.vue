@@ -38,7 +38,7 @@ async function loadAuxData() {
       schoolStructureService.getShifts({ per_page: 100 }),
     ])
     academicYears.value = ayRes.data
-    gradeLevels.value = glRes
+    gradeLevels.value = glRes.data
     shifts.value = shRes.data
   } catch {
     toast.error('Erro ao carregar dados auxiliares')

@@ -69,6 +69,8 @@ Executar dentro do container (`docker compose exec app`) ou local em `backend/`:
 9. Nunca implementar sem autorizacao do usuario
 10. CRUD sempre em pagina separada (*FormPage.vue), NUNCA popup/dialog
 11. Toda lista deve ter coluna Acoes (editar/excluir) e busca
+12. Enums devem ter values em ingles (backend) mas exibicao SEMPRE em PT-BR (labels). Nunca mostrar o value cru ao usuario
+13. Sempre rodar rebuild do frontend (`docker compose up -d --build --force-recreate frontend`) apos alteracoes no frontend
 
 ## Documentacao (docs/)
 

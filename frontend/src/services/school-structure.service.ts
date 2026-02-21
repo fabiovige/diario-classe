@@ -45,11 +45,20 @@ export const schoolStructureService = {
   deleteShift(id: number): Promise<void> {
     return apiDelete(`shifts/${id}`)
   },
-  getGradeLevels(params?: Record<string, unknown>): Promise<GradeLevel[]> {
-    return apiGet<GradeLevel[]>('grade-levels', params)
+  getGradeLevels(params?: Record<string, unknown>): Promise<PaginatedData<GradeLevel>> {
+    return apiGet<PaginatedData<GradeLevel>>('grade-levels', params)
   },
   getGradeLevel(id: number): Promise<GradeLevel> {
     return apiGet<GradeLevel>(`grade-levels/${id}`)
+  },
+  createGradeLevel(data: Record<string, unknown>): Promise<GradeLevel> {
+    return apiPost<GradeLevel>('grade-levels', data)
+  },
+  updateGradeLevel(id: number, data: Record<string, unknown>): Promise<GradeLevel> {
+    return apiPut<GradeLevel>(`grade-levels/${id}`, data)
+  },
+  deleteGradeLevel(id: number): Promise<void> {
+    return apiDelete(`grade-levels/${id}`)
   },
   getClassGroups(params?: Record<string, unknown>): Promise<PaginatedData<ClassGroup>> {
     return apiGet<PaginatedData<ClassGroup>>('class-groups', params)

@@ -14,7 +14,8 @@ class GradeLevelResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'type' => $this->type,
+            'type' => $this->type->value,
+            'type_label' => $this->type->label(),
             'order' => $this->order,
         ];
     }

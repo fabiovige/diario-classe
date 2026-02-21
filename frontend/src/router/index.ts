@@ -121,6 +121,18 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Niveis de Ensino' },
     },
     {
+      path: '/school-structure/grade-levels/new',
+      name: 'grade-level-create',
+      component: () => import('@/modules/school-structure/pages/GradeLevelFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Novo Nivel de Ensino' },
+    },
+    {
+      path: '/school-structure/grade-levels/:id/edit',
+      name: 'grade-level-edit',
+      component: () => import('@/modules/school-structure/pages/GradeLevelFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Nivel de Ensino' },
+    },
+    {
       path: '/school-structure/class-groups',
       name: 'class-groups',
       component: () => import('@/modules/school-structure/pages/ClassGroupListPage.vue'),
@@ -229,16 +241,52 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Componentes Curriculares' },
     },
     {
+      path: '/curriculum/components/new',
+      name: 'curricular-component-create',
+      component: () => import('@/modules/curriculum/pages/CurricularComponentFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Novo Componente Curricular' },
+    },
+    {
+      path: '/curriculum/components/:id/edit',
+      name: 'curricular-component-edit',
+      component: () => import('@/modules/curriculum/pages/CurricularComponentFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Componente Curricular' },
+    },
+    {
       path: '/curriculum/experience-fields',
       name: 'experience-fields',
       component: () => import('@/modules/curriculum/pages/ExperienceFieldListPage.vue'),
       meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Campos de Experiencia' },
     },
     {
+      path: '/curriculum/experience-fields/new',
+      name: 'experience-field-create',
+      component: () => import('@/modules/curriculum/pages/ExperienceFieldFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Novo Campo de Experiencia' },
+    },
+    {
+      path: '/curriculum/experience-fields/:id/edit',
+      name: 'experience-field-edit',
+      component: () => import('@/modules/curriculum/pages/ExperienceFieldFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Campo de Experiencia' },
+    },
+    {
       path: '/curriculum/assignments',
       name: 'teacher-assignments',
       component: () => import('@/modules/curriculum/pages/TeacherAssignmentListPage.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'director'], breadcrumb: 'Atribuicoes' },
+    },
+    {
+      path: '/curriculum/assignments/new',
+      name: 'teacher-assignment-create',
+      component: () => import('@/modules/curriculum/pages/TeacherAssignmentFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Nova Atribuicao' },
+    },
+    {
+      path: '/curriculum/assignments/:id/edit',
+      name: 'teacher-assignment-edit',
+      component: () => import('@/modules/curriculum/pages/TeacherAssignmentFormPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Atribuicao' },
     },
 
     // AcademicCalendar

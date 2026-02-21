@@ -7,6 +7,9 @@ use App\Modules\Shared\Audit\Infrastructure\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property GradeLevelType $type
+ */
 class GradeLevel extends Model
 {
     /** @use HasFactory<\Database\Factories\GradeLevelFactory> */

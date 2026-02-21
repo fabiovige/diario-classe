@@ -42,10 +42,10 @@ const statusOptions = [
 async function loadAuxData() {
   try {
     const [rolesRes, schoolsRes] = await Promise.all([
-      identityService.getRoles(),
+      identityService.getRoles({ per_page: 100 }),
       schoolStructureService.getSchools({ per_page: 100 }),
     ])
-    roles.value = rolesRes
+    roles.value = rolesRes.data
     schools.value = schoolsRes.data
   } catch {
     toast.error('Erro ao carregar dados auxiliares')

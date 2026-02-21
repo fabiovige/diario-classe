@@ -8,14 +8,18 @@ use App\Modules\Identity\Presentation\Requests\UpdateRoleRequest;
 use App\Modules\Identity\Presentation\Resources\RoleResource;
 use App\Modules\Shared\Presentation\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class RoleController extends ApiController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::query()
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
+            ->orderBy('name')
+            ->paginate($request->query('per_page', 15));
 
-        return $this->success(RoleResource::collection($roles));
+        return $this->success(RoleResource::collection($roles)->response()->getData(true));
     }
 
     public function store(CreateRoleRequest $request): JsonResponse

@@ -16,6 +16,7 @@ class ExperienceFieldController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $fields = ExperienceField::query()
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('active') !== null, fn ($q) => $q->where('active', $request->boolean('active')))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));
@@ -38,5 +39,20 @@ class ExperienceFieldController extends ApiController
         $field = ExperienceField::findOrFail($id);
 
         return $this->success(new ExperienceFieldResource($field));
+    }
+
+    public function update(CreateExperienceFieldRequest $request, int $id): JsonResponse
+    {
+        $field = ExperienceField::findOrFail($id);
+        $field->update($request->validated());
+
+        return $this->success(new ExperienceFieldResource($field));
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        ExperienceField::findOrFail($id)->delete();
+
+        return $this->noContent();
     }
 }

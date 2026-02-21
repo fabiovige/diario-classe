@@ -83,7 +83,7 @@ onMounted(loadData)
       <EmptyState v-if="!loading && items.length === 0" message="Nenhum turno encontrado" />
 
       <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column field="name" header="Nome" sortable />
+        <Column field="name_label" header="Nome" sortable />
         <Column header="Escola">
           <template #body="{ data }">
             {{ data.school?.name ?? '--' }}

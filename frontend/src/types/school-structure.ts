@@ -1,4 +1,4 @@
-import type { AcademicYearStatus, EducationLevel } from './enums'
+import type { AcademicYearStatus, EducationLevel, ShiftPeriod } from './enums'
 
 export interface School {
   id: number
@@ -25,7 +25,8 @@ export interface AcademicYear {
 export interface Shift {
   id: number
   school_id: number
-  name: string
+  name: ShiftPeriod
+  name_label: string
   start_time: string | null
   end_time: string | null
   school?: School
@@ -35,6 +36,7 @@ export interface GradeLevel {
   id: number
   name: string
   type: EducationLevel
+  type_label: string
   order: number
 }
 

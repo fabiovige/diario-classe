@@ -16,6 +16,7 @@ class CurricularComponentController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $components = CurricularComponent::query()
+            ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('knowledge_area'), fn ($q, $area) => $q->where('knowledge_area', $area))
             ->when($request->query('active') !== null, fn ($q) => $q->where('active', $request->boolean('active')))
             ->orderBy('name')
@@ -40,5 +41,20 @@ class CurricularComponentController extends ApiController
         $component = CurricularComponent::findOrFail($id);
 
         return $this->success(new CurricularComponentResource($component));
+    }
+
+    public function update(CreateCurricularComponentRequest $request, int $id): JsonResponse
+    {
+        $component = CurricularComponent::findOrFail($id);
+        $component->update($request->validated());
+
+        return $this->success(new CurricularComponentResource($component));
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        CurricularComponent::findOrFail($id)->delete();
+
+        return $this->noContent();
     }
 }

@@ -17,6 +17,7 @@ class TeacherAssignmentController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $assignments = TeacherAssignment::with(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])
+            ->when($request->query('search'), fn ($q, $search) => $q->whereHas('teacher.user', fn ($q2) => $q2->where('name', 'like', "%{$search}%")))
             ->when($request->query('teacher_id'), fn ($q, $id) => $q->where('teacher_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('active') !== null, fn ($q) => $q->where('active', $request->boolean('active')))
@@ -60,5 +61,12 @@ class TeacherAssignmentController extends ApiController
         return $this->success(new TeacherAssignmentResource(
             $assignment->refresh()->load(['teacher.user', 'classGroup.gradeLevel', 'classGroup.shift', 'curricularComponent', 'experienceField'])
         ));
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        TeacherAssignment::findOrFail($id)->delete();
+
+        return $this->noContent();
     }
 }

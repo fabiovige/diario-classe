@@ -40,8 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('schools', SchoolController::class);
     Route::apiResource('academic-years', AcademicYearController::class)->except(['destroy']);
     Route::apiResource('shifts', ShiftController::class);
-    Route::get('grade-levels', [GradeLevelController::class, 'index']);
-    Route::get('grade-levels/{gradeLevel}', [GradeLevelController::class, 'show']);
+    Route::apiResource('grade-levels', GradeLevelController::class);
     Route::apiResource('class-groups', ClassGroupController::class);
 
     Route::apiResource('students', StudentController::class)->except(['destroy']);
@@ -56,9 +55,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('assessment-periods', AssessmentPeriodController::class)->except(['destroy']);
 
-    Route::apiResource('curricular-components', CurricularComponentController::class)->only(['index', 'store', 'show']);
-    Route::apiResource('experience-fields', ExperienceFieldController::class)->only(['index', 'store', 'show']);
-    Route::apiResource('teacher-assignments', TeacherAssignmentController::class)->except(['destroy']);
+    Route::apiResource('curricular-components', CurricularComponentController::class);
+    Route::apiResource('experience-fields', ExperienceFieldController::class);
+    Route::apiResource('teacher-assignments', TeacherAssignmentController::class);
 
     Route::post('attendance/bulk', [AttendanceController::class, 'bulkRecord']);
     Route::get('attendance/class/{classGroupId}', [AttendanceController::class, 'byClass']);

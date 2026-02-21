@@ -6,7 +6,7 @@ export type AcademicYearStatus = 'planning' | 'active' | 'closed'
 
 export type ShiftPeriod = 'morning' | 'afternoon' | 'evening' | 'full_time'
 
-export type EducationLevel = 'infantil' | 'fundamental_1' | 'fundamental_2'
+export type EducationLevel = 'early_childhood' | 'elementary' | 'high_school'
 
 export type EnrollmentStatus = 'active' | 'transferred' | 'cancelled' | 'completed'
 
