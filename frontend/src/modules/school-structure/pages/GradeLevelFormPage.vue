@@ -20,7 +20,8 @@ const loading = ref(false)
 
 const educationLevelOptions = [
   { label: 'Ed. Infantil', value: 'early_childhood' },
-  { label: 'Fundamental', value: 'elementary' },
+  { label: 'Fund. Anos Iniciais', value: 'elementary_early' },
+  { label: 'Fund. Anos Finais', value: 'elementary_late' },
   { label: 'Ensino Medio', value: 'high_school' },
 ]
 

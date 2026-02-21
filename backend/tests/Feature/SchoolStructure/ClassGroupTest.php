@@ -18,7 +18,7 @@ beforeEach(function () {
     $this->academicYear = AcademicYear::factory()->create(['school_id' => $this->school->id]);
     $this->gradeLevel = GradeLevel::create([
         'name' => '1º Ano',
-        'type' => GradeLevelType::Elementary->value,
+        'type' => GradeLevelType::ElementaryEarly->value,
         'order' => 7,
     ]);
 });

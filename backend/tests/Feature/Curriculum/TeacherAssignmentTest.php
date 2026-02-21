@@ -20,7 +20,7 @@ beforeEach(function () {
     $this->school = School::factory()->create();
     $this->academicYear = AcademicYear::factory()->create(['school_id' => $this->school->id]);
     $this->shift = Shift::factory()->create(['school_id' => $this->school->id]);
-    $this->gradeLevel = GradeLevel::create(['name' => '1º Ano', 'type' => GradeLevelType::Elementary->value, 'order' => 7]);
+    $this->gradeLevel = GradeLevel::create(['name' => '1º Ano', 'type' => GradeLevelType::ElementaryEarly->value, 'order' => 7]);
     $this->classGroup = ClassGroup::factory()->create([
         'academic_year_id' => $this->academicYear->id,
         'grade_level_id' => $this->gradeLevel->id,
@@ -43,12 +43,18 @@ it('can create a teacher assignment with curricular component', function () {
         ->assertJsonPath('data.curricular_component_id', $this->component->id);
 });
 
-it('can create a teacher assignment with experience field', function () {
+it('can create a teacher assignment with experience field for early childhood', function () {
+    $infantilGrade = GradeLevel::create(['name' => 'Pré I', 'type' => GradeLevelType::EarlyChildhood->value, 'order' => 5]);
+    $infantilClass = ClassGroup::factory()->create([
+        'academic_year_id' => $this->academicYear->id,
+        'grade_level_id' => $infantilGrade->id,
+        'shift_id' => $this->shift->id,
+    ]);
     $field = ExperienceField::factory()->create();
 
     $response = $this->actingAs($this->admin)->postJson('/api/teacher-assignments', [
         'teacher_id' => $this->teacher->id,
-        'class_group_id' => $this->classGroup->id,
+        'class_group_id' => $infantilClass->id,
         'experience_field_id' => $field->id,
         'start_date' => '2026-02-09',
     ]);
@@ -93,6 +99,56 @@ it('rejects assignment when teacher is from different school', function () {
     ]);
 
     $response->assertUnprocessable();
+});
+
+it('rejects curricular component for early childhood class', function () {
+    $infantilGrade = GradeLevel::create(['name' => 'Maternal I', 'type' => GradeLevelType::EarlyChildhood->value, 'order' => 3]);
+    $infantilClass = ClassGroup::factory()->create([
+        'academic_year_id' => $this->academicYear->id,
+        'grade_level_id' => $infantilGrade->id,
+        'shift_id' => $this->shift->id,
+    ]);
+
+    $response = $this->actingAs($this->admin)->postJson('/api/teacher-assignments', [
+        'teacher_id' => $this->teacher->id,
+        'class_group_id' => $infantilClass->id,
+        'curricular_component_id' => $this->component->id,
+        'start_date' => '2026-02-09',
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('curricular_component_id');
+});
+
+it('rejects experience field for elementary late class', function () {
+    $lateGrade = GradeLevel::create(['name' => '6º Ano', 'type' => GradeLevelType::ElementaryLate->value, 'order' => 12]);
+    $lateClass = ClassGroup::factory()->create([
+        'academic_year_id' => $this->academicYear->id,
+        'grade_level_id' => $lateGrade->id,
+        'shift_id' => $this->shift->id,
+    ]);
+    $field = ExperienceField::factory()->create();
+
+    $response = $this->actingAs($this->admin)->postJson('/api/teacher-assignments', [
+        'teacher_id' => $this->teacher->id,
+        'class_group_id' => $lateClass->id,
+        'experience_field_id' => $field->id,
+        'start_date' => '2026-02-09',
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('experience_field_id');
+});
+
+it('accepts curricular component for elementary early class', function () {
+    $response = $this->actingAs($this->admin)->postJson('/api/teacher-assignments', [
+        'teacher_id' => $this->teacher->id,
+        'class_group_id' => $this->classGroup->id,
+        'curricular_component_id' => $this->component->id,
+        'start_date' => '2026-02-09',
+    ]);
+
+    $response->assertCreated();
 });
 
 it('can list teacher assignments', function () {

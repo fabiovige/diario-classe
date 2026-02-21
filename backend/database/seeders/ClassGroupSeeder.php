@@ -21,7 +21,7 @@ class ClassGroupSeeder extends Seeder
     {
         $schools = School::orderBy('id')->get();
         $infantilGrades = GradeLevel::where('type', 'early_childhood')->orderBy('order')->get();
-        $fundamentalGrades = GradeLevel::where('type', 'elementary')->orderBy('order')->get();
+        $fundamentalGrades = GradeLevel::whereIn('type', ['elementary_early', 'elementary_late'])->orderBy('order')->get();
 
         foreach ($schools as $index => $school) {
             $academicYear = AcademicYear::where('school_id', $school->id)

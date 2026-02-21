@@ -43,10 +43,9 @@ const isEarlyChildhood = computed(() =>
   selectedClassGroup.value?.grade_level?.type === 'early_childhood'
 )
 
-const isElementary = computed(() => {
-  const type = selectedClassGroup.value?.grade_level?.type
-  return type === 'elementary' || type === 'high_school'
-})
+const isElementary = computed(() =>
+  selectedClassGroup.value?.grade_level?.uses_experience_fields === false
+)
 
 const hasClassGroupSelected = computed(() => !!form.value.class_group_id)
 

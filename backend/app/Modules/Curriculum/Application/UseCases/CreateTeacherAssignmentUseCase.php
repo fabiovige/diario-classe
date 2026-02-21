@@ -13,6 +13,7 @@ final class CreateTeacherAssignmentUseCase
     public function execute(CreateTeacherAssignmentDTO $dto): TeacherAssignment
     {
         $this->validateComponentXorField($dto);
+        $this->validateCurriculumMatchesStage($dto);
         $this->validateTeacherBelongsToSchool($dto);
 
         return TeacherAssignment::create([
@@ -34,6 +35,24 @@ final class CreateTeacherAssignmentUseCase
         if ($hasComponent === $hasField) {
             throw ValidationException::withMessages([
                 'curricular_component_id' => 'Informe exatamente um: componente curricular OU campo de experiência.',
+            ]);
+        }
+    }
+
+    private function validateCurriculumMatchesStage(CreateTeacherAssignmentDTO $dto): void
+    {
+        $classGroup = ClassGroup::with('gradeLevel')->findOrFail($dto->classGroupId);
+        $gradeType = $classGroup->gradeLevel->type;
+
+        if ($gradeType->usesExperienceFields() && $dto->curricularComponentId !== null) {
+            throw ValidationException::withMessages([
+                'curricular_component_id' => 'Ed. Infantil deve usar Campo de Experiência, não Componente Curricular.',
+            ]);
+        }
+
+        if ($gradeType->usesCurricularComponents() && $dto->experienceFieldId !== null) {
+            throw ValidationException::withMessages([
+                'experience_field_id' => 'Esta etapa deve usar Componente Curricular, não Campo de Experiência.',
             ]);
         }
     }

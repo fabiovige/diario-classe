@@ -56,7 +56,7 @@ class AssessmentConfigSeeder extends Seeder
 
                 $this->seedInstruments($config);
 
-                if ($gradeLevel->type === GradeLevelType::Elementary) {
+                if (in_array($gradeLevel->type, [GradeLevelType::ElementaryEarly, GradeLevelType::ElementaryLate], true)) {
                     $this->seedConceptualScales($config);
                 }
             }

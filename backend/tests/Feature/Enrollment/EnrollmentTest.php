@@ -20,7 +20,7 @@ beforeEach(function () {
     $this->academicYear = AcademicYear::factory()->create(['school_id' => $this->school->id]);
     $this->student = Student::factory()->create();
     $this->shift = Shift::factory()->create(['school_id' => $this->school->id]);
-    $this->gradeLevel = GradeLevel::create(['name' => '1º Ano', 'type' => GradeLevelType::Elementary->value, 'order' => 7]);
+    $this->gradeLevel = GradeLevel::create(['name' => '1º Ano', 'type' => GradeLevelType::ElementaryEarly->value, 'order' => 7]);
     $this->classGroup = ClassGroup::factory()->create([
         'academic_year_id' => $this->academicYear->id,
         'grade_level_id' => $this->gradeLevel->id,

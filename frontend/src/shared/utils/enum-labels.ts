@@ -50,7 +50,8 @@ const SHIFT_PERIOD_LABELS: Record<ShiftPeriod, string> = {
 
 const EDUCATION_LEVEL_LABELS: Record<EducationLevel, string> = {
   early_childhood: 'Ed. Infantil',
-  elementary: 'Fundamental',
+  elementary_early: 'Fund. Anos Iniciais',
+  elementary_late: 'Fund. Anos Finais',
   high_school: 'Ensino Medio',
 }
 

@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->school = School::factory()->create();
     $this->academicYear = AcademicYear::factory()->create(['school_id' => $this->school->id]);
     $this->shift = Shift::factory()->create(['school_id' => $this->school->id]);
-    $this->gradeLevel = GradeLevel::create(['name' => '1º Ano', 'type' => GradeLevelType::Elementary->value, 'order' => 7]);
+    $this->gradeLevel = GradeLevel::create(['name' => '1º Ano', 'type' => GradeLevelType::ElementaryEarly->value, 'order' => 7]);
     $this->classGroup = ClassGroup::factory()->create([
         'academic_year_id' => $this->academicYear->id,
         'grade_level_id' => $this->gradeLevel->id,
@@ -146,7 +146,7 @@ it('can calculate period average', function () {
 });
 
 it('can create and list assessment configs', function () {
-    $newGradeLevel = GradeLevel::create(['name' => '2º Ano', 'type' => GradeLevelType::Elementary->value, 'order' => 8]);
+    $newGradeLevel = GradeLevel::create(['name' => '2º Ano', 'type' => GradeLevelType::ElementaryEarly->value, 'order' => 8]);
 
     $response = $this->actingAs($this->admin)->postJson('/api/assessment-configs', [
         'school_id' => $this->school->id,

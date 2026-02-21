@@ -15,7 +15,7 @@ class GradeLevelFactory extends Factory
     {
         return [
             'name' => fake()->unique()->randomElement(['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano']),
-            'type' => GradeLevelType::Elementary->value,
+            'type' => GradeLevelType::ElementaryEarly->value,
             'order' => fake()->unique()->numberBetween(1, 15),
         ];
     }

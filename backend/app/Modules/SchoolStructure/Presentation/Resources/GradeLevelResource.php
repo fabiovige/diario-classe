@@ -18,6 +18,9 @@ class GradeLevelResource extends JsonResource
             'type_label' => $this->type->label(),
             'order' => $this->order,
             'min_age_months' => $this->min_age_months,
+            'teaching_model' => $this->type->teachingModel(),
+            'teaching_model_label' => $this->type->teachingModelLabel(),
+            'uses_experience_fields' => $this->type->usesExperienceFields(),
         ];
     }
 }

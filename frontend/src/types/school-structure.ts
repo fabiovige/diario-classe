@@ -38,6 +38,9 @@ export interface GradeLevel {
   type: EducationLevel
   type_label: string
   order: number
+  teaching_model?: string
+  teaching_model_label?: string
+  uses_experience_fields?: boolean
 }
 
 export interface ClassGroup {
