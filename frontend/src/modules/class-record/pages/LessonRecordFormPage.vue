@@ -43,10 +43,14 @@ const assignmentPlaceholder = computed(() => {
   return 'Selecione'
 })
 
+function formatClassGroupLabel(cg: ClassGroup): string {
+  return [cg.grade_level?.name, cg.name, cg.shift?.name_label ?? cg.shift?.name].filter(Boolean).join(' - ')
+}
+
 async function loadClassGroups() {
   try {
-    const response = await schoolStructureService.getClassGroups({ per_page: 100 })
-    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
+    const response = await schoolStructureService.getClassGroups({ per_page: 200 })
+    classGroups.value = response.data.map(cg => ({ ...cg, label: formatClassGroupLabel(cg) }))
   } catch {
     toast.error('Erro ao carregar turmas')
   }
@@ -83,6 +87,11 @@ async function loadRecord() {
     form.value.methodology = record.methodology
     form.value.observations = record.observations
     form.value.class_count = record.class_count
+
+    if (record.class_group && !classGroups.value.some(cg => cg.id === record.class_group_id)) {
+      classGroups.value.push({ ...record.class_group, label: formatClassGroupLabel(record.class_group) })
+    }
+
     await loadAssignments()
   } catch {
     toast.error('Erro ao carregar registro')
