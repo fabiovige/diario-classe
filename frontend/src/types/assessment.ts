@@ -84,6 +84,64 @@ export interface ConceptualScale {
   order: number
 }
 
+export interface ReportCardStudent {
+  id: number
+  name: string
+  display_name: string
+  birth_date: string | null
+  class_group?: { id: number; label: string }
+  enrollment_number?: string
+  school_name?: string | null
+  academic_year?: number | null
+}
+
+export interface ReportCardPeriod {
+  id: number
+  name: string
+  number: number
+}
+
+export interface ReportCardPeriodData {
+  average: number | null
+  conceptual: string | null
+  absences: number
+}
+
+export interface ReportCardSubject {
+  teacher_assignment_id: number
+  name: string
+  teacher_name: string
+  knowledge_area: string | null
+  periods: Record<string, ReportCardPeriodData>
+  final_average: number | null
+  recovery_grade: number | null
+  final_grade: number | null
+  total_absences: number
+  frequency_percentage: number | null
+  status: string
+}
+
+export interface ReportCardDescriptive {
+  experience_field: string
+  period: string
+  content: string
+}
+
+export interface ReportCardSummary {
+  total_subjects: number
+  passing_grade: number
+  scale_max: number
+  grade_type: string
+}
+
+export interface ReportCardResponse {
+  student: ReportCardStudent
+  assessment_periods: ReportCardPeriod[]
+  subjects: ReportCardSubject[]
+  descriptive_reports: ReportCardDescriptive[]
+  summary: ReportCardSummary | null
+}
+
 export interface BulkGradeRequest {
   class_group_id: number
   teacher_assignment_id: number

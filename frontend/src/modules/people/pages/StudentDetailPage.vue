@@ -38,7 +38,10 @@ onMounted(loadStudent)
   <div class="p-6">
     <div class="mb-4 flex items-center justify-between">
       <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Detalhes do Aluno</h1>
-      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/people/students')" />
+      <div class="flex gap-2">
+        <Button label="Boletim" icon="pi pi-book" @click="router.push(`/assessment/report-card/${studentId}`)" />
+        <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/people/students')" />
+      </div>
     </div>
 
     <div v-if="student" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">

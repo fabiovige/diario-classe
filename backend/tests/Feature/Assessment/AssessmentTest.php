@@ -7,6 +7,8 @@ use App\Modules\Assessment\Domain\Entities\AssessmentInstrument;
 use App\Modules\Assessment\Domain\Entities\Grade;
 use App\Modules\Curriculum\Domain\Entities\CurricularComponent;
 use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
+use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
+use App\Modules\Enrollment\Domain\Entities\Enrollment;
 use App\Modules\Identity\Domain\Entities\Role;
 use App\Modules\Identity\Domain\Enums\RoleSlug;
 use App\Modules\People\Domain\Entities\Student;
@@ -167,11 +169,33 @@ it('can create and list assessment configs', function () {
 it('can get student report card', function () {
     $student = $this->students[0];
 
+    $enrollment = Enrollment::create([
+        'student_id' => $student->id,
+        'academic_year_id' => $this->academicYear->id,
+        'school_id' => $this->school->id,
+        'enrollment_number' => 'RA-0001',
+        'enrollment_type' => 'new_enrollment',
+        'status' => 'active',
+        'enrollment_date' => now(),
+    ]);
+
+    ClassAssignment::create([
+        'enrollment_id' => $enrollment->id,
+        'class_group_id' => $this->classGroup->id,
+        'status' => 'active',
+        'start_date' => now(),
+    ]);
+
     $response = $this->actingAs($this->admin)
         ->getJson("/api/report-cards/student/{$student->id}");
 
     $response->assertOk()
-        ->assertJsonStructure(['data' => ['period_averages', 'final_averages', 'descriptive_reports']]);
+        ->assertJsonStructure(['data' => [
+            'student' => ['id', 'name', 'display_name', 'birth_date', 'class_group', 'enrollment_number', 'school_name', 'academic_year'],
+            'assessment_periods',
+            'subjects',
+            'descriptive_reports',
+        ]]);
 });
 
 it('validates required fields for bulk grades', function () {

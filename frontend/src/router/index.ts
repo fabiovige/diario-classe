@@ -404,7 +404,7 @@ const router = createRouter({
       path: '/assessment/report-card/:studentId',
       name: 'report-card',
       component: () => import('@/modules/assessment/pages/ReportCardPage.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Boletim' },
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Boletim' },
     },
 
     // PeriodClosing

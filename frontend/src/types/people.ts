@@ -16,6 +16,10 @@ export interface Student {
   disability_type_label: string | null
   active: boolean
   guardians?: Guardian[]
+  current_enrollment?: {
+    school_name: string | null
+    class_group_label: string | null
+  } | null
   created_at: string
 }
 

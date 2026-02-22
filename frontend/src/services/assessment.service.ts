@@ -1,6 +1,6 @@
 import { apiGet, apiPost, apiPut } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
-import type { Grade, PeriodAverage, DescriptiveReport, AssessmentConfig, BulkGradeRequest } from '@/types/assessment'
+import type { Grade, PeriodAverage, DescriptiveReport, AssessmentConfig, BulkGradeRequest, ReportCardResponse } from '@/types/assessment'
 
 export const assessmentService = {
   bulkGrades(data: BulkGradeRequest): Promise<Grade[]> {
@@ -30,8 +30,8 @@ export const assessmentService = {
   updateDescriptiveReport(id: number, data: Record<string, unknown>): Promise<DescriptiveReport> {
     return apiPut<DescriptiveReport>(`descriptive-reports/${id}`, data)
   },
-  getReportCard(studentId: number): Promise<any> {
-    return apiGet(`report-cards/student/${studentId}`)
+  getReportCard(studentId: number): Promise<ReportCardResponse> {
+    return apiGet<ReportCardResponse>(`report-cards/student/${studentId}`)
   },
   getConfigs(params?: Record<string, unknown>): Promise<PaginatedData<AssessmentConfig>> {
     return apiGet<PaginatedData<AssessmentConfig>>('assessment-configs', params)

@@ -6,9 +6,11 @@ use App\Modules\People\Domain\Enums\DisabilityType;
 use App\Modules\People\Domain\Enums\Gender;
 use App\Modules\People\Domain\Enums\RaceColor;
 use App\Modules\Shared\Audit\Infrastructure\Traits\Auditable;
+use App\Modules\Enrollment\Domain\Entities\Enrollment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property \Illuminate\Support\Carbon|null $birth_date
@@ -61,6 +63,12 @@ class Student extends Model
         return $this->belongsToMany(Guardian::class, 'student_guardian')
             ->withPivot(['relationship', 'is_primary', 'can_pickup'])
             ->withTimestamps();
+    }
+
+    /** @return HasMany<Enrollment, $this> */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     public function displayName(): string

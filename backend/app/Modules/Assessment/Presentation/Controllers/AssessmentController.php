@@ -9,11 +9,15 @@ use App\Modules\Assessment\Application\UseCases\CreateAssessmentConfigUseCase;
 use App\Modules\Assessment\Application\UseCases\RecordBulkGradesUseCase;
 use App\Modules\Assessment\Application\UseCases\RecordDescriptiveReportUseCase;
 use App\Modules\Assessment\Application\UseCases\RecordRecoveryGradeUseCase;
+use App\Modules\AcademicCalendar\Domain\Entities\AssessmentPeriod;
 use App\Modules\Assessment\Domain\Entities\AssessmentConfig;
 use App\Modules\Assessment\Domain\Entities\DescriptiveReport;
 use App\Modules\Assessment\Domain\Entities\FinalAverage;
 use App\Modules\Assessment\Domain\Entities\Grade;
 use App\Modules\Assessment\Domain\Entities\PeriodAverage;
+use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
+use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
+use App\Modules\People\Domain\Entities\Student;
 use App\Modules\Assessment\Presentation\Requests\CreateAssessmentConfigRequest;
 use App\Modules\Assessment\Presentation\Requests\RecordBulkGradesRequest;
 use App\Modules\Assessment\Presentation\Requests\RecordDescriptiveReportRequest;
@@ -135,24 +139,148 @@ class AssessmentController extends ApiController
 
     public function reportCard(int $studentId): JsonResponse
     {
-        $periodAverages = PeriodAverage::where('student_id', $studentId)
-            ->with(['assessmentPeriod', 'teacherAssignment.curricularComponent'])
-            ->orderBy('assessment_period_id')
+        $student = Student::findOrFail($studentId);
+
+        $classAssignment = ClassAssignment::where('status', 'active')
+            ->whereHas('enrollment', fn ($q) => $q->where('student_id', $studentId)->where('status', 'active'))
+            ->with(['enrollment', 'classGroup.gradeLevel', 'classGroup.shift', 'classGroup.academicYear.school'])
+            ->latest('start_date')
+            ->first();
+
+        if (! $classAssignment) {
+            return $this->success([
+                'student' => $this->buildStudentData($student, null, null),
+                'assessment_periods' => [],
+                'subjects' => [],
+                'descriptive_reports' => [],
+                'summary' => null,
+            ]);
+        }
+
+        $classGroup = $classAssignment->classGroup;
+        $enrollment = $classAssignment->enrollment;
+
+        $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academic_year_id)
+            ->orderBy('number')
             ->get();
+
+        $assignments = TeacherAssignment::where('class_group_id', $classGroup->id)
+            ->where('active', true)
+            ->with(['curricularComponent', 'experienceField', 'teacher.user'])
+            ->get();
+
+        $periodAverages = PeriodAverage::where('student_id', $studentId)
+            ->where('class_group_id', $classGroup->id)
+            ->get()
+            ->groupBy('teacher_assignment_id');
 
         $finalAverages = FinalAverage::where('student_id', $studentId)
-            ->with(['teacherAssignment.curricularComponent'])
-            ->get();
+            ->where('class_group_id', $classGroup->id)
+            ->get()
+            ->keyBy('teacher_assignment_id');
+
+        $config = AssessmentConfig::where('school_id', $enrollment->school_id)
+            ->where('academic_year_id', $classGroup->academic_year_id)
+            ->where('grade_level_id', $classGroup->grade_level_id)
+            ->first();
+
+        $subjects = collect();
+        foreach ($assignments as $assignment) {
+            $averages = $periodAverages->get($assignment->id, collect());
+            /** @var ?FinalAverage $final */
+            $final = $finalAverages->get($assignment->id);
+
+            $periodsData = [];
+            foreach ($periods as $period) {
+                /** @var ?PeriodAverage $avg */
+                $avg = $averages->firstWhere('assessment_period_id', $period->id);
+                $periodsData[(string) $period->number] = [
+                    'average' => $avg !== null && $avg->numeric_average !== null ? (float) $avg->numeric_average : null,
+                    'conceptual' => $avg?->conceptual_average,
+                    'absences' => $avg !== null ? $avg->total_absences : 0,
+                ];
+            }
+
+            $subjectName = $assignment->curricularComponent !== null
+                ? $assignment->curricularComponent->name
+                : ($assignment->experienceField !== null ? $assignment->experienceField->name : '');
+
+            $teacherName = $assignment->teacher !== null && $assignment->teacher->user !== null
+                ? $assignment->teacher->user->name
+                : '';
+
+            $subjects->push([
+                'teacher_assignment_id' => $assignment->id,
+                'name' => $subjectName,
+                'teacher_name' => $teacherName,
+                'knowledge_area' => $assignment->curricularComponent?->knowledge_area,
+                'periods' => $periodsData,
+                'final_average' => $final !== null && $final->numeric_average !== null ? (float) $final->numeric_average : null,
+                'recovery_grade' => $final !== null && $final->recovery_grade !== null ? (float) $final->recovery_grade : null,
+                'final_grade' => $final !== null && $final->final_grade !== null ? (float) $final->final_grade : null,
+                'total_absences' => $final !== null ? $final->total_absences : $averages->sum('total_absences'),
+                'frequency_percentage' => $final !== null && $final->frequency_percentage !== null ? (float) $final->frequency_percentage : null,
+                'status' => $final !== null ? $final->status : 'pending',
+            ]);
+        }
 
         $descriptiveReports = DescriptiveReport::where('student_id', $studentId)
+            ->where('class_group_id', $classGroup->id)
             ->with(['experienceField', 'assessmentPeriod'])
-            ->get();
+            ->orderBy('assessment_period_id')
+            ->get()
+            ->map(fn (DescriptiveReport $r) => [
+                'experience_field' => $r->experienceField?->name,
+                'period' => $r->assessmentPeriod?->name,
+                'content' => $r->content,
+            ]);
 
         return $this->success([
-            'period_averages' => PeriodAverageResource::collection($periodAverages),
-            'final_averages' => $finalAverages,
-            'descriptive_reports' => DescriptiveReportResource::collection($descriptiveReports),
+            'student' => $this->buildStudentData($student, $classGroup, $enrollment),
+            'assessment_periods' => $periods->map(fn (AssessmentPeriod $p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'number' => $p->number,
+            ])->values(),
+            'subjects' => $subjects,
+            'descriptive_reports' => $descriptiveReports,
+            'summary' => $config ? [
+                'total_subjects' => $subjects->count(),
+                'passing_grade' => (float) $config->passing_grade,
+                'scale_max' => (float) $config->scale_max,
+                'grade_type' => $config->grade_type->value,
+            ] : null,
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function buildStudentData(Student $student, mixed $classGroup, mixed $enrollment): array
+    {
+        $data = [
+            'id' => $student->id,
+            'name' => $student->name,
+            'display_name' => $student->displayName(),
+            'birth_date' => $student->birth_date?->format('Y-m-d'),
+        ];
+
+        if ($classGroup) {
+            $data['class_group'] = [
+                'id' => $classGroup->id,
+                'label' => collect([
+                    $classGroup->gradeLevel?->name,
+                    $classGroup->name,
+                    $classGroup->shift?->name?->label(),
+                ])->filter()->join(' - '),
+            ];
+            $data['school_name'] = $classGroup->academicYear?->school?->name;
+            $data['academic_year'] = $classGroup->academicYear?->year;
+        }
+
+        if ($enrollment) {
+            $data['enrollment_number'] = $enrollment->enrollment_number;
+        }
+
+        return $data;
     }
 
     public function indexConfigs(Request $request): JsonResponse
