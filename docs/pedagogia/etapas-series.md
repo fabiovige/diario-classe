@@ -76,40 +76,53 @@ ter regra complementar via CME), mas o padrao e 31/03.
   - Frequencia abaixo de 75%
 - Conselho de Classe pode aprovar aluno abaixo da media (com justificativa)
 
-## Modelo de Docencia por Etapa
+## Modelo de Docencia por Etapa (Jandira-SP)
 
-### Educacao Infantil + Anos Iniciais (1o ao 5o ano) — Professor Polivalente
+### Educacao Infantil — Professor Polivalente
 
-- **Um unico professor** leciona todas (ou quase todas) as disciplinas da turma
-- Esse professor e chamado de **professor polivalente** ou **professor regente**
-- O mesmo professor ministra Portugues, Matematica, Ciencias, Historia, Geografia etc.
-- Pode haver professores especialistas para disciplinas especificas (Ed. Fisica, Arte, Ingles), mas o professor principal e um so
-- No sistema: uma turma dos anos iniciais tera **poucas atribuicoes** (teacher_assignments), normalmente 1 professor regente com multiplos componentes curriculares. Na Ed. Infantil usa-se campos de experiencia ao inves de componentes curriculares
+- **Um unico professor** leciona todos os campos de experiencia da turma
+- Usa campos de experiencia (BNCC) ao inves de componentes curriculares
+- No sistema: 1 teacher_assignment por campo de experiencia, todos vinculados ao mesmo professor
 
-### Anos Finais (6o ao 9o ano) — Professor Especialista
+### Anos Iniciais (1o ao 5o ano) — Modelo Misto
 
-- **Um professor por disciplina/componente curricular**
-- Cada professor e especialista na sua area (Matematica, Portugues, Ciencias, Historia, Geografia, Ingles, Ed. Fisica, Arte etc.)
-- O professor circula entre varias turmas lecionando sua disciplina
-- No sistema: uma turma dos anos finais tera **muitas atribuicoes** (teacher_assignments), uma por componente curricular, cada uma com um professor diferente
+- **Professor polivalente (regente):** leciona 6 componentes — Lingua Portuguesa, Matematica, Ciencias, Historia, Geografia e Ensino Religioso
+- **Professor especialista de Ingles:** 1 por escola, circula entre turmas
+- **Professor especialista de Artes:** 1 por escola, circula entre turmas
+- **Professor especialista de Ed. Fisica:** 1 por escola, circula entre turmas
+- Total por turma: **4 professores, 9 componentes**
+- No sistema: 9 teacher_assignments por turma — 6 do polivalente + 3 de especialistas
 
-### Ensino Medio (referencia — nao atendido pela rede municipal)
+### Anos Finais (6o ao 9o ano) — Modelo Especialista Puro
 
-- Mesmo modelo dos anos finais: um professor por disciplina
-- Nao se aplica ao sistema atual (responsabilidade estadual)
+- **1 professor por componente curricular**
+- Componentes: Lingua Portuguesa, Matematica, Ciencias, Historia, Geografia, Arte, Ed. Fisica, Ingles, Ensino Religioso (9 componentes)
+- Professor circula entre varias turmas lecionando sua disciplina
+- Total por turma: **9 professores** (podendo compartilhar entre turmas)
+- No sistema: 9 teacher_assignments por turma, cada um com professor diferente
+
+### Estrutura de Horarios (Jandira-SP)
+
+- **5 aulas de 50 minutos** por turno
+- **Manha:** 07:00 - 12:00 (com intervalo de 20min)
+- **Tarde:** 13:00 - 17:30 (com intervalo de 20min)
+- **25 aulas/semana** por turma (5 aulas x 5 dias)
+- Professor monta sua propria grade livremente
+- Sistema valida conflitos automaticamente (professor em 2 turmas no mesmo horario, 2 disciplinas no mesmo slot de uma turma)
 
 ### Implicacoes no Sistema
 
 | Aspecto | Anos Iniciais (1o-5o) | Anos Finais (6o-9o) |
 |---------|----------------------|---------------------|
-| Professor por turma | 1 regente (+ especialistas) | 1 por disciplina |
-| Atribuicoes por turma | Poucas (1-3) | Muitas (8-12) |
-| Chamada | Professor regente faz para todas as aulas | Cada professor faz para sua aula |
-| Diario de classe | Professor regente registra multiplas disciplinas | Cada professor registra a sua |
-| "Minhas Aulas" | Professor regente ve poucas turmas, cada uma com varias disciplinas | Professor especialista ve varias turmas, cada uma com 1 disciplina |
-| Avaliacao | Professor regente avalia em todos os componentes | Cada professor avalia so no seu componente |
+| Professor por turma | 1 regente + 3 especialistas | 1 por disciplina (9) |
+| Atribuicoes por turma | 9 (6 polivalente + 3 especialista) | 9 (cada um especialista) |
+| Chamada | Cada professor faz para sua aula | Cada professor faz para sua aula |
+| Diario de classe | Regente registra 6 disciplinas, especialistas 1 cada | Cada professor registra a sua |
+| "Minhas Aulas" | Regente ve poucas turmas com 6 disciplinas | Especialista ve varias turmas com 1 disciplina |
+| Avaliacao | Regente avalia em 6 componentes, especialistas em 1 | Cada professor avalia so no seu componente |
+| Grade de aulas | Regente ocupa maioria dos slots, especialistas alguns | Slots distribuidos entre 9 professores |
 
-Essa distincao e padrao nacional (LDB, Resolucoes CNE) e impacta diretamente a experiencia do professor no sistema.
+**Observacao:** Informatica NAO faz parte da grade curricular de Jandira.
 
 ## Rematricula
 

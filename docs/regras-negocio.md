@@ -58,6 +58,19 @@ Regras sao versionadas por ano letivo.
 - Decisoes: aprovado, retido, progressao_parcial, encaminhamento
 - Pre-conselho: resumo automatico (notas, frequencia, alertas) por aluno
 
+## Grade de Aulas
+
+- Cada turma tem 25 slots semanais (5 aulas/dia x 5 dias)
+- Time slots sao configurados por turno (shift): horario de inicio, fim e tipo (aula ou intervalo)
+- Professor monta sua propria grade; sistema apenas impede conflitos
+- Validacoes obrigatorias:
+  - **Conflito de turma:** nao pode haver 2 atribuicoes no mesmo slot+dia para a mesma turma
+  - **Conflito de professor:** nao pode haver 2 atribuicoes no mesmo slot+dia para o mesmo professor (mesmo em turmas diferentes)
+  - **Turno correto:** time_slot.shift_id deve ser compativel com class_group.shift_id
+- Operacao de salvamento e sync: remove slots antigos da atribuicao e insere novos (permite redesenhar a grade)
+- Grade vinculada a teacher_assignment (que ja vincula professor + turma + componente)
+- Turno padrao: 5 aulas de 50min + 1 intervalo de 20min
+
 ## LGPD
 
 - Dados de menores de 12 anos exigem responsavel vinculado

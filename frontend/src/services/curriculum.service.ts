@@ -1,6 +1,6 @@
 import { apiGet, apiPost, apiPut, apiDelete } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
-import type { CurricularComponent, DailyAssignmentSummary, ExperienceField, TeacherAssignment } from '@/types/curriculum'
+import type { ClassSchedule, CurricularComponent, DailyAssignmentSummary, ExperienceField, TeacherAssignment, TimeSlot } from '@/types/curriculum'
 
 export const curriculumService = {
   getComponents(params?: Record<string, unknown>): Promise<PaginatedData<CurricularComponent>> {
@@ -54,5 +54,25 @@ export const curriculumService = {
       params.teacher_id = teacherId
     }
     return apiGet<DailyAssignmentSummary[]>('teacher-assignments/daily-summary', params)
+  },
+
+  getTimeSlots(params?: Record<string, unknown>): Promise<TimeSlot[]> {
+    return apiGet<TimeSlot[]>('time-slots', params)
+  },
+  createTimeSlot(data: Record<string, unknown>): Promise<TimeSlot> {
+    return apiPost<TimeSlot>('time-slots', data)
+  },
+  updateTimeSlot(id: number, data: Record<string, unknown>): Promise<TimeSlot> {
+    return apiPut<TimeSlot>(`time-slots/${id}`, data)
+  },
+  deleteTimeSlot(id: number): Promise<void> {
+    return apiDelete(`time-slots/${id}`)
+  },
+
+  getClassSchedules(params?: Record<string, unknown>): Promise<ClassSchedule[]> {
+    return apiGet<ClassSchedule[]>('class-schedules', params)
+  },
+  saveAssignmentSchedule(assignmentId: number, slots: Array<{ time_slot_id: number; day_of_week: number }>): Promise<ClassSchedule[]> {
+    return apiPut<ClassSchedule[]>(`class-schedules/assignment/${assignmentId}`, { slots })
   },
 }

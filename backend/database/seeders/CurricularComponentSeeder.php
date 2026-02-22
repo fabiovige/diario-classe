@@ -20,6 +20,8 @@ class CurricularComponentSeeder extends Seeder
         ['name' => 'Informática', 'knowledge_area' => 'parte_diversificada', 'code' => 'INF'],
     ];
 
+    private const INACTIVE_CODES = ['INF'];
+
     public function run(): void
     {
         foreach (self::COMPONENTS as $component) {
@@ -28,7 +30,7 @@ class CurricularComponentSeeder extends Seeder
                 [
                     'knowledge_area' => $component['knowledge_area'],
                     'code' => $component['code'],
-                    'active' => true,
+                    'active' => ! in_array($component['code'], self::INACTIVE_CODES),
                 ],
             );
         }

@@ -38,6 +38,34 @@ export interface TeacherAssignment {
   updated_at: string
 }
 
+export interface TimeSlot {
+  id: number
+  shift_id: number
+  number: number
+  start_time: string
+  end_time: string
+  type: string
+  type_label: string
+  shift?: import('./school-structure').Shift
+  created_at: string
+  updated_at: string
+}
+
+export interface ClassSchedule {
+  id: number
+  teacher_assignment_id: number
+  time_slot_id: number
+  day_of_week: number
+  day_of_week_label: string
+  day_of_week_short: string
+  time_slot?: TimeSlot
+  teacher_assignment?: TeacherAssignment
+  created_at: string
+  updated_at: string
+}
+
+export type DayOfWeek = 1 | 2 | 3 | 4 | 5
+
 export interface DailyAssignmentSummary extends TeacherAssignment {
   has_attendance: boolean
   has_lesson_record: boolean

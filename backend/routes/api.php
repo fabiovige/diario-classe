@@ -8,7 +8,9 @@ use App\Modules\ClassRecord\Presentation\Controllers\LessonRecordController;
 use App\Modules\Curriculum\Presentation\Controllers\CurricularComponentController;
 use App\Modules\Curriculum\Presentation\Controllers\ExperienceFieldController;
 use App\Modules\Curriculum\Presentation\Controllers\DailyClassController;
+use App\Modules\Curriculum\Presentation\Controllers\ClassScheduleController;
 use App\Modules\Curriculum\Presentation\Controllers\TeacherAssignmentController;
+use App\Modules\Curriculum\Presentation\Controllers\TimeSlotController;
 use App\Modules\Enrollment\Presentation\Controllers\EnrollmentController;
 use App\Modules\Identity\Presentation\Controllers\AuthController;
 use App\Modules\Identity\Presentation\Controllers\RoleController;
@@ -67,6 +69,10 @@ Route::middleware(['auth:sanctum', 'school.scope'])->group(function () {
     Route::apiResource('experience-fields', ExperienceFieldController::class);
     Route::get('teacher-assignments/daily-summary', [DailyClassController::class, 'index']);
     Route::apiResource('teacher-assignments', TeacherAssignmentController::class);
+
+    Route::apiResource('time-slots', TimeSlotController::class);
+    Route::get('class-schedules', [ClassScheduleController::class, 'index']);
+    Route::put('class-schedules/assignment/{teacherAssignmentId}', [ClassScheduleController::class, 'saveForAssignment']);
 
     Route::post('attendance/bulk', [AttendanceController::class, 'bulkRecord']);
     Route::get('attendance/class/{classGroupId}', [AttendanceController::class, 'byClass']);

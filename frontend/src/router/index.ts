@@ -288,6 +288,18 @@ const router = createRouter({
       component: () => import('@/modules/curriculum/pages/TeacherAssignmentFormPage.vue'),
       meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Editar Atribuicao' },
     },
+    {
+      path: '/curriculum/time-slots',
+      name: 'time-slots',
+      component: () => import('@/modules/curriculum/pages/TimeSlotListPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin'], breadcrumb: 'Horarios de Aula' },
+    },
+    {
+      path: '/curriculum/schedules',
+      name: 'class-schedules',
+      component: () => import('@/modules/curriculum/pages/ClassSchedulePage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator'], breadcrumb: 'Grade de Aulas' },
+    },
 
     // AcademicCalendar
     {
@@ -321,6 +333,14 @@ const router = createRouter({
       name: 'class-session',
       component: () => import('@/modules/curriculum/pages/ClassSessionPage.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Sessao de Aula' },
+    },
+
+    // My Schedule (Teacher)
+    {
+      path: '/my-schedule',
+      name: 'my-schedule',
+      component: () => import('@/modules/curriculum/pages/TeacherSchedulePage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Minha Grade' },
     },
 
     // Attendance

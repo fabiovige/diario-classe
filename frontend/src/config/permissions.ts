@@ -44,6 +44,8 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
             { label: 'Componentes', icon: 'pi pi-bookmark', to: '/curriculum/components' },
             { label: 'Campos Experiencia', icon: 'pi pi-star', to: '/curriculum/experience-fields' },
             { label: 'Atribuicoes', icon: 'pi pi-link', to: '/curriculum/assignments' },
+            { label: 'Horarios de Aula', icon: 'pi pi-clock', to: '/curriculum/time-slots' },
+            { label: 'Grade de Aulas', icon: 'pi pi-table', to: '/curriculum/schedules' },
           ],
         },
         {
@@ -89,6 +91,7 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     {
       label: 'Pedagogico', icon: 'pi pi-graduation-cap', items: [
         { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/my-classes' },
+        { label: 'Grade de Aulas', icon: 'pi pi-table', to: '/curriculum/schedules' },
         { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
         {
           label: 'Avaliacao', icon: 'pi pi-chart-bar', items: [
@@ -116,6 +119,7 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     {
       label: 'Pedagogico', icon: 'pi pi-graduation-cap', items: [
         { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/my-classes' },
+        { label: 'Grade de Aulas', icon: 'pi pi-table', to: '/curriculum/schedules' },
         { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
         { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/class-record' },
         {
@@ -160,6 +164,7 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
   teacher: [
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
     { label: 'Minhas Aulas', icon: 'pi pi-book', to: '/my-classes' },
+    { label: 'Minha Grade', icon: 'pi pi-table', to: '/my-schedule' },
     { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
     { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/class-record' },
     {

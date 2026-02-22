@@ -11,12 +11,17 @@ class TeacherAssignmentSeeder extends Seeder
 
     private const BATCH_SIZE = 500;
 
+    private const SPECIALIST_CODES = ['ART', 'EDF', 'ING'];
+
     public function run(): void
     {
         $components = DB::table('curricular_components')->where('active', true)->get();
         $experienceFields = DB::table('experience_fields')->where('active', true)->get();
         $schools = DB::table('schools')->orderBy('id')->pluck('id');
         $now = now()->toDateTimeString();
+
+        $polivalentComponents = $components->filter(fn ($c) => ! in_array($c->code, self::SPECIALIST_CODES));
+        $specialistComponents = $components->filter(fn ($c) => in_array($c->code, self::SPECIALIST_CODES));
 
         $batch = [];
         $total = 0;
@@ -53,10 +58,16 @@ class TeacherAssignmentSeeder extends Seeder
 
             $teacherCount = count($teachers);
             $polivalentIndex = 0;
+            $specialistBaseIndex = max(3, (int) ceil($teacherCount * 0.6));
 
             $specialistMap = [];
             foreach ($components as $i => $component) {
                 $specialistMap[$component->id] = $teachers[$i % $teacherCount];
+            }
+
+            $earlySpecialistMap = [];
+            foreach ($specialistComponents->values() as $i => $component) {
+                $earlySpecialistMap[$component->id] = $teachers[($specialistBaseIndex + $i) % $teacherCount];
             }
 
             foreach ($classGroups as $cg) {
@@ -79,13 +90,26 @@ class TeacherAssignmentSeeder extends Seeder
                 }
 
                 if ($cg->type === 'elementary_early') {
-                    $teacherId = $teachers[$polivalentIndex % $teacherCount];
+                    $regenteId = $teachers[$polivalentIndex % $teacherCount];
                     $polivalentIndex++;
 
-                    foreach ($components as $component) {
+                    foreach ($polivalentComponents as $component) {
                         $batch[] = [
                             'class_group_id' => $cg->id,
-                            'teacher_id' => $teacherId,
+                            'teacher_id' => $regenteId,
+                            'curricular_component_id' => $component->id,
+                            'experience_field_id' => null,
+                            'start_date' => self::ENROLLMENT_START,
+                            'active' => true,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+
+                    foreach ($specialistComponents as $component) {
+                        $batch[] = [
+                            'class_group_id' => $cg->id,
+                            'teacher_id' => $earlySpecialistMap[$component->id],
                             'curricular_component_id' => $component->id,
                             'experience_field_id' => null,
                             'start_date' => self::ENROLLMENT_START,

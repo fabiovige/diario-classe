@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             CurricularComponentSeeder::class,
             ExperienceFieldSeeder::class,
             TeacherAssignmentSeeder::class,
+            TimeSlotSeeder::class,
             AttendanceConfigSeeder::class,
             AssessmentConfigSeeder::class,
             LessonRecordSeeder::class,
