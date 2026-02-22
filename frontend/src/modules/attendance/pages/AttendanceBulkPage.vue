@@ -49,10 +49,6 @@ const canSubmit = computed(() =>
   selectedClassGroupId.value && selectedAssignmentId.value && selectedDate.value && students.value.length > 0
 )
 
-const canLoadRecords = computed(() =>
-  selectedClassGroupId.value && selectedAssignmentId.value && selectedDate.value && students.value.length > 0
-)
-
 const assignmentPlaceholder = computed(() => {
   if (!selectedClassGroupId.value) return 'Selecione a turma primeiro'
   if (loadingAssignments.value) return 'Carregando...'
@@ -97,6 +93,7 @@ async function loadStudents() {
       status: 'present' as AttendanceStatus,
       notes: null,
     }))
+    await loadExistingRecords()
   } catch {
     toast.error('Erro ao carregar alunos')
   } finally {
@@ -105,7 +102,7 @@ async function loadStudents() {
 }
 
 async function loadExistingRecords() {
-  if (!canLoadRecords.value || !selectedClassGroupId.value) return
+  if (!selectedClassGroupId.value || !selectedAssignmentId.value || !selectedDate.value || students.value.length === 0) return
 
   loadingRecords.value = true
   try {
@@ -115,14 +112,17 @@ async function loadExistingRecords() {
       per_page: 200,
     })
 
+    if (response.data.length === 0) return
+
     const recordMap = new Map(response.data.map(r => [r.student_id, { status: r.status, notes: r.notes }]))
 
     students.value = students.value.map(s => {
       const existing = recordMap.get(s.student_id)
+      if (!existing) return s
       return {
         ...s,
-        status: (existing?.status as AttendanceStatus) ?? 'present',
-        notes: existing?.notes ?? null,
+        status: existing.status as AttendanceStatus,
+        notes: existing.notes ?? null,
       }
     })
   } catch {
@@ -140,10 +140,19 @@ function onClassGroupChange() {
   loadStudents()
 }
 
+function resetStudentStatuses() {
+  students.value = students.value.map(s => ({
+    ...s,
+    status: 'present' as AttendanceStatus,
+    notes: null,
+  }))
+}
+
 watch(
   () => [selectedAssignmentId.value, selectedDate.value],
   () => {
-    if (!canLoadRecords.value) return
+    if (!selectedClassGroupId.value || !selectedAssignmentId.value || !selectedDate.value || students.value.length === 0) return
+    resetStudentStatuses()
     loadExistingRecords()
   },
 )
@@ -237,7 +246,7 @@ onMounted(loadClassGroups)
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Data *</label>
-          <InputText v-model="selectedDate" type="date" class="w-full" />
+          <InputText v-model="selectedDate" type="date" class="w-full" :disabled="!selectedClassGroupId" />
         </div>
       </div>
     </div>
