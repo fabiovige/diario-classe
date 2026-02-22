@@ -20,23 +20,23 @@
 
 ### 0.2 Frontend (Vue.js)
 
-- [ ] Inicializar projeto Vue.js 3 com Vite
-- [ ] Configurar TypeScript
-- [ ] Setup Vue Router
-- [ ] Setup Pinia (estado global)
-- [ ] Configurar Vitest + Testing Library
-- [ ] Definir design system base (botoes, inputs, tabelas, modais)
-- [ ] Configurar ESLint + Prettier
-- [ ] Criar layout base (sidebar, header, content area)
+- [x] Inicializar projeto Vue.js 3 com Vite
+- [x] Configurar TypeScript
+- [x] Setup Vue Router
+- [x] Setup Pinia (estado global)
+- [x] Configurar Vitest + Testing Library
+- [x] Definir design system base (botoes, inputs, tabelas, modais)
+- [x] Configurar ESLint + Prettier
+- [x] Criar layout base (sidebar, header, content area)
 
 ### 0.3 Infraestrutura
 
-- [ ] Criar Docker Compose (PHP-FPM, PostgreSQL, Redis, Node)
+- [x] Criar Docker Compose (PHP-FPM, MySQL, Redis, Node)
 - [ ] Configurar Nginx ou Caddy como reverse proxy
 - [ ] Criar Makefile com comandos uteis (up, down, test, migrate, seed)
-- [ ] Configurar .env.example com todas as variaveis
+- [x] Configurar .env.example com todas as variaveis
 - [ ] Setup de CI basico (GitHub Actions: lint, testes, build)
-- [ ] Configurar .gitignore para backend e frontend
+- [x] Configurar .gitignore para backend e frontend
 
 ---
 
@@ -46,93 +46,96 @@
 
 **Backend:**
 
-- [ ] Criar modulo Identity com estrutura de camadas (Domain, Application, Infrastructure, Presentation)
-- [ ] Implementar entidade User (email, password, status, perfil)
-- [ ] Implementar autenticacao (login/logout/refresh token via JWT ou Sanctum)
-- [ ] Implementar RBAC: Role, Permission
-- [ ] Criar perfis padrao: Admin, Secretario, Diretor, Coordenador, Professor, Responsavel
-- [ ] Implementar middleware de autorizacao por permissao
-- [ ] Implementar escopo por escola (professor ve so suas turmas)
+- [x] Criar modulo Identity com estrutura de camadas (Domain, Application, Infrastructure, Presentation)
+- [x] Implementar entidade User (email, password, status, perfil)
+- [x] Implementar autenticacao (login/logout/refresh token via Sanctum)
+- [x] Implementar RBAC: Role, Permission
+- [x] Criar perfis padrao: Admin, Secretario, Diretor, Coordenador, Professor, Responsavel
+- [x] Implementar middleware de autorizacao por permissao (CheckPermission)
+- [x] Implementar escopo por escola (CheckSchoolScope)
 - [ ] Implementar politica de senhas (minimo 8 chars, complexidade)
 - [ ] Implementar audit log de acessos (login, logout, tentativas)
-- [ ] Criar seeders com usuarios de teste por perfil
-- [ ] Escrever testes: autenticacao, autorizacao, escopos
+- [x] Criar seeders com usuarios de teste por perfil
+- [x] Escrever testes: autenticacao, autorizacao (AuthTest, UserTest)
 
 **Frontend:**
 
-- [ ] Tela de login
-- [ ] Gerenciamento de token (armazenamento, refresh automatico)
-- [ ] Guards de rota por perfil/permissao
-- [ ] Tela de gestao de usuarios (CRUD)
-- [ ] Tela de gestao de perfis e permissoes
+- [x] Tela de login (LoginPage)
+- [x] Gerenciamento de token (armazenamento, refresh automatico)
+- [x] Guards de rota por perfil/permissao (authGuard, roleGuard)
+- [x] Tela de gestao de usuarios (UserListPage, UserFormPage)
+- [x] Tela de gestao de perfis e permissoes (RoleListPage, RoleFormPage)
 
 ### 1.2 Estrutura Escolar — `Modules/SchoolStructure`
 
 **Backend:**
 
-- [ ] Criar modulo SchoolStructure
-- [ ] Entidade School (nome, endereco, codigo INEP, telefone, email, tipo)
-- [ ] Entidade AcademicYear (ano, data_inicio, data_fim, status: planning/active/closed)
-- [ ] Entidade Shift (turno: manha, tarde, integral, noturno)
-- [ ] Entidade GradeLevel (serie/ano: 1o ano, 2o ano, Pre I, Pre II, Berçario, etc)
-- [ ] Entidade ClassGroup (turma: vinculo serie + turno + ano_letivo + escola)
-- [ ] Value Object: SchoolType (creche, pre-escola, fundamental, mista)
-- [ ] CRUD completo com validacoes de dominio
-- [ ] Regra: turma sempre vinculada a ano letivo + serie + turno + escola
+- [x] Criar modulo SchoolStructure
+- [x] Entidade School (nome, endereco, codigo INEP, telefone, email, tipo)
+- [x] Entidade AcademicYear (ano, data_inicio, data_fim, status)
+- [x] Entidade Shift (turno: manha, tarde, integral, noturno)
+- [x] Entidade GradeLevel (serie/ano com min_age_months e type)
+- [x] Entidade ClassGroup (turma: vinculo serie + turno + ano_letivo + escola + max_students)
+- [x] Enums: SchoolType, ShiftName, GradeLevelType, AcademicYearStatus
+- [x] CRUD completo com validacoes de dominio
+- [x] Regra: turma sempre vinculada a ano letivo + serie + turno + escola
 - [ ] Regra: ano letivo so pode fechar se todos os periodos avaliativos estiverem fechados
-- [ ] Seeders com as 30 EMEBs de Jandira
-- [ ] Escrever testes para todas as regras de dominio
+- [x] Seeders com as 30 EMEBs de Jandira
+- [x] Escrever testes (SchoolTest, ClassGroupTest)
 
 **Frontend:**
 
-- [ ] Tela de listagem/cadastro de escolas
-- [ ] Tela de configuracao de ano letivo
-- [ ] Tela de gestao de turnos
-- [ ] Tela de gestao de series/anos
-- [ ] Tela de gestao de turmas (criar, editar, visualizar alunos)
+- [x] Tela de listagem/cadastro de escolas (SchoolListPage, SchoolFormPage)
+- [x] Tela de configuracao de ano letivo (AcademicYearListPage, AcademicYearFormPage)
+- [x] Tela de gestao de turnos (ShiftListPage, ShiftFormPage)
+- [x] Tela de gestao de series/anos (GradeLevelListPage, GradeLevelFormPage)
+- [x] Tela de gestao de turmas (ClassGroupListPage, ClassGroupFormPage)
 
 ### 1.3 Pessoas — `Modules/People`
 
 **Backend:**
 
-- [ ] Criar modulo People
-- [ ] Entidade Student (nome, data_nascimento, cpf, nis, foto, sexo, raca_cor, necessidades_especiais)
-- [ ] Entidade Guardian (responsavel: nome, cpf, telefone, email, parentesco)
-- [ ] Entidade Teacher (professor: nome, cpf, formacao, registro_funcional)
-- [ ] Vinculo StudentGuardian (aluno-responsavel, com tipo: mae, pai, outro)
+- [x] Criar modulo People
+- [x] Entidade Student (nome, data_nascimento, cpf, nis, sexo, raca_cor, necessidades_especiais, disability_type)
+- [x] Entidade Guardian (responsavel: nome, cpf, telefone, email, parentesco)
+- [x] Entidade Teacher (professor: nome, cpf, formacao, registro_funcional)
+- [x] Vinculo StudentGuardian (aluno-responsavel, com tipo: mae, pai, outro + is_primary, can_pickup)
 - [ ] Value Object: Address, Phone, Document
 - [ ] Regra: dados sensiveis (laudo, necessidades especiais) com flag LGPD
 - [ ] Regra: aluno menor de 12 anos exige responsavel vinculado
-- [ ] CRUD completo com busca e filtros
-- [ ] Escrever testes
+- [x] CRUD completo com busca e filtros
+- [x] Escrever testes (StudentTest, TeacherTest)
 
 **Frontend:**
 
-- [ ] Tela de listagem/cadastro de alunos
-- [ ] Tela de listagem/cadastro de professores
-- [ ] Tela de vinculacao aluno-responsavel
+- [x] Tela de listagem/cadastro de alunos (StudentListPage, StudentFormPage, StudentDetailPage)
+- [x] Tela de listagem/cadastro de professores (TeacherListPage, TeacherFormPage)
+- [x] Tela de listagem/cadastro de responsaveis (GuardianListPage, GuardianFormPage)
 - [ ] Busca inteligente (por nome, CPF, RA)
 
 ### 1.4 Matricula e Enturmacao — `Modules/Enrollment`
 
 **Backend:**
 
-- [ ] Criar modulo Enrollment
-- [ ] Entidade Enrollment (matricula: aluno + ano_letivo + escola + data_entrada + status)
-- [ ] Entidade ClassAssignment (enturmacao: matricula + turma + data_inicio + data_fim)
-- [ ] Entidade EnrollmentMovement (movimentacao: tipo, data, motivo, escola_destino)
-- [ ] Tipos de movimentacao: matricula_inicial, transferencia_interna, transferencia_externa, abandono, falecimento, reclassificacao
-- [ ] Regra: aluno so pode ter uma enturmacao ativa por turno
-- [ ] Regra: transferencia encerra enturmacao anterior e cria nova
+- [x] Criar modulo Enrollment
+- [x] Entidade Enrollment (matricula: aluno + ano_letivo + escola + data_entrada + status + enrollment_number)
+- [x] Entidade ClassAssignment (enturmacao: matricula + turma + data_inicio + data_fim + status)
+- [x] Entidade EnrollmentMovement (movimentacao: tipo, data, motivo, escola_origem/destino)
+- [x] Entidade EnrollmentDocument (documentos: tipo, upload, status de revisao)
+- [x] Tipos de movimentacao: matricula_inicial, transferencia_interna, transferencia_externa, abandono, falecimento, reclassificacao
+- [x] Regra: aluno so pode ter uma enturmacao ativa por turno
+- [x] Regra: transferencia encerra enturmacao anterior e cria nova
 - [ ] Regra: movimentacoes geram audit trail automatico
-- [ ] UseCase: MatricularAluno, EnturmarAluno, TransferirAluno
-- [ ] Escrever testes para todos os use cases
+- [x] UseCase: CreateEnrollment, AssignToClass, TransferEnrollment
+- [x] Service: EnrollmentNumberGenerator (geracao automatica de numero de matricula)
+- [x] Escrever testes (EnrollmentTest)
 
 **Frontend:**
 
-- [ ] Tela de matricula de aluno (selecionar escola, serie, turma)
-- [ ] Tela de enturmacao (arrastar/selecionar alunos para turma)
-- [ ] Tela de transferencia (interna e externa)
+- [x] Tela de matricula de aluno (EnrollmentListPage, EnrollmentFormPage)
+- [x] Tela de detalhe da matricula (EnrollmentDetailPage com documentos)
+- [ ] Tela de enturmacao dedicada (arrastar/selecionar alunos para turma)
+- [ ] Tela de transferencia dedicada (interna e externa)
 - [ ] Historico de movimentacoes do aluno
 
 ---
@@ -143,65 +146,68 @@
 
 **Backend:**
 
-- [ ] Criar modulo Curriculum
-- [ ] Entidade CurricularComponent (componente: nome, area_conhecimento, tipo)
-- [ ] Entidade ExperienceField (campo de experiencia - Ed. Infantil)
+- [x] Criar modulo Curriculum
+- [x] Entidade CurricularComponent (componente: nome, area_conhecimento, tipo)
+- [x] Entidade ExperienceField (campo de experiencia - Ed. Infantil)
 - [ ] Entidade CurriculumMatrix (matriz: escola + serie + ano_letivo + componentes + carga_horaria)
-- [ ] Entidade TeacherAssignment (vinculo professor + turma + componente)
-- [ ] Regra: Ed. Infantil usa ExperienceField, Fundamental usa CurricularComponent
+- [x] Entidade TeacherAssignment (vinculo professor + turma + componente/campo_experiencia)
+- [x] Regra: Ed. Infantil usa ExperienceField, Fundamental usa CurricularComponent
 - [ ] Regra: matriz configuravel por escola e ano letivo
-- [ ] CRUD + validacoes
-- [ ] Escrever testes
+- [x] CRUD + validacoes
+- [x] Escrever testes (CurricularComponentTest, TeacherAssignmentTest, DailyClassSummaryTest)
 
 **Frontend:**
 
-- [ ] Tela de configuracao de componentes curriculares
-- [ ] Tela de montagem de matriz curricular por serie
-- [ ] Tela de atribuicao professor-turma-componente
+- [x] Tela de configuracao de componentes curriculares (CurricularComponentListPage, CurricularComponentFormPage)
+- [x] Tela de campos de experiencia (ExperienceFieldListPage, ExperienceFieldFormPage)
+- [x] Tela de atribuicao professor-turma-componente (TeacherAssignmentListPage, TeacherAssignmentFormPage)
+- [x] Workspace unificado do professor (MyClassesPage, ClassSessionPage)
 
 ### 2.2 Calendario Escolar — `Modules/AcademicCalendar`
 
 **Backend:**
 
-- [ ] Criar modulo AcademicCalendar
+- [x] Criar modulo AcademicCalendar
 - [ ] Entidade SchoolCalendar (calendario: escola + ano_letivo)
 - [ ] Entidade CalendarDay (dia: data, tipo, descricao)
-- [ ] Entidade AssessmentPeriod (periodo avaliativo: tipo, numero, data_inicio, data_fim, status)
+- [x] Entidade AssessmentPeriod (periodo avaliativo: tipo, numero, data_inicio, data_fim, status)
 - [ ] Value Object: DayType (letivo, nao_letivo, reposicao, recesso, feriado)
 - [ ] Regra: contador automatico de dias letivos
 - [ ] Regra: validacao de carga horaria minima (parametro configuravel)
-- [ ] Regra: periodo avaliativo tem status (aberto, em_fechamento, fechado)
+- [x] Regra: periodo avaliativo tem status (aberto, fechado)
 - [ ] Eventos: conselho_de_classe, reuniao_pais, formacao_docente
-- [ ] Escrever testes
+- [x] Escrever testes (AssessmentPeriodTest)
 
 **Frontend:**
 
 - [ ] Tela de calendario visual (mensal, com cores por tipo de dia)
-- [ ] Tela de configuracao de periodos avaliativos
+- [x] Tela de configuracao de periodos avaliativos (AssessmentPeriodListPage, AssessmentPeriodFormPage)
 - [ ] Indicadores: dias letivos cumpridos vs. meta
 
 ### 2.3 Frequencia — `Modules/Attendance`
 
 **Backend:**
 
-- [ ] Criar modulo Attendance
-- [ ] Entidade AttendanceRecord (registro: aluno + turma + componente + data + status)
-- [ ] Value Object: AttendanceStatus (presente, falta, falta_justificada, dispensado)
-- [ ] Entidade AbsenceJustification (justificativa: aluno + data + motivo + documento)
+- [x] Criar modulo Attendance
+- [x] Entidade AttendanceRecord (registro: aluno + turma + componente + data + status + notes)
+- [x] Enum: AttendanceStatus (presente, falta, falta_justificada, dispensado)
+- [x] Entidade AbsenceJustification (justificativa: aluno + data + motivo + aprovacao)
+- [x] Entidade AttendanceConfig (configuracao de regras de frequencia por escola/serie)
 - [ ] Entidade ActiveSearch (busca ativa: aluno + tentativas de contato)
-- [ ] Service: FrequencyCalculator (calculo de % frequencia por aluno/turma/componente)
-- [ ] Service: AlertEngine (motor de alertas com limiares configuraveis)
+- [x] Service: FrequencyCalculator (calculo de % frequencia)
+- [x] Service: AttendanceAlertChecker (motor de alertas com limiares configuraveis)
 - [ ] Regra: alerta ao atingir X faltas consecutivas (parametro configuravel)
 - [ ] Regra: alerta ao atingir X faltas alternadas no mes (parametro configuravel)
 - [ ] Regra: alerta ao atingir X% de faltas no bimestre (parametro configuravel)
-- [ ] UseCase: RegistrarFrequencia (batch por turma), JustificarFalta, RegistrarBuscaAtiva
-- [ ] Escrever testes para calculator, alertas e use cases
+- [x] UseCase: RecordBulkAttendance, JustifyAbsence, ApproveAbsenceJustification
+- [x] Escrever testes (AttendanceTest)
 
 **Frontend:**
 
-- [ ] Tela de chamada (interface rapida: lista de alunos com toggle P/F)
-- [ ] Tela de mapa de frequencia (calendario visual por aluno)
-- [ ] Tela de justificativa de falta (com upload)
+- [x] Tela de chamada em lote (AttendanceBulkPage)
+- [x] Tela de frequencia por turma (AttendanceClassGridPage)
+- [x] Tela de frequencia individual do aluno (AttendanceStudentPage)
+- [x] Tela de justificativa de falta (AbsenceJustificationPage)
 - [ ] Painel de alertas de frequencia
 - [ ] Tela de registro de busca ativa
 
@@ -209,17 +215,17 @@
 
 **Backend:**
 
-- [ ] Criar modulo ClassRecord
-- [ ] Entidade LessonRecord (registro: turma + componente + data + conteudo + observacoes)
+- [x] Criar modulo ClassRecord
+- [x] Entidade LessonRecord (registro: turma + componente + data + conteudo + metodologia + observacoes + class_count)
 - [ ] Vinculo opcional com habilidades do curriculo
 - [ ] Regra: registro vinculado a dia letivo do calendario
-- [ ] CRUD + validacoes
-- [ ] Escrever testes
+- [x] CRUD + validacoes
+- [x] Escrever testes (LessonRecordTest)
 
 **Frontend:**
 
-- [ ] Tela de registro de aula (integrada com tela de chamada)
-- [ ] Historico de aulas por turma/componente
+- [x] Tela de registro de aula (LessonRecordListPage, LessonRecordFormPage)
+- [ ] Historico de aulas por turma/componente (visualizacao consolidada)
 
 ---
 
@@ -229,35 +235,39 @@
 
 **Backend:**
 
-- [ ] Criar modulo Assessment
-- [ ] Entidade AssessmentRule (regra: escola + serie + ano_letivo + tipo_avaliacao + formula_media)
-- [ ] Entidade AssessmentInstrument (instrumento: nome, peso, tipo)
-- [ ] Entidade Grade (nota: aluno + turma + componente + periodo + instrumento + valor)
-- [ ] Entidade DescriptiveReport (relatorio descritivo: aluno + campo_experiencia + periodo + texto)
-- [ ] Strategy Pattern: GradeCalculator (numerico, conceitual, descritivo)
-- [ ] Strategy Pattern: AverageFormula (aritmetica, ponderada, customizada)
-- [ ] Regra: tipo de avaliacao determinado pela regra da serie (nao hardcoded)
-- [ ] Regra: Ed. Infantil aceita APENAS registros descritivos
-- [ ] Regra: escalas e formulas configuraveis por escola/serie/ano_letivo
-- [ ] Escrever testes para cada strategy e formula
+- [x] Criar modulo Assessment
+- [x] Entidade AssessmentConfig (regra: escola + serie + ano_letivo + tipo_avaliacao + formula_media + recovery rules)
+- [x] Entidade AssessmentInstrument (instrumento: nome, peso, tipo)
+- [x] Entidade Grade (nota: aluno + turma + componente + periodo + instrumento + valor numerico/conceitual + recovery)
+- [x] Entidade DescriptiveReport (relatorio descritivo: aluno + campo_experiencia + periodo + texto)
+- [x] Entidade PeriodAverage (media por periodo)
+- [x] Entidade FinalAverage (media final por componente/ano)
+- [x] Entidade ConceptualScale (escala de conceitos configuravel)
+- [x] Strategy Pattern: GradeCalculator (NumericGradeCalculation, ConceptualGradeCalculation, DescriptiveGradeCalculation)
+- [x] Factory: GradeCalculationFactory
+- [x] Regra: tipo de avaliacao determinado pela regra da serie (nao hardcoded)
+- [x] Regra: Ed. Infantil aceita APENAS registros descritivos
+- [x] Regra: escalas e formulas configuraveis por escola/serie/ano_letivo
+- [x] Escrever testes (AssessmentTest)
 
 **Frontend:**
 
 - [ ] Tela de configuracao de regras de avaliacao por serie
-- [ ] Tela de lancamento de notas (grid: alunos x instrumentos)
-- [ ] Tela de lancamento descritivo (Ed. Infantil: texto + upload)
-- [ ] Visualizacao de medias calculadas automaticamente
+- [x] Tela de lancamento de notas em lote (GradeBulkPage)
+- [x] Tela de consulta de notas (GradeListPage)
+- [x] Tela de lancamento descritivo (DescriptiveReportPage)
+- [x] Tela de boletim do aluno (ReportCardPage)
 
 ### 3.2 Recuperacao — `Modules/Assessment`
 
 **Backend:**
 
 - [ ] Entidade RecoveryActivity (atividade de recuperacao: tipo, aluno, componente, periodo)
-- [ ] Tipos: paralela, continua, final
-- [ ] Regra: substituicao de nota configuravel (maior nota, media, ultima nota)
+- [x] Enum: RecoveryType, RecoveryReplaces (regras de substituicao)
+- [x] Campo recovery_type na entidade Grade
 - [ ] Regra: recuperacao final so se habilita apos fechamento do ultimo periodo regular
-- [ ] UseCase: RegistrarRecuperacao, AplicarSubstituicaoNota
-- [ ] Escrever testes
+- [x] UseCase: RecordRecoveryGrade
+- [ ] Escrever testes especificos de recuperacao
 
 **Frontend:**
 
@@ -268,7 +278,7 @@
 
 **Backend:**
 
-- [ ] Criar modulo Council
+- [ ] Criar modulo Council (estrutura existe mas SEM implementacao)
 - [ ] Entidade CouncilMeeting (reuniao: turma + periodo + data + participantes)
 - [ ] Entidade CouncilDeliberation (deliberacao: aluno + decisao + justificativa)
 - [ ] Decisoes: aprovado, retido, progressao_parcial, encaminhamento
@@ -286,24 +296,26 @@
 
 **Backend:**
 
-- [ ] Criar modulo PeriodClosing
-- [ ] Entidade PeriodClosing (fechamento: turma + componente + periodo + status + aprovado_por)
-- [ ] Entidade FinalResult (resultado final: aluno + turma + ano_letivo + resultado + media_final)
-- [ ] Entidade Rectification (retificacao: fechamento + campo_alterado + valor_anterior + valor_novo + justificativa)
-- [ ] Workflow: pendente -> em_validacao -> aprovado -> fechado
-- [ ] Regra: fechamento exige todas as notas e frequencia lancadas
+- [x] Criar modulo PeriodClosing
+- [x] Entidade PeriodClosing (fechamento: turma + componente + periodo + status + aprovado_por)
+- [x] Entidade FinalResultRecord (resultado final: aluno + turma + ano_letivo + resultado + media_final)
+- [x] Entidade Rectification (retificacao: fechamento + campo_alterado + valor_anterior + valor_novo + justificativa)
+- [x] Workflow: Draft -> Submitted -> Validated -> Approved -> Closed
+- [x] Specification Pattern: LessonRecordsComplete, AttendanceComplete, GradesComplete
+- [x] UseCase: ClosePeriod, SubmitPeriodClosing, ValidatePeriodClosing, RunCompletenessCheck, CalculateFinalResult, RequestRectification
+- [x] Regra: fechamento exige todas as notas e frequencia lancadas (specifications)
 - [ ] Regra: aprovacao hierarquica (professor -> coordenador -> diretor)
-- [ ] Regra: dados imutaveis apos status "fechado"
-- [ ] Regra: retificacao so via fluxo formal com justificativa e audit trail
-- [ ] Resultado final: aprovado, retido, transferido, abandono, reclassificado
-- [ ] Escrever testes para workflow e imutabilidade
+- [x] Regra: dados imutaveis apos status "fechado"
+- [x] Regra: retificacao so via fluxo formal com justificativa
+- [x] Resultado final: Approved, NotApproved, Promoted, Retained
+- [x] Escrever testes (PeriodClosingTest)
 
 **Frontend:**
 
-- [ ] Tela de fechamento bimestral (checklist de pendencias)
-- [ ] Tela de aprovacao hierarquica (coordenador/diretor)
+- [x] Tela de fechamento (ClosingDashboardPage)
+- [x] Tela de detalhe do fechamento (ClosingDetailPage)
 - [ ] Tela de retificacao pos-fechamento
-- [ ] Tela de resultado final do ano letivo
+- [x] Tela de resultado final do ano letivo (FinalResultPage)
 
 ---
 
@@ -313,7 +325,8 @@
 
 **Frontend:**
 
-- [ ] Dashboard: turmas do dia, pendencias, alertas de frequencia
+- [x] Dashboard basico do professor (TeacherDashboard)
+- [x] Workspace unificado "Minhas Aulas" (MyClassesPage + ClassSessionPage)
 - [ ] Lancamento rapido de frequencia (acesso direto pela dashboard)
 - [ ] Lancamento rapido de notas
 - [ ] Calendario com prazos de fechamento
@@ -337,7 +350,8 @@
 
 **Frontend:**
 
-- [ ] Dashboard: indicadores da escola (frequencia geral, rendimento, evasao)
+- [x] Dashboard basico do diretor (DirectorDashboard)
+- [x] Dashboard basico do coordenador (CoordinatorDashboard)
 - [ ] Painel de fechamentos pendentes por turma
 - [ ] Relatorios comparativos entre turmas
 - [ ] Alertas: alunos com risco de evasao, turmas com baixo rendimento
@@ -347,7 +361,8 @@
 
 **Frontend:**
 
-- [ ] Dashboard: indicadores consolidados das 30 escolas
+- [x] Dashboard basico do admin (AdminDashboard)
+- [x] Dashboard basico do secretario (SecretaryDashboard)
 - [ ] Ranking de escolas por indicadores
 - [ ] Tela de configuracao de parametros municipais (regras de avaliacao, limiares)
 - [ ] Relatorios para prestacao de contas
@@ -413,12 +428,13 @@
 
 ### T.1 Sistema de Auditoria
 
-- [ ] Implementar audit trail generico (trait/observer no Laravel)
-- [ ] Campos: user_id, action, entity, entity_id, old_values, new_values, ip, user_agent, timestamp
+- [x] Implementar audit trail generico (trait Auditable no Laravel)
+- [x] Entidade AuditLog com campos padrao
 - [ ] Logs imutaveis (append-only, sem update/delete)
 - [ ] Tela de consulta de audit trail (filtros por usuario, entidade, periodo)
 - [ ] Relatorios de auditoria para orgaos de controle
 - [ ] Monitoramento de operacoes sensiveis (alteracao de nota, exclusao, fechamento)
+- [x] Escrever testes (AuditLogTest)
 
 ### T.2 LGPD
 
@@ -428,6 +444,26 @@
 - [ ] Documentar politica de retencao de dados
 - [ ] Marcar campos sensiveis (laudo, saude) com criptografia em repouso
 - [ ] Implementar log de acesso a dados pessoais
+
+---
+
+## UI/UX — Padronizacao de Interface
+
+### U.1 Paginas que precisam migrar de dialog para pagina separada
+
+- [x] ShiftListPage: migrado para ShiftFormPage (usa router.push)
+- [x] CurricularComponentListPage: migrado para CurricularComponentFormPage (usa router.push)
+- [x] ExperienceFieldListPage: migrado para ExperienceFieldFormPage (usa router.push)
+- [x] TeacherAssignmentListPage: migrado para TeacherAssignmentFormPage (usa router.push)
+
+### U.2 Acoes faltantes nas listas
+
+- [x] AcademicYearListPage: possui editar, excluir, busca e criar
+- [x] AssessmentPeriodListPage: possui editar, excluir, busca e criar
+- [x] LessonRecordListPage: possui editar, excluir, busca e criar
+- [x] TeacherListPage: possui editar, excluir, busca e criar
+- [x] RoleListPage: possui editar, excluir, busca e criar
+- [x] ShiftListPage: possui editar, excluir, busca e criar
 
 ---
 
