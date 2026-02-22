@@ -95,33 +95,31 @@ Toda lista paginada deve ter:
 
 ## Status Atual das Paginas
 
-### Conformes (pagina separada + acoes)
+### Conformes (pagina separada + acoes + busca + paginacao)
 
 | Pagina | Criar | Editar | Excluir | Busca |
 |---|---|---|---|---|
 | UserListPage | pagina | pagina | sim | sim |
-| RoleListPage | pagina | pagina | sim | - |
+| RoleListPage | pagina | pagina | sim | sim |
 | SchoolListPage | pagina | pagina | sim | sim |
 | ClassGroupListPage | pagina | pagina | sim | sim |
+| ShiftListPage | pagina | pagina | sim | sim |
+| AcademicYearListPage | pagina | pagina | sim | sim |
+| GradeLevelListPage | pagina | pagina | sim | sim |
+| StudentListPage | pagina | pagina | - | sim |
+| TeacherListPage | pagina | pagina | sim | sim |
+| GuardianListPage | pagina | pagina | - | sim |
+| CurricularComponentListPage | pagina | pagina | sim | sim |
+| ExperienceFieldListPage | pagina | pagina | sim | sim |
+| TeacherAssignmentListPage | pagina | pagina | sim | sim |
+| AssessmentPeriodListPage | pagina | pagina | sim | sim |
+| LessonRecordListPage | pagina | pagina | sim | sim |
 
-### Precisam de correcao (dialog -> pagina)
+### Excecoes (sem excluir por regra de negocio)
 
-| Pagina | Problema |
+| Pagina | Motivo |
 |---|---|
-| ShiftListPage | Criar/editar via dialog |
-| CurricularComponentListPage | Criar via dialog, sem editar/excluir |
-| ExperienceFieldListPage | Criar via dialog, sem editar/excluir |
-| TeacherAssignmentListPage | Criar via dialog, sem editar/excluir |
-
-### Precisam de acoes adicionais
-
-| Pagina | Falta |
-|---|---|
-| AcademicYearListPage | Excluir |
-| AssessmentPeriodListPage | Excluir |
-| LessonRecordListPage | Excluir |
-| TeacherListPage | Botao criar |
-| EnrollmentListPage | Editar (abre detalhe) |
-| GradeLevelListPage | Somente leitura (sem acoes) |
-| RoleListPage | Busca |
-| ShiftListPage | Busca |
+| StudentListPage | Dados protegidos (LGPD) |
+| GuardianListPage | Dados protegidos (LGPD) |
+| EnrollmentListPage | Abre detalhe (sem edicao inline) |
+| GradeLevelListPage | Dados de referencia do sistema |
