@@ -52,7 +52,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/my-classes' },
     { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
     { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/class-record' },
-    { label: 'Avaliacao', icon: 'pi pi-chart-bar', to: '/assessment' },
+    {
+      label: 'Avaliacao', icon: 'pi pi-chart-bar', items: [
+        { label: 'Lancamento de Notas', icon: 'pi pi-pencil', to: '/assessment' },
+        { label: 'Relatorios Descritivos', icon: 'pi pi-file-edit', to: '/assessment/descriptive' },
+        { label: 'Consulta de Notas', icon: 'pi pi-list', to: '/assessment/grades' },
+      ],
+    },
     { label: 'Fechamento', icon: 'pi pi-lock', to: '/period-closing' },
   ],
   director: [
@@ -70,7 +76,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     },
     { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/my-classes' },
     { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
-    { label: 'Avaliacao', icon: 'pi pi-chart-bar', to: '/assessment' },
+    {
+      label: 'Avaliacao', icon: 'pi pi-chart-bar', items: [
+        { label: 'Lancamento de Notas', icon: 'pi pi-pencil', to: '/assessment' },
+        { label: 'Relatorios Descritivos', icon: 'pi pi-file-edit', to: '/assessment/descriptive' },
+        { label: 'Consulta de Notas', icon: 'pi pi-list', to: '/assessment/grades' },
+      ],
+    },
     { label: 'Fechamento', icon: 'pi pi-lock', to: '/period-closing' },
   ],
   coordinator: [
@@ -84,7 +96,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/my-classes' },
     { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
     { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/class-record' },
-    { label: 'Avaliacao', icon: 'pi pi-chart-bar', to: '/assessment' },
+    {
+      label: 'Avaliacao', icon: 'pi pi-chart-bar', items: [
+        { label: 'Lancamento de Notas', icon: 'pi pi-pencil', to: '/assessment' },
+        { label: 'Relatorios Descritivos', icon: 'pi pi-file-edit', to: '/assessment/descriptive' },
+        { label: 'Consulta de Notas', icon: 'pi pi-list', to: '/assessment/grades' },
+      ],
+    },
     { label: 'Fechamento', icon: 'pi pi-lock', to: '/period-closing' },
   ],
   secretary: [
@@ -112,7 +130,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     { label: 'Minhas Aulas', icon: 'pi pi-book', to: '/my-classes' },
     { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
     { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/class-record' },
-    { label: 'Avaliacao', icon: 'pi pi-chart-bar', to: '/assessment' },
+    {
+      label: 'Avaliacao', icon: 'pi pi-chart-bar', items: [
+        { label: 'Lancamento de Notas', icon: 'pi pi-pencil', to: '/assessment' },
+        { label: 'Relatorios Descritivos', icon: 'pi pi-file-edit', to: '/assessment/descriptive' },
+        { label: 'Consulta de Notas', icon: 'pi pi-list', to: '/assessment/grades' },
+      ],
+    },
     { label: 'Fechamento', icon: 'pi pi-lock', to: '/period-closing' },
   ],
   guardian: [

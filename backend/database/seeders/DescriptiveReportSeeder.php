@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use App\Modules\AcademicCalendar\Domain\Entities\AssessmentPeriod;
-use App\Modules\Assessment\Domain\Entities\DescriptiveReport;
 use App\Modules\Curriculum\Domain\Entities\ExperienceField;
 use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
 use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
 use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
 use Illuminate\Database\Seeder;
@@ -14,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class DescriptiveReportSeeder extends Seeder
 {
+    private const BATCH_SIZE = 500;
+
     private const REPORT_TEMPLATES = [
         'O aluno demonstra bom desenvolvimento nas atividades propostas, participando ativamente das rodas de conversa e interagindo com os colegas de forma respeitosa.',
         'Apresenta evolução significativa na coordenação motora e nas atividades artísticas. Mostra interesse em explorar diferentes materiais e texturas.',
@@ -30,10 +30,10 @@ class DescriptiveReportSeeder extends Seeder
     public function run(): void
     {
         $infantilIds = GradeLevel::where('type', 'early_childhood')->pluck('id')->toArray();
-
         $experienceFields = ExperienceField::where('active', true)->get();
 
-        $classGroupIds = ClassAssignment::where('status', 'active')
+        $classGroupIds = DB::table('class_assignments')
+            ->where('status', 'active')
             ->distinct()
             ->pluck('class_group_id')
             ->toArray();
@@ -45,6 +45,8 @@ class DescriptiveReportSeeder extends Seeder
 
         $templateCount = count(self::REPORT_TEMPLATES);
         $templateIndex = 0;
+        $now = now()->toDateTimeString();
+        $batch = [];
 
         foreach ($classGroups as $classGroup) {
             $studentIds = DB::table('class_assignments')
@@ -72,24 +74,29 @@ class DescriptiveReportSeeder extends Seeder
             foreach ($studentIds as $studentId) {
                 foreach ($experienceFields as $experienceField) {
                     foreach ($periods as $period) {
-                        $content = self::REPORT_TEMPLATES[$templateIndex % $templateCount];
+                        $batch[] = [
+                            'student_id' => $studentId,
+                            'class_group_id' => $classGroup->id,
+                            'experience_field_id' => $experienceField->id,
+                            'assessment_period_id' => $period->id,
+                            'content' => self::REPORT_TEMPLATES[$templateIndex % $templateCount],
+                            'recorded_by' => $recordedBy,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
                         $templateIndex++;
 
-                        DescriptiveReport::updateOrCreate(
-                            [
-                                'student_id' => $studentId,
-                                'class_group_id' => $classGroup->id,
-                                'experience_field_id' => $experienceField->id,
-                                'assessment_period_id' => $period->id,
-                            ],
-                            [
-                                'content' => $content,
-                                'recorded_by' => $recordedBy,
-                            ],
-                        );
+                        if (count($batch) >= self::BATCH_SIZE) {
+                            DB::table('descriptive_reports')->insert($batch);
+                            $batch = [];
+                        }
                     }
                 }
             }
+        }
+
+        if (! empty($batch)) {
+            DB::table('descriptive_reports')->insert($batch);
         }
     }
 }

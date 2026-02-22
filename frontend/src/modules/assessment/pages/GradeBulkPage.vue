@@ -192,6 +192,14 @@ watch(
   },
 )
 
+function clampGrade(data: StudentGrade) {
+  if (data.numeric_value === null) return
+  const min = config.value?.scale_min ?? 0
+  const max = config.value?.scale_max ?? 10
+  if (data.numeric_value < min) data.numeric_value = min
+  if (data.numeric_value > max) data.numeric_value = max
+}
+
 async function handleSubmit() {
   if (!selectedClassGroupId.value || !selectedAssignmentId.value || !selectedPeriodId.value || !selectedInstrumentId.value) return
   submitting.value = true
@@ -245,18 +253,19 @@ onMounted(loadClassGroups)
 
     <Message v-if="isDescriptive" severity="info" class="mt-4" :closable="false">
       Esta turma utiliza avaliacao descritiva. Acesse a pagina de
-      <router-link to="/assessment/descriptive-reports" class="font-semibold underline">Relatorios Descritivos</router-link>
+      <router-link to="/assessment/descriptive" class="font-semibold underline">Relatorios Descritivos</router-link>
       para registrar as avaliacoes.
     </Message>
 
     <div v-if="!isDescriptive" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-      <EmptyState v-if="!loading && !loadingGrades && students.length === 0" message="Selecione uma turma para carregar os alunos" />
+      <EmptyState v-if="!loading && !loadingGrades && !loadingDeps && !selectedClassGroupId && students.length === 0" message="Selecione uma turma para carregar os alunos" />
+      <EmptyState v-if="!loading && !loadingGrades && !loadingDeps && selectedClassGroupId && students.length === 0" message="Nenhum aluno enturmado nesta turma" />
 
       <DataTable v-if="students.length > 0" :value="students" :loading="loading || loadingGrades" stripedRows responsiveLayout="scroll">
         <Column field="student_name" header="Aluno" sortable />
         <Column v-if="isNumeric" header="Nota" :style="{ width: '150px' }">
           <template #body="{ data }">
-            <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :maxFractionDigits="config?.rounding_precision ?? 2" class="w-full" />
+            <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :minFractionDigits="0" :maxFractionDigits="config?.rounding_precision ?? 2" :maxlength="5" inputmode="decimal" @blur="clampGrade(data)" class="w-full" />
           </template>
         </Column>
         <Column v-if="isConceptual" header="Conceito" :style="{ width: '180px' }">

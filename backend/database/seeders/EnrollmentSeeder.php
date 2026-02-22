@@ -19,46 +19,44 @@ class EnrollmentSeeder extends Seeder
 
     private const TRANSFER_PERCENTAGE = 5;
 
-    private const MAX_STUDENTS_PER_SCHOOL = 100;
+    private const FILL_RATE = 0.7;
 
     public function run(): void
     {
         $faker = FakerFactory::create('pt_BR');
-        $students = Student::all()->shuffle();
         $schools = School::orderBy('id')->get();
-
-        $schoolClassGroups = $this->loadSchoolClassGroups($schools);
         $adminUser = \App\Models\User::where('email', 'admin@jandira.sp.gov.br')->first();
         $createdBy = $adminUser?->id;
 
+        $schoolClassGroups = $this->loadSchoolClassGroups($schools);
+        $totalSpotsNeeded = $this->calculateTotalSpots($schoolClassGroups);
+
+        $existingStudentCount = Student::count();
+        $studentsToCreate = max(0, $totalSpotsNeeded - $existingStudentCount);
+
+        if ($studentsToCreate > 0) {
+            Student::factory()->count($studentsToCreate)->create();
+        }
+
+        $students = Student::all()->shuffle();
         $studentIndex = 0;
-        $totalStudents = $students->count();
 
         foreach ($schoolClassGroups as $schoolData) {
-            $schoolCount = 0;
             $schoolSequential = 0;
             $schoolId = $schoolData['school']->id;
             $year = $schoolData['academicYear']->year;
 
             foreach ($schoolData['classGroups'] as $classGroup) {
-                if ($studentIndex >= $totalStudents || $schoolCount >= self::MAX_STUDENTS_PER_SCHOOL) {
-                    break;
+                if ($studentIndex >= $students->count()) {
+                    break 2;
                 }
 
-                $spotsToFill = min(
-                    (int) ceil($classGroup->max_students * 0.8),
-                    $totalStudents - $studentIndex,
-                    self::MAX_STUDENTS_PER_SCHOOL - $schoolCount,
-                );
-
-                if ($spotsToFill <= 0) {
-                    break;
-                }
+                $spotsToFill = (int) ceil($classGroup->max_students * self::FILL_RATE);
+                $spotsToFill = min($spotsToFill, $students->count() - $studentIndex);
 
                 for ($s = 0; $s < $spotsToFill; $s++) {
                     $student = $students[$studentIndex];
                     $studentIndex++;
-                    $schoolCount++;
                     $schoolSequential++;
 
                     $enrollment = Enrollment::create([
@@ -92,10 +90,6 @@ class EnrollmentSeeder extends Seeder
 
                     $this->applyTransfer($faker, $enrollment, $createdBy);
                 }
-            }
-
-            if ($studentIndex >= $totalStudents) {
-                break;
             }
         }
     }
@@ -132,6 +126,18 @@ class EnrollmentSeeder extends Seeder
         }
 
         return $result;
+    }
+
+    private function calculateTotalSpots(array $schoolClassGroups): int
+    {
+        $total = 0;
+        foreach ($schoolClassGroups as $schoolData) {
+            foreach ($schoolData['classGroups'] as $classGroup) {
+                $total += (int) ceil($classGroup->max_students * self::FILL_RATE);
+            }
+        }
+
+        return $total;
     }
 
     private function applyTransfer(

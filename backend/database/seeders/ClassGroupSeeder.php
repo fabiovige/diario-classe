@@ -7,6 +7,7 @@ use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
 use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
 use App\Modules\SchoolStructure\Domain\Entities\School;
 use App\Modules\SchoolStructure\Domain\Entities\Shift;
+use App\Modules\SchoolStructure\Domain\Enums\GradeLevelType;
 use Illuminate\Database\Seeder;
 
 class ClassGroupSeeder extends Seeder
@@ -29,13 +30,13 @@ class ClassGroupSeeder extends Seeder
                 ->firstOrFail();
 
             $shifts = Shift::where('school_id', $school->id)
-                ->whereIn('name', ['Manhã', 'Tarde'])
+                ->whereIn('name', ['morning', 'afternoon'])
                 ->get();
 
             $grades = $this->resolveGradesForSchool($index, $infantilGrades, $fundamentalGrades);
 
             foreach ($grades as $gradeLevel) {
-                $maxStudents = $gradeLevel->type === 'early_childhood'
+                $maxStudents = $gradeLevel->type === GradeLevelType::EarlyChildhood
                     ? self::MAX_STUDENTS_INFANTIL
                     : self::MAX_STUDENTS_FUNDAMENTAL;
 
@@ -77,7 +78,7 @@ class ClassGroupSeeder extends Seeder
 
     private function resolveGroupCount(GradeLevel $gradeLevel): int
     {
-        if ($gradeLevel->type === 'early_childhood') {
+        if ($gradeLevel->type === GradeLevelType::EarlyChildhood) {
             return 2;
         }
 

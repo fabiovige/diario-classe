@@ -380,19 +380,19 @@ const router = createRouter({
       path: '/assessment/grades',
       name: 'grade-list',
       component: () => import('@/modules/assessment/pages/GradeListPage.vue'),
-      meta: { requiresAuth: true, breadcrumb: 'Notas' },
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Notas' },
     },
     {
       path: '/assessment/descriptive',
       name: 'descriptive-reports',
       component: () => import('@/modules/assessment/pages/DescriptiveReportPage.vue'),
-      meta: { requiresAuth: true, breadcrumb: 'Relatorio Descritivo' },
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Relatorio Descritivo' },
     },
     {
       path: '/assessment/report-card/:studentId',
       name: 'report-card',
       component: () => import('@/modules/assessment/pages/ReportCardPage.vue'),
-      meta: { requiresAuth: true, breadcrumb: 'Boletim' },
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Boletim' },
     },
 
     // PeriodClosing
