@@ -48,6 +48,7 @@ class AssessmentController extends ApiController
     public function indexGrades(Request $request): JsonResponse
     {
         $grades = Grade::with('student')
+            ->when($request->query('school_id'), fn ($q, $id) => $q->whereHas('classGroup.academicYear', fn ($q2) => $q2->where('school_id', $id)))
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('teacher_assignment_id'), fn ($q, $id) => $q->where('teacher_assignment_id', $id))
@@ -129,6 +130,7 @@ class AssessmentController extends ApiController
     public function indexDescriptiveReports(Request $request): JsonResponse
     {
         $reports = DescriptiveReport::with(['student', 'classGroup.gradeLevel', 'classGroup.shift', 'experienceField', 'assessmentPeriod'])
+            ->when($request->query('school_id'), fn ($q, $id) => $q->whereHas('classGroup.academicYear', fn ($q2) => $q2->where('school_id', $id)))
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('assessment_period_id'), fn ($q, $id) => $q->where('assessment_period_id', $id))

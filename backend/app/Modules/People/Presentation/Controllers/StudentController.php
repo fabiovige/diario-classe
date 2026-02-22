@@ -28,6 +28,7 @@ class StudentController extends ApiController
             ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->query('active'), fn ($q, $active) => $q->where('active', $active === 'true'))
             ->when($request->query('school_id'), fn ($q, $id) => $q->whereHas('enrollments', fn ($q2) => $q2->where('school_id', $id)))
+            ->when($request->query('academic_year_id'), fn ($q, $id) => $q->whereHas('enrollments', fn ($q2) => $q2->where('academic_year_id', $id)))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->whereHas('enrollments.classAssignments', fn ($q2) => $q2->where('class_group_id', $id)))
             ->orderBy('name')
             ->paginate($request->query('per_page', 15));

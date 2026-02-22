@@ -33,6 +33,7 @@ class PeriodClosingController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $closings = PeriodClosing::with(self::EAGER_RELATIONS)
+            ->when($request->query('school_id'), fn ($q, $id) => $q->whereHas('classGroup.academicYear', fn ($q2) => $q2->where('school_id', $id)))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('assessment_period_id'), fn ($q, $id) => $q->where('assessment_period_id', $id))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))

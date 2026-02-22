@@ -29,7 +29,7 @@ beforeEach(function () {
     ]);
 
     $teacherRole = Role::create(['name' => 'Professor', 'slug' => RoleSlug::Teacher->value, 'permissions' => ['*']]);
-    $this->teacherUser = User::factory()->create(['role_id' => $teacherRole->id]);
+    $this->teacherUser = User::factory()->create(['role_id' => $teacherRole->id, 'school_id' => $this->school->id]);
     $this->teacher = Teacher::factory()->create([
         'user_id' => $this->teacherUser->id,
         'school_id' => $this->school->id,
@@ -81,7 +81,7 @@ it('returns daily summary with correct flags', function () {
 });
 
 it('returns empty when teacher has no assignments', function () {
-    $otherUser = User::factory()->create(['role_id' => $this->teacherUser->role_id]);
+    $otherUser = User::factory()->create(['role_id' => $this->teacherUser->role_id, 'school_id' => $this->school->id]);
     $otherTeacher = Teacher::factory()->create([
         'user_id' => $otherUser->id,
         'school_id' => $this->school->id,

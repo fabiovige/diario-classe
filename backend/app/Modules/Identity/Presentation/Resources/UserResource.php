@@ -18,6 +18,7 @@ class UserResource extends JsonResource
             'cpf' => $this->cpf,
             'status' => $this->status,
             'school_id' => $this->school_id,
+            'school_name' => $this->whenLoaded('school', fn () => $this->school->name),
             'role' => new RoleResource($this->whenLoaded('role')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

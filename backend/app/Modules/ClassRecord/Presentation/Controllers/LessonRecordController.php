@@ -19,6 +19,7 @@ class LessonRecordController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $records = LessonRecord::with(['classGroup.gradeLevel', 'classGroup.shift', 'teacherAssignment'])
+            ->when($request->query('school_id'), fn ($q, $id) => $q->whereHas('classGroup.academicYear', fn ($q2) => $q2->where('school_id', $id)))
             ->when($request->query('search'), fn ($q, $search) => $q->where('content', 'like', "%{$search}%"))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('teacher_assignment_id'), fn ($q, $id) => $q->where('teacher_assignment_id', $id))

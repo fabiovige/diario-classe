@@ -67,7 +67,7 @@ function mapMenuItem(item: { label: string; icon: string; to?: string; items?: a
         severity="secondary"
         v-tooltip.right="item.label"
         class="h-10 w-10"
-        @click="item.command?.()"
+        @click="item.command ? item.command() : appStore.toggleSidebar()"
       />
     </div>
   </aside>

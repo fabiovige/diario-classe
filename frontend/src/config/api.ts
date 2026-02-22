@@ -14,6 +14,21 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  if (config.method === 'get') {
+    const raw = localStorage.getItem('user')
+    if (raw) {
+      try {
+        const user = JSON.parse(raw)
+        if (user.role?.slug !== 'admin' && user.school_id) {
+          config.params = { ...config.params, school_id: user.school_id }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   return config
 })
 

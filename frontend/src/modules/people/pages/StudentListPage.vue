@@ -14,13 +14,15 @@ import { peopleService } from '@/services/people.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { useSchoolScope } from '@/composables/useSchoolScope'
 import { formatDate } from '@/shared/utils/formatters'
 import type { Student } from '@/types/people'
-import type { School, ClassGroup } from '@/types/school-structure'
+import type { School, AcademicYear, ClassGroup } from '@/types/school-structure'
 
 const router = useRouter()
 const toast = useToast()
 const { confirmDelete } = useConfirm()
+const { shouldShowSchoolFilter, userSchoolId, userSchoolName } = useSchoolScope()
 
 const items = ref<Student[]>([])
 const loading = ref(false)
@@ -30,12 +32,14 @@ const perPage = ref(15)
 const search = ref('')
 
 const schools = ref<School[]>([])
+const academicYears = ref<AcademicYear[]>([])
 const classGroups = ref<(ClassGroup & { label: string })[]>([])
 const selectedSchoolId = ref<number | null>(null)
+const selectedAcademicYearId = ref<number | null>(null)
 const selectedClassGroupId = ref<number | null>(null)
 
 const hasActiveFilters = computed(() =>
-  selectedSchoolId.value !== null || selectedClassGroupId.value !== null
+  selectedSchoolId.value !== null || selectedAcademicYearId.value !== null || selectedClassGroupId.value !== null
 )
 
 async function loadSchools() {
@@ -47,13 +51,28 @@ async function loadSchools() {
   }
 }
 
+async function loadAcademicYears() {
+  if (!selectedSchoolId.value) {
+    academicYears.value = []
+    return
+  }
+  try {
+    const response = await schoolStructureService.getAcademicYears({ school_id: selectedSchoolId.value, per_page: 200 })
+    academicYears.value = response.data
+  } catch {
+    toast.error('Erro ao carregar anos letivos')
+  }
+}
+
 async function loadClassGroups() {
   if (!selectedSchoolId.value) {
     classGroups.value = []
     return
   }
   try {
-    const response = await schoolStructureService.getClassGroups({ school_id: selectedSchoolId.value, per_page: 200 })
+    const params: Record<string, unknown> = { school_id: selectedSchoolId.value, per_page: 200 }
+    if (selectedAcademicYearId.value) params.academic_year_id = selectedAcademicYearId.value
+    const response = await schoolStructureService.getClassGroups(params)
     classGroups.value = response.data.map(cg => ({
       ...cg,
       label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - '),
@@ -64,6 +83,15 @@ async function loadClassGroups() {
 }
 
 watch(selectedSchoolId, () => {
+  selectedAcademicYearId.value = null
+  selectedClassGroupId.value = null
+  academicYears.value = []
+  classGroups.value = []
+  loadAcademicYears()
+  onFilter()
+})
+
+watch(selectedAcademicYearId, () => {
   selectedClassGroupId.value = null
   classGroups.value = []
   loadClassGroups()
@@ -76,6 +104,7 @@ async function loadData() {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
     if (selectedSchoolId.value) params.school_id = selectedSchoolId.value
+    if (selectedAcademicYearId.value) params.academic_year_id = selectedAcademicYearId.value
     if (selectedClassGroupId.value) params.class_group_id = selectedClassGroupId.value
     const response = await peopleService.getStudents(params)
     items.value = response.data
@@ -105,7 +134,9 @@ function onFilter() {
 
 function clearFilters() {
   selectedSchoolId.value = null
+  selectedAcademicYearId.value = null
   selectedClassGroupId.value = null
+  academicYears.value = []
   classGroups.value = []
   currentPage.value = 1
   loadData()
@@ -124,7 +155,13 @@ function handleDelete(student: Student) {
 }
 
 onMounted(() => {
-  loadSchools()
+  if (shouldShowSchoolFilter.value) {
+    loadSchools()
+  }
+  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+    selectedSchoolId.value = userSchoolId.value
+    return
+  }
   loadData()
 })
 </script>
@@ -135,9 +172,17 @@ onMounted(() => {
 
     <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <div class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-        <div class="flex flex-col gap-1.5">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Escola</label>
           <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
+        </div>
+        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Ano Letivo</label>
+          <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Todos os anos" class="w-full" showClear :disabled="!selectedSchoolId" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Turma</label>

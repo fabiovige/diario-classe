@@ -3,7 +3,7 @@
 namespace App\Modules\Identity\Infrastructure\Providers;
 
 use App\Modules\Identity\Infrastructure\Middleware\CheckPermission;
-use App\Modules\Identity\Infrastructure\Middleware\CheckSchoolScope;
+use App\Modules\Identity\Infrastructure\Middleware\ApplySchoolScope;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,6 +14,6 @@ class IdentityServiceProvider extends ServiceProvider
         /** @var Router $router */
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('permission', CheckPermission::class);
-        $router->aliasMiddleware('school.scope', CheckSchoolScope::class);
+        $router->aliasMiddleware('school.scope', ApplySchoolScope::class);
     }
 }

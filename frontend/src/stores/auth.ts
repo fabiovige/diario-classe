@@ -12,6 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
   const permissions = computed<string[]>(() => user.value?.role?.permissions ?? [])
   const userName = computed(() => user.value?.name ?? '')
   const userSchoolId = computed(() => user.value?.school_id ?? null)
+  const userSchoolName = computed(() => user.value?.school_name ?? null)
 
   function setAuth(newUser: User, newToken: string) {
     user.value = newUser
@@ -49,6 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
     permissions,
     userName,
     userSchoolId,
+    userSchoolName,
     setAuth,
     clearAuth,
     updateUser,

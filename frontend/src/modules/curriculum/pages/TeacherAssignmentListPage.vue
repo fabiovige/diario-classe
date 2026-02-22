@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -7,17 +7,22 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Toolbar from 'primevue/toolbar'
 import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { curriculumService } from '@/services/curriculum.service'
+import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { useSchoolScope } from '@/composables/useSchoolScope'
 import { formatDate } from '@/shared/utils/formatters'
 import type { TeacherAssignment } from '@/types/curriculum'
+import type { School } from '@/types/school-structure'
 
 const router = useRouter()
 const toast = useToast()
 const { confirmDelete } = useConfirm()
+const { shouldShowSchoolFilter, userSchoolName } = useSchoolScope()
 
 const items = ref<TeacherAssignment[]>([])
 const loading = ref(false)
@@ -26,11 +31,31 @@ const currentPage = ref(1)
 const perPage = ref(15)
 const search = ref('')
 
+const schools = ref<School[]>([])
+const selectedSchoolId = ref<number | null>(null)
+
+const hasActiveFilters = computed(() => selectedSchoolId.value !== null)
+
+async function loadSchools() {
+  try {
+    const response = await schoolStructureService.getSchools({ per_page: 200 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+}
+
+watch(selectedSchoolId, () => {
+  currentPage.value = 1
+  loadData()
+})
+
 async function loadData() {
   loading.value = true
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
+    if (selectedSchoolId.value) params.school_id = selectedSchoolId.value
     const response = await curriculumService.getAssignments(params)
     items.value = response.data
     totalRecords.value = response.meta.total
@@ -39,6 +64,12 @@ async function loadData() {
   } finally {
     loading.value = false
   }
+}
+
+function clearFilters() {
+  selectedSchoolId.value = null
+  currentPage.value = 1
+  loadData()
 }
 
 function handleDelete(assignment: TeacherAssignment) {
@@ -64,7 +95,12 @@ function onSearch() {
   loadData()
 }
 
-onMounted(loadData)
+onMounted(() => {
+  if (shouldShowSchoolFilter.value) {
+    loadSchools()
+  }
+  loadData()
+})
 </script>
 
 <template>
@@ -72,10 +108,22 @@ onMounted(loadData)
     <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Atribuicoes de Professores</h1>
 
     <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
+      <div class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
+        </div>
+        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+        </div>
+      </div>
+
       <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start>
           <InputText v-model="search" placeholder="Buscar professor..." @keyup.enter="onSearch" />
           <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
+          <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text class="ml-2" @click="clearFilters" />
         </template>
         <template #end>
           <Button label="Nova Atribuicao" icon="pi pi-plus" @click="router.push('/curriculum/assignments/new')" />

@@ -14,6 +14,7 @@ export interface User {
   cpf: string
   status: UserStatus
   school_id: number | null
+  school_name?: string | null
   role: Role
   created_at: string
   updated_at: string

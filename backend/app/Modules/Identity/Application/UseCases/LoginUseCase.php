@@ -29,7 +29,7 @@ final class LoginUseCase
         $token = $user->createToken('api')->plainTextToken;
 
         return [
-            'user' => $user->load('role'),
+            'user' => $user->load(['role', 'school']),
             'token' => $token,
         ];
     }

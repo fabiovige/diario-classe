@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Modules\Identity\Domain\Entities\Role;
 use App\Modules\Identity\Domain\Enums\UserStatus;
+use App\Modules\SchoolStructure\Domain\Entities\School;
 use App\Modules\Shared\Audit\Infrastructure\Traits\Auditable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -48,6 +49,12 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    /** @return BelongsTo<School, $this> */
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class);
     }
 
     public function hasPermission(string $permission): bool
