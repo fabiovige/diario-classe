@@ -30,7 +30,6 @@ class SchoolController extends ApiController
         $school = $useCase->execute(new CreateSchoolDTO(
             name: $request->validated('name'),
             inepCode: $request->validated('inep_code'),
-            type: $request->validated('type', 'municipal'),
             address: $request->validated('address'),
             phone: $request->validated('phone'),
             email: $request->validated('email'),

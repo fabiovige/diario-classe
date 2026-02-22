@@ -19,7 +19,6 @@ const loading = ref(false)
 const form = ref({
   name: '',
   inep_code: '',
-  type: '',
   address: '',
   phone: '',
   email: '',
@@ -33,7 +32,6 @@ async function loadSchool() {
     const school = await schoolStructureService.getSchool(id.value)
     form.value.name = school.name
     form.value.inep_code = school.inep_code
-    form.value.type = school.type
     form.value.address = school.address
     form.value.phone = school.phone
     form.value.email = school.email
@@ -80,10 +78,6 @@ onMounted(loadSchool)
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Codigo INEP *</label>
           <InputText v-model="form.inep_code" required class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Tipo *</label>
-          <InputText v-model="form.type" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Endereco</label>

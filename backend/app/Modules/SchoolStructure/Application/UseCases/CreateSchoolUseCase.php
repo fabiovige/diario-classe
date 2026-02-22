@@ -12,7 +12,7 @@ final class CreateSchoolUseCase
         return School::create([
             'name' => $dto->name,
             'inep_code' => $dto->inepCode,
-            'type' => $dto->type,
+            'type' => 'municipal',
             'address' => $dto->address,
             'phone' => $dto->phone,
             'email' => $dto->email,

@@ -86,7 +86,6 @@ onMounted(loadData)
       <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
         <Column field="name" header="Nome" sortable />
         <Column field="inep_code" header="Codigo INEP" sortable />
-        <Column field="type" header="Tipo" sortable />
         <Column field="phone" header="Telefone" />
         <Column header="Status">
           <template #body="{ data }">

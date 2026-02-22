@@ -7,7 +7,6 @@ final readonly class CreateSchoolDTO
     public function __construct(
         public string $name,
         public ?string $inepCode = null,
-        public string $type = 'municipal',
         public ?string $address = null,
         public ?string $phone = null,
         public ?string $email = null,
