@@ -2,17 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Modules\AcademicCalendar\Domain\Entities\AssessmentPeriod;
-use App\Modules\Curriculum\Domain\Entities\ExperienceField;
-use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
-use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class DescriptiveReportSeeder extends Seeder
 {
-    private const BATCH_SIZE = 500;
+    private const BATCH_SIZE = 5000;
 
     private const REPORT_TEMPLATES = [
         'O aluno demonstra bom desenvolvimento nas atividades propostas, participando ativamente das rodas de conversa e interagindo com os colegas de forma respeitosa.',
@@ -29,74 +24,96 @@ class DescriptiveReportSeeder extends Seeder
 
     public function run(): void
     {
-        $infantilIds = GradeLevel::where('type', 'early_childhood')->pluck('id')->toArray();
-        $experienceFields = ExperienceField::where('active', true)->get();
+        DB::disableQueryLog();
 
-        $classGroupIds = DB::table('class_assignments')
-            ->where('status', 'active')
-            ->distinct()
-            ->pluck('class_group_id')
+        $infantilIds = DB::table('grade_levels')
+            ->where('type', 'early_childhood')
+            ->pluck('id')
             ->toArray();
 
-        $classGroups = ClassGroup::whereIn('id', $classGroupIds)
+        $experienceFieldIds = DB::table('experience_fields')
+            ->where('active', true)
+            ->pluck('id')
+            ->toArray();
+
+        $classGroups = DB::table('class_groups')
             ->whereIn('grade_level_id', $infantilIds)
-            ->with('academicYear')
+            ->whereIn('id', function ($q) {
+                $q->select('class_group_id')
+                    ->from('class_assignments')
+                    ->where('status', 'active')
+                    ->distinct();
+            })
             ->get();
+
+        $firstPeriods = DB::table('assessment_periods')
+            ->where('number', 1)
+            ->pluck('id', 'academic_year_id');
+
+        $teacherAssignments = DB::table('teacher_assignments')
+            ->where('teacher_assignments.active', true)
+            ->whereIn('teacher_assignments.class_group_id', $classGroups->pluck('id'))
+            ->join('teachers', 'teachers.id', '=', 'teacher_assignments.teacher_id')
+            ->select('teacher_assignments.class_group_id', 'teachers.user_id')
+            ->get()
+            ->unique('class_group_id')
+            ->keyBy('class_group_id');
+
+        $studentsByClass = DB::table('class_assignments')
+            ->where('class_assignments.status', 'active')
+            ->whereIn('class_assignments.class_group_id', $classGroups->pluck('id'))
+            ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
+            ->select('class_assignments.class_group_id', 'enrollments.student_id')
+            ->get()
+            ->groupBy('class_group_id');
 
         $templateCount = count(self::REPORT_TEMPLATES);
         $templateIndex = 0;
         $now = now()->toDateTimeString();
         $batch = [];
+        $total = $classGroups->count();
 
-        foreach ($classGroups as $classGroup) {
-            $studentIds = DB::table('class_assignments')
-                ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
-                ->where('class_assignments.class_group_id', $classGroup->id)
-                ->where('class_assignments.status', 'active')
-                ->pluck('enrollments.student_id')
-                ->toArray();
+        foreach ($classGroups as $index => $cg) {
+            $periodId = $firstPeriods->get($cg->academic_year_id);
+            $ta = $teacherAssignments->get($cg->id);
+            $students = $studentsByClass->get($cg->id);
 
-            $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academic_year_id)
-                ->whereIn('number', [1, 2, 3, 4])
-                ->get();
-
-            $firstTeacherAssignment = TeacherAssignment::where('class_group_id', $classGroup->id)
-                ->where('active', true)
-                ->with('teacher')
-                ->first();
-
-            if (! $firstTeacherAssignment) {
+            if (! $periodId || ! $ta || ! $students) {
                 continue;
             }
 
-            $recordedBy = $firstTeacherAssignment->teacher->user_id;
+            $recordedBy = $ta->user_id;
 
-            foreach ($studentIds as $studentId) {
-                foreach ($experienceFields as $experienceField) {
-                    foreach ($periods as $period) {
-                        $batch[] = [
-                            'student_id' => $studentId,
-                            'class_group_id' => $classGroup->id,
-                            'experience_field_id' => $experienceField->id,
-                            'assessment_period_id' => $period->id,
-                            'content' => self::REPORT_TEMPLATES[$templateIndex % $templateCount],
-                            'recorded_by' => $recordedBy,
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
-                        $templateIndex++;
+            foreach ($students as $student) {
+                foreach ($experienceFieldIds as $fieldId) {
+                    $batch[] = [
+                        'student_id' => $student->student_id,
+                        'class_group_id' => $cg->id,
+                        'experience_field_id' => $fieldId,
+                        'assessment_period_id' => $periodId,
+                        'content' => self::REPORT_TEMPLATES[$templateIndex % $templateCount],
+                        'recorded_by' => $recordedBy,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                    $templateIndex++;
 
-                        if (count($batch) >= self::BATCH_SIZE) {
-                            DB::table('descriptive_reports')->insert($batch);
-                            $batch = [];
-                        }
+                    if (count($batch) >= self::BATCH_SIZE) {
+                        DB::table('descriptive_reports')->insert($batch);
+                        $batch = [];
                     }
                 }
+            }
+
+            if (($index + 1) % 100 === 0) {
+                $this->command->info("  DescriptiveReports: " . ($index + 1) . "/$total turmas...");
             }
         }
 
         if (! empty($batch)) {
             DB::table('descriptive_reports')->insert($batch);
         }
+
+        $this->command->info("  DescriptiveReports: $total/$total turmas finalizadas.");
     }
 }

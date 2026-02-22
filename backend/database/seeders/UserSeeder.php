@@ -2,72 +2,55 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Modules\Identity\Domain\Entities\Role;
-use App\Modules\SchoolStructure\Domain\Entities\School;
-use Faker\Factory as FakerFactory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = FakerFactory::create('pt_BR');
+        $faker = \Faker\Factory::create('pt_BR');
+        $roles = DB::table('roles')->pluck('id', 'slug');
+        $schools = DB::table('schools')->orderBy('id')->pluck('id');
+        $passwordHash = Hash::make('password');
+        $adminHash = Hash::make('admin123');
+        $now = now()->toDateTimeString();
 
-        $roles = Role::all()->keyBy(fn (Role $r) => $r->slug->value);
-
-        User::updateOrCreate(
-            ['email' => 'admin@jandira.sp.gov.br'],
-            [
-                'name' => 'Administrador do Sistema',
-                'password' => 'admin123',
-                'status' => 'active',
-                'role_id' => $roles['admin']->id,
-                'cpf' => $this->generateCpf($faker),
-            ],
-        );
+        DB::table('users')->insert([
+            'name' => 'Administrador do Sistema',
+            'email' => 'admin@jandira.sp.gov.br',
+            'password' => $adminHash,
+            'status' => 'active',
+            'role_id' => $roles['admin'],
+            'cpf' => $faker->unique()->cpf(false),
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         $schoolRoleSlugs = ['director', 'secretary', 'coordinator', 'teacher', 'guardian'];
-        $schools = School::orderBy('id')->get();
+        $batch = [];
 
-        foreach ($schools as $school) {
+        foreach ($schools as $schoolId) {
             foreach ($schoolRoleSlugs as $slug) {
-                $this->createSchoolUser($faker, $school, $roles[$slug]);
+                $name = $faker->name();
+                $batch[] = [
+                    'name' => $name,
+                    'email' => Str::slug($name, '.') . '.' . count($batch) . '@jandira.sp.gov.br',
+                    'password' => $passwordHash,
+                    'status' => 'active',
+                    'role_id' => $roles[$slug],
+                    'school_id' => $schoolId,
+                    'cpf' => $faker->unique()->cpf(false),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
         }
-    }
 
-    private function createSchoolUser(
-        \Faker\Generator $faker,
-        School $school,
-        Role $role,
-    ): User {
-        $name = $faker->name();
-        $email = $this->generateEmail($name);
-
-        return User::updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => $name,
-                'password' => 'password',
-                'status' => 'active',
-                'role_id' => $role->id,
-                'school_id' => $school->id,
-                'cpf' => $this->generateCpf($faker),
-            ],
-        );
-    }
-
-    private function generateEmail(string $name): string
-    {
-        $slug = Str::slug($name, '.');
-
-        return "{$slug}@jandira.sp.gov.br";
-    }
-
-    private function generateCpf(\Faker\Generator $faker): string
-    {
-        return $faker->unique()->cpf(false);
+        foreach (array_chunk($batch, 500) as $chunk) {
+            DB::table('users')->insert($chunk);
+        }
     }
 }

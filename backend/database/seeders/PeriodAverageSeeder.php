@@ -2,90 +2,137 @@
 
 namespace Database\Seeders;
 
-use App\Modules\AcademicCalendar\Domain\Entities\AssessmentPeriod;
-use App\Modules\Assessment\Domain\Entities\AssessmentConfig;
-use App\Modules\Assessment\Domain\Entities\AssessmentInstrument;
-use App\Modules\Assessment\Domain\Entities\Grade;
-use App\Modules\Attendance\Domain\Entities\AttendanceRecord;
-use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
-use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
-use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class PeriodAverageSeeder extends Seeder
 {
-    private const BATCH_SIZE = 500;
+    private const BATCH_SIZE = 5000;
 
     public function run(): void
     {
-        $infantilIds = GradeLevel::where('type', 'early_childhood')->pluck('id')->toArray();
+        DB::disableQueryLog();
 
-        $classGroupIds = ClassAssignment::where('status', 'active')
-            ->distinct()
-            ->pluck('class_group_id')
+        $infantilIds = DB::table('grade_levels')
+            ->where('type', 'early_childhood')
+            ->pluck('id')
             ->toArray();
 
-        $classGroups = ClassGroup::with('academicYear')
-            ->whereIn('id', $classGroupIds)
+        $classGroups = DB::table('class_groups')
             ->whereNotIn('grade_level_id', $infantilIds)
+            ->whereIn('id', function ($q) {
+                $q->select('class_group_id')
+                    ->from('class_assignments')
+                    ->where('status', 'active')
+                    ->distinct();
+            })
             ->get();
 
-        foreach ($classGroups as $classGroup) {
-            $this->processClassGroup($classGroup, $infantilIds);
-        }
-    }
-
-    private function processClassGroup(ClassGroup $classGroup, array $infantilIds): void
-    {
-        $academicYear = $classGroup->academicYear;
-
-        $config = AssessmentConfig::where('school_id', $academicYear->school_id)
-            ->where('academic_year_id', $academicYear->id)
-            ->where('grade_level_id', $classGroup->grade_level_id)
-            ->first();
-
-        if (! $config) {
-            return;
-        }
-
-        $instruments = AssessmentInstrument::where('assessment_config_id', $config->id)->get();
-
-        if ($instruments->isEmpty()) {
-            return;
-        }
-
-        $periods = AssessmentPeriod::where('academic_year_id', $academicYear->id)
-            ->whereIn('number', [1, 2, 3, 4])
+        $firstPeriods = DB::table('assessment_periods')
+            ->where('number', 1)
             ->get()
-            ->keyBy('number');
+            ->keyBy('academic_year_id');
 
-        $studentIds = DB::table('class_assignments')
-            ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
-            ->where('class_assignments.class_group_id', $classGroup->id)
+        $instrumentWeights = DB::table('assessment_instruments')
+            ->pluck('weight', 'id');
+
+        $teacherAssignments = DB::table('teacher_assignments')
+            ->where('teacher_assignments.active', true)
+            ->whereIn('teacher_assignments.class_group_id', $classGroups->pluck('id'))
+            ->select('id', 'class_group_id')
+            ->get()
+            ->groupBy('class_group_id');
+
+        $studentsByClass = DB::table('class_assignments')
             ->where('class_assignments.status', 'active')
-            ->pluck('enrollments.student_id')
-            ->toArray();
+            ->whereIn('class_assignments.class_group_id', $classGroups->pluck('id'))
+            ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
+            ->select('class_assignments.class_group_id', 'enrollments.student_id')
+            ->get()
+            ->groupBy('class_group_id');
 
-        $teacherAssignments = TeacherAssignment::where('class_group_id', $classGroup->id)
-            ->where('active', true)
-            ->get();
-
+        $now = now()->toDateTimeString();
         $batch = [];
+        $total = $classGroups->count();
 
-        foreach ($teacherAssignments as $teacherAssignment) {
-            foreach ($periods as $period) {
+        foreach ($classGroups as $index => $cg) {
+            $period = $firstPeriods->get($cg->academic_year_id);
+
+            if (! $period) {
+                continue;
+            }
+
+            $tas = $teacherAssignments->get($cg->id);
+            $students = $studentsByClass->get($cg->id);
+
+            if (! $tas || ! $students) {
+                continue;
+            }
+
+            $studentIds = $students->pluck('student_id')->toArray();
+            $taIds = $tas->pluck('id')->toArray();
+
+            $allGrades = DB::table('grades')
+                ->where('class_group_id', $cg->id)
+                ->where('assessment_period_id', $period->id)
+                ->whereIn('student_id', $studentIds)
+                ->whereIn('teacher_assignment_id', $taIds)
+                ->get()
+                ->groupBy(fn ($g) => "$g->teacher_assignment_id|$g->student_id");
+
+            $attendanceCounts = DB::table('attendance_records')
+                ->select(
+                    'teacher_assignment_id',
+                    'student_id',
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw("SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count"),
+                )
+                ->where('class_group_id', $cg->id)
+                ->whereIn('teacher_assignment_id', $taIds)
+                ->whereIn('student_id', $studentIds)
+                ->whereBetween('date', [$period->start_date, $period->end_date])
+                ->groupBy('teacher_assignment_id', 'student_id')
+                ->get()
+                ->keyBy(fn ($r) => "$r->teacher_assignment_id|$r->student_id");
+
+            foreach ($tas as $ta) {
                 foreach ($studentIds as $studentId) {
-                    $row = $this->buildAverageRow(
-                        $studentId,
-                        $classGroup->id,
-                        $teacherAssignment->id,
-                        $period,
-                        $instruments
-                    );
+                    $key = "$ta->id|$studentId";
+                    $grades = $allGrades->get($key, collect());
 
-                    $batch[] = $row;
+                    $weightedSum = 0.0;
+                    $totalWeight = 0.0;
+
+                    foreach ($grades as $grade) {
+                        if ($grade->numeric_value === null) {
+                            continue;
+                        }
+                        $w = (float) ($instrumentWeights[$grade->assessment_instrument_id] ?? 1);
+                        $weightedSum += (float) $grade->numeric_value * $w;
+                        $totalWeight += $w;
+                    }
+
+                    $numericAverage = $totalWeight > 0 ? round($weightedSum / $totalWeight, 2) : 0.00;
+
+                    $att = $attendanceCounts->get($key);
+                    $totalAtt = $att ? (int) $att->total : 0;
+                    $absentAtt = $att ? (int) $att->absent_count : 0;
+
+                    $frequencyPercentage = $totalAtt > 0
+                        ? round(($totalAtt - $absentAtt) / $totalAtt * 100, 2)
+                        : 100.00;
+
+                    $batch[] = [
+                        'student_id' => $studentId,
+                        'class_group_id' => $cg->id,
+                        'teacher_assignment_id' => $ta->id,
+                        'assessment_period_id' => $period->id,
+                        'numeric_average' => $numericAverage,
+                        'conceptual_average' => null,
+                        'total_absences' => $absentAtt,
+                        'frequency_percentage' => $frequencyPercentage,
+                        'calculated_at' => $now,
+                    ];
 
                     if (count($batch) >= self::BATCH_SIZE) {
                         DB::table('period_averages')->insert($batch);
@@ -93,70 +140,16 @@ class PeriodAverageSeeder extends Seeder
                     }
                 }
             }
+
+            if (($index + 1) % 100 === 0) {
+                $this->command->info("  PeriodAverages: " . ($index + 1) . "/$total turmas...");
+            }
         }
 
         if (! empty($batch)) {
             DB::table('period_averages')->insert($batch);
         }
-    }
 
-    private function buildAverageRow(
-        int $studentId,
-        int $classGroupId,
-        int $teacherAssignmentId,
-        AssessmentPeriod $period,
-        $instruments
-    ): array {
-        $grades = Grade::where('student_id', $studentId)
-            ->where('class_group_id', $classGroupId)
-            ->where('teacher_assignment_id', $teacherAssignmentId)
-            ->where('assessment_period_id', $period->id)
-            ->get()
-            ->keyBy('assessment_instrument_id');
-
-        $weightedSum = 0.0;
-        $totalWeight = 0.0;
-
-        foreach ($instruments as $instrument) {
-            $grade = $grades->get($instrument->id);
-
-            if (! $grade || $grade->numeric_value === null) {
-                continue;
-            }
-
-            $weightedSum += (float) $grade->numeric_value * (float) $instrument->weight;
-            $totalWeight += (float) $instrument->weight;
-        }
-
-        $numericAverage = $totalWeight > 0 ? round($weightedSum / $totalWeight, 2) : 0.00;
-
-        $totalAttendance = AttendanceRecord::where('student_id', $studentId)
-            ->where('class_group_id', $classGroupId)
-            ->where('teacher_assignment_id', $teacherAssignmentId)
-            ->whereBetween('date', [$period->start_date, $period->end_date])
-            ->count();
-
-        $absentCount = AttendanceRecord::where('student_id', $studentId)
-            ->where('class_group_id', $classGroupId)
-            ->where('teacher_assignment_id', $teacherAssignmentId)
-            ->whereBetween('date', [$period->start_date, $period->end_date])
-            ->where('status', 'absent')
-            ->count();
-
-        $frequencyPercentage = $totalAttendance > 0
-            ? round(($totalAttendance - $absentCount) / $totalAttendance * 100, 2)
-            : 100.00;
-
-        return [
-            'student_id' => $studentId,
-            'class_group_id' => $classGroupId,
-            'teacher_assignment_id' => $teacherAssignmentId,
-            'assessment_period_id' => $period->id,
-            'numeric_average' => $numericAverage,
-            'conceptual_average' => null,
-            'total_absences' => $absentCount,
-            'frequency_percentage' => $frequencyPercentage,
-            'calculated_at' => now(),
-        ];
+        $this->command->info("  PeriodAverages: $total/$total turmas finalizadas.");
     }
 }

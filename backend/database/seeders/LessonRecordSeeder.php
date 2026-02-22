@@ -2,23 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Modules\ClassRecord\Domain\Entities\LessonRecord;
-use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
+use Database\Seeders\Traits\GeneratesSchoolDays;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class LessonRecordSeeder extends Seeder
 {
-    private const LESSON_DATES = [
-        '2025-02-17', '2025-02-24', '2025-03-03', '2025-03-10',
-        '2025-03-17', '2025-03-24', '2025-03-31', '2025-04-07',
-        '2025-04-28', '2025-05-05', '2025-05-12', '2025-05-19',
-        '2025-05-26', '2025-06-02', '2025-06-09', '2025-06-16',
-        '2025-08-04', '2025-08-11', '2025-08-18', '2025-08-25',
-        '2025-09-01', '2025-09-08', '2025-09-15', '2025-09-22',
-        '2025-10-06', '2025-10-13', '2025-10-20', '2025-10-27',
-        '2025-11-03', '2025-11-10', '2025-11-17', '2025-11-24',
-    ];
+    use GeneratesSchoolDays;
+
+    private const BATCH_SIZE = 5000;
+
+    private const BIMESTRE_1_START = '2025-02-10';
+
+    private const BIMESTRE_1_END = '2025-04-17';
 
     private const CONTENTS = [
         'Introdução ao conteúdo programático do bimestre',
@@ -29,6 +25,10 @@ class LessonRecordSeeder extends Seeder
         'Revisão geral e preparação para avaliação',
         'Leitura compartilhada e interpretação de textos',
         'Atividades de pesquisa e produção textual',
+        'Resolução de situações-problema contextualizadas',
+        'Projeto interdisciplinar com produção coletiva',
+        'Atividades de campo e observação do meio',
+        'Seminário com apresentação dos alunos',
     ];
 
     private const METHODOLOGIES = [
@@ -40,40 +40,83 @@ class LessonRecordSeeder extends Seeder
         'Jogos educativos e atividades lúdicas',
         'Pesquisa orientada com uso de tecnologia',
         'Atividade interdisciplinar com produção coletiva',
+        'Leitura compartilhada com mediação do professor',
+        'Trabalho cooperativo em pequenos grupos',
+        'Experimentação e registro de observações',
+        'Produção textual orientada com revisão entre pares',
     ];
 
     public function run(): void
     {
-        $classGroupIds = ClassAssignment::where('status', 'active')
+        DB::disableQueryLog();
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::statement('SET UNIQUE_CHECKS=0');
+
+        $schoolDays = $this->generateSchoolDays(2025, self::BIMESTRE_1_START, self::BIMESTRE_1_END);
+        $contentCount = count(self::CONTENTS);
+        $methodCount = count(self::METHODOLOGIES);
+        $now = now()->toDateTimeString();
+
+        $classGroups = DB::table('class_assignments')
+            ->where('status', 'active')
             ->distinct()
-            ->pluck('class_group_id');
+            ->pluck('class_group_id')
+            ->toArray();
 
-        foreach ($classGroupIds as $classGroupId) {
-            $teacherAssignments = TeacherAssignment::where('class_group_id', $classGroupId)
-                ->where('active', true)
-                ->with('teacher')
-                ->get();
+        $teacherAssignments = DB::table('teacher_assignments')
+            ->where('teacher_assignments.active', true)
+            ->whereIn('teacher_assignments.class_group_id', $classGroups)
+            ->join('teachers', 'teachers.id', '=', 'teacher_assignments.teacher_id')
+            ->select('teacher_assignments.id', 'teacher_assignments.class_group_id', 'teachers.user_id')
+            ->get()
+            ->groupBy('class_group_id');
 
-            foreach ($teacherAssignments as $teacherAssignment) {
-                $recordedBy = $teacherAssignment->teacher?->user_id;
+        $total = count($classGroups);
+        $batch = [];
+        $globalIndex = 0;
 
-                foreach (self::LESSON_DATES as $index => $date) {
-                    LessonRecord::updateOrCreate(
-                        [
-                            'class_group_id' => $classGroupId,
-                            'teacher_assignment_id' => $teacherAssignment->id,
-                            'date' => $date,
-                        ],
-                        [
-                            'content' => self::CONTENTS[$index % count(self::CONTENTS)],
-                            'methodology' => self::METHODOLOGIES[$index % count(self::METHODOLOGIES)],
-                            'observations' => null,
-                            'class_count' => 2,
-                            'recorded_by' => $recordedBy,
-                        ],
-                    );
+        foreach ($classGroups as $index => $classGroupId) {
+            $tas = $teacherAssignments->get($classGroupId);
+
+            if (! $tas) {
+                continue;
+            }
+
+            foreach ($tas as $ta) {
+                foreach ($schoolDays as $date) {
+                    $batch[] = [
+                        'class_group_id' => $classGroupId,
+                        'teacher_assignment_id' => $ta->id,
+                        'date' => $date,
+                        'content' => self::CONTENTS[$globalIndex % $contentCount],
+                        'methodology' => self::METHODOLOGIES[$globalIndex % $methodCount],
+                        'observations' => null,
+                        'class_count' => rand(1, 2) === 1 ? 2 : 1,
+                        'recorded_by' => $ta->user_id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                    $globalIndex++;
+
+                    if (count($batch) >= self::BATCH_SIZE) {
+                        DB::table('lesson_records')->insert($batch);
+                        $batch = [];
+                    }
                 }
             }
+
+            if (($index + 1) % 200 === 0) {
+                $this->command->info("  LessonRecords: " . ($index + 1) . "/$total turmas...");
+            }
         }
+
+        if (! empty($batch)) {
+            DB::table('lesson_records')->insert($batch);
+        }
+
+        DB::statement('SET UNIQUE_CHECKS=1');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+        $this->command->info("  LessonRecords: $total/$total turmas finalizadas.");
     }
 }

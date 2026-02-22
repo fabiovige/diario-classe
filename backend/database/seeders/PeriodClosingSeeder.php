@@ -2,98 +2,114 @@
 
 namespace Database\Seeders;
 
-use App\Modules\AcademicCalendar\Domain\Entities\AssessmentPeriod;
-use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
-use App\Modules\PeriodClosing\Domain\Entities\PeriodClosing;
-use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class PeriodClosingSeeder extends Seeder
 {
+    private const BATCH_SIZE = 200;
+
     public function run(): void
     {
-        $admin = \App\Models\User::where('email', 'admin@jandira.sp.gov.br')->first();
+        DB::disableQueryLog();
 
-        $classGroupIds = ClassAssignment::where('status', 'active')
+        $adminId = DB::table('users')
+            ->where('email', 'admin@jandira.sp.gov.br')
+            ->value('id');
+
+        $classGroupIds = DB::table('class_assignments')
+            ->where('status', 'active')
             ->distinct()
             ->pluck('class_group_id')
             ->toArray();
 
-        foreach ($classGroupIds as $classGroupId) {
-            $this->processClassGroup($classGroupId, $admin);
-        }
-    }
+        $classGroups = DB::table('class_groups')
+            ->whereIn('id', $classGroupIds)
+            ->pluck('academic_year_id', 'id');
 
-    private function processClassGroup(int $classGroupId, ?\App\Models\User $admin): void
-    {
-        $classGroup = ClassGroup::with('academicYear')->find($classGroupId);
-
-        if (! $classGroup) {
-            return;
-        }
-
-        $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academicYear->id)
+        $periods = DB::table('assessment_periods')
             ->whereIn('number', [1, 2, 3, 4])
             ->get()
-            ->keyBy('number');
+            ->groupBy('academic_year_id');
 
-        $teacherAssignments = TeacherAssignment::where('class_group_id', $classGroupId)
-            ->where('active', true)
-            ->get();
+        $teacherAssignments = DB::table('teacher_assignments')
+            ->where('teacher_assignments.active', true)
+            ->whereIn('teacher_assignments.class_group_id', $classGroupIds)
+            ->select('teacher_assignments.id', 'teacher_assignments.class_group_id')
+            ->get()
+            ->groupBy('class_group_id');
 
-        foreach ($teacherAssignments as $teacherAssignment) {
-            foreach ($periods as $periodNumber => $period) {
-                $data = $this->resolveClosingData($periodNumber, $admin);
+        $now = now()->toDateTimeString();
+        $batch = [];
+        $total = count($classGroupIds);
 
-                PeriodClosing::updateOrCreate(
-                    [
+        foreach ($classGroupIds as $index => $classGroupId) {
+            $academicYearId = $classGroups->get($classGroupId);
+            $ayPeriods = $periods->get($academicYearId);
+            $tas = $teacherAssignments->get($classGroupId);
+
+            if (! $ayPeriods || ! $tas) {
+                continue;
+            }
+
+            foreach ($tas as $ta) {
+                foreach ($ayPeriods as $period) {
+                    $row = [
                         'class_group_id' => $classGroupId,
-                        'teacher_assignment_id' => $teacherAssignment->id,
+                        'teacher_assignment_id' => $ta->id,
                         'assessment_period_id' => $period->id,
-                    ],
-                    $data,
-                );
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+
+                    if ($period->number === 1) {
+                        $row += [
+                            'status' => 'approved',
+                            'all_grades_complete' => true,
+                            'all_attendance_complete' => true,
+                            'all_lesson_records_complete' => true,
+                            'submitted_by' => $adminId,
+                            'submitted_at' => '2025-04-18',
+                            'validated_by' => $adminId,
+                            'validated_at' => '2025-04-19',
+                            'approved_by' => $adminId,
+                            'approved_at' => '2025-04-20',
+                        ];
+                    }
+
+                    if ($period->number > 1) {
+                        $row += [
+                            'status' => 'pending',
+                            'all_grades_complete' => false,
+                            'all_attendance_complete' => false,
+                            'all_lesson_records_complete' => false,
+                            'submitted_by' => null,
+                            'submitted_at' => null,
+                            'validated_by' => null,
+                            'validated_at' => null,
+                            'approved_by' => null,
+                            'approved_at' => null,
+                        ];
+                    }
+
+                    $batch[] = $row;
+
+                    if (count($batch) >= self::BATCH_SIZE) {
+                        DB::table('period_closings')->insert($batch);
+                        $batch = [];
+                    }
+                }
+            }
+
+            if (($index + 1) % 300 === 0) {
+                $this->command->info("  PeriodClosings: " . ($index + 1) . "/$total turmas...");
             }
         }
-    }
 
-    private const APPROVED_DATES = [
-        1 => ['submitted' => '2025-04-18', 'validated' => '2025-04-19', 'approved' => '2025-04-20'],
-        2 => ['submitted' => '2025-07-01', 'validated' => '2025-07-02', 'approved' => '2025-07-03'],
-        3 => ['submitted' => '2025-10-01', 'validated' => '2025-10-02', 'approved' => '2025-10-03'],
-    ];
-
-    private function resolveClosingData(int $periodNumber, ?\App\Models\User $admin): array
-    {
-        if ($periodNumber <= 3) {
-            $dates = self::APPROVED_DATES[$periodNumber];
-
-            return [
-                'status' => 'approved',
-                'all_grades_complete' => true,
-                'all_attendance_complete' => true,
-                'all_lesson_records_complete' => true,
-                'submitted_by' => $admin?->id,
-                'submitted_at' => $dates['submitted'],
-                'validated_by' => $admin?->id,
-                'validated_at' => $dates['validated'],
-                'approved_by' => $admin?->id,
-                'approved_at' => $dates['approved'],
-            ];
+        if (! empty($batch)) {
+            DB::table('period_closings')->insert($batch);
         }
 
-        return [
-            'status' => 'pending',
-            'all_grades_complete' => false,
-            'all_attendance_complete' => false,
-            'all_lesson_records_complete' => false,
-            'submitted_by' => null,
-            'submitted_at' => null,
-            'validated_by' => null,
-            'validated_at' => null,
-            'approved_by' => null,
-            'approved_at' => null,
-        ];
+        $this->command->info("  PeriodClosings: $total/$total turmas finalizadas.");
     }
 }

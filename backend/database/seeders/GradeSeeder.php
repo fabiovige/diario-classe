@@ -2,106 +2,134 @@
 
 namespace Database\Seeders;
 
-use App\Modules\AcademicCalendar\Domain\Entities\AssessmentPeriod;
-use App\Modules\Assessment\Domain\Entities\AssessmentConfig;
-use App\Modules\Assessment\Domain\Entities\AssessmentInstrument;
-use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
-use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
-use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class GradeSeeder extends Seeder
 {
-    private const BATCH_SIZE = 500;
+    private const BATCH_SIZE = 5000;
 
     public function run(): void
     {
-        $infantilIds = GradeLevel::where('type', 'early_childhood')->pluck('id')->toArray();
+        DB::disableQueryLog();
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::statement('SET UNIQUE_CHECKS=0');
 
-        $classGroupIds = ClassAssignment::where('status', 'active')
-            ->distinct()
-            ->pluck('class_group_id')
+        $infantilIds = DB::table('grade_levels')
+            ->where('type', 'early_childhood')
+            ->pluck('id')
             ->toArray();
 
-        $classGroups = ClassGroup::whereIn('id', $classGroupIds)
-            ->with('academicYear')
+        $classGroups = DB::table('class_groups')
+            ->whereNotIn('grade_level_id', $infantilIds)
+            ->whereIn('id', function ($q) {
+                $q->select('class_group_id')
+                    ->from('class_assignments')
+                    ->where('status', 'active')
+                    ->distinct();
+            })
             ->get();
+
+        $firstPeriods = DB::table('assessment_periods')
+            ->where('number', 1)
+            ->pluck('id', 'academic_year_id');
+
+        $instruments = DB::table('assessment_instruments')
+            ->join('assessment_configs', 'assessment_configs.id', '=', 'assessment_instruments.assessment_config_id')
+            ->select(
+                'assessment_instruments.id',
+                'assessment_configs.school_id',
+                'assessment_configs.academic_year_id',
+                'assessment_configs.grade_level_id',
+            )
+            ->orderBy('assessment_instruments.order')
+            ->get()
+            ->groupBy(fn ($i) => "$i->school_id|$i->academic_year_id|$i->grade_level_id");
+
+        $teacherAssignments = DB::table('teacher_assignments')
+            ->where('teacher_assignments.active', true)
+            ->join('teachers', 'teachers.id', '=', 'teacher_assignments.teacher_id')
+            ->select('teacher_assignments.id', 'teacher_assignments.class_group_id', 'teachers.user_id')
+            ->get()
+            ->groupBy('class_group_id');
+
+        $studentsByClass = DB::table('class_assignments')
+            ->where('class_assignments.status', 'active')
+            ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
+            ->select('class_assignments.class_group_id', 'enrollments.student_id')
+            ->get()
+            ->groupBy('class_group_id');
+
+        $academicYears = DB::table('academic_years')
+            ->pluck('school_id', 'id');
 
         $now = now()->toDateTimeString();
         $batch = [];
+        $total = $classGroups->count();
 
-        foreach ($classGroups as $classGroup) {
-            if (in_array($classGroup->grade_level_id, $infantilIds, true)) {
+        foreach ($classGroups as $index => $cg) {
+            $periodId = $firstPeriods->get($cg->academic_year_id);
+            $schoolId = $academicYears->get($cg->academic_year_id);
+
+            if (! $periodId || ! $schoolId) {
                 continue;
             }
 
-            $config = AssessmentConfig::where('school_id', $classGroup->academicYear->school_id)
-                ->where('academic_year_id', $classGroup->academic_year_id)
-                ->where('grade_level_id', $classGroup->grade_level_id)
-                ->first();
+            $key = "$schoolId|$cg->academic_year_id|$cg->grade_level_id";
+            $cgInstruments = $instruments->get($key);
 
-            if (! $config) {
+            if (! $cgInstruments) {
                 continue;
             }
 
-            $instruments = AssessmentInstrument::where('assessment_config_id', $config->id)
-                ->orderBy('order')
-                ->get();
+            $tas = $teacherAssignments->get($cg->id);
+            $students = $studentsByClass->get($cg->id);
 
-            $periods = AssessmentPeriod::where('academic_year_id', $classGroup->academic_year_id)
-                ->whereIn('number', [1, 2, 3, 4])
-                ->get();
+            if (! $tas || ! $students) {
+                continue;
+            }
 
-            $studentIds = DB::table('class_assignments')
-                ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
-                ->where('class_assignments.class_group_id', $classGroup->id)
-                ->where('class_assignments.status', 'active')
-                ->pluck('enrollments.student_id')
-                ->toArray();
+            $studentIds = $students->pluck('student_id')->toArray();
 
-            $teacherAssignments = TeacherAssignment::where('class_group_id', $classGroup->id)
-                ->where('active', true)
-                ->with('teacher')
-                ->get();
+            foreach ($tas as $ta) {
+                foreach ($studentIds as $studentId) {
+                    foreach ($cgInstruments as $instrument) {
+                        $batch[] = [
+                            'student_id' => $studentId,
+                            'class_group_id' => $cg->id,
+                            'teacher_assignment_id' => $ta->id,
+                            'assessment_period_id' => $periodId,
+                            'assessment_instrument_id' => $instrument->id,
+                            'numeric_value' => max(0, min(10, round(rand(40, 90) / 10 + (rand(-10, 10) / 10), 1))),
+                            'conceptual_value' => null,
+                            'observations' => null,
+                            'is_recovery' => false,
+                            'recovery_type' => null,
+                            'recorded_by' => $ta->user_id,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
 
-            foreach ($teacherAssignments as $teacherAssignment) {
-                $recordedBy = $teacherAssignment->teacher->user_id;
-
-                foreach ($periods as $period) {
-                    foreach ($studentIds as $studentId) {
-                        foreach ($instruments as $instrument) {
-                            $numericValue = max(0, min(10, round(rand(40, 90) / 10 + (rand(-10, 10) / 10), 1)));
-
-                            $batch[] = [
-                                'student_id' => $studentId,
-                                'class_group_id' => $classGroup->id,
-                                'teacher_assignment_id' => $teacherAssignment->id,
-                                'assessment_period_id' => $period->id,
-                                'assessment_instrument_id' => $instrument->id,
-                                'numeric_value' => $numericValue,
-                                'conceptual_value' => null,
-                                'observations' => null,
-                                'is_recovery' => false,
-                                'recovery_type' => null,
-                                'recorded_by' => $recordedBy,
-                                'created_at' => $now,
-                                'updated_at' => $now,
-                            ];
-
-                            if (count($batch) >= self::BATCH_SIZE) {
-                                DB::table('grades')->insert($batch);
-                                $batch = [];
-                            }
+                        if (count($batch) >= self::BATCH_SIZE) {
+                            DB::table('grades')->insert($batch);
+                            $batch = [];
                         }
                     }
                 }
+            }
+
+            if (($index + 1) % 100 === 0) {
+                $this->command->info("  Grades: " . ($index + 1) . "/$total turmas...");
             }
         }
 
         if (! empty($batch)) {
             DB::table('grades')->insert($batch);
         }
+
+        DB::statement('SET UNIQUE_CHECKS=1');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+        $this->command->info("  Grades: $total/$total turmas finalizadas.");
     }
 }

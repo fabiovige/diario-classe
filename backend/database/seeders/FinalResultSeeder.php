@@ -2,97 +2,85 @@
 
 namespace Database\Seeders;
 
-use App\Modules\Assessment\Domain\Entities\PeriodAverage;
-use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
-use App\Modules\PeriodClosing\Domain\Entities\FinalResultRecord;
-use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
-use App\Modules\SchoolStructure\Domain\Entities\GradeLevel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class FinalResultSeeder extends Seeder
 {
-    private const PASSING_AVERAGE = 6.0;
-
-    private const MINIMUM_FREQUENCY = 75.0;
+    private const BATCH_SIZE = 1000;
 
     public function run(): void
     {
-        $admin = \App\Models\User::where('email', 'admin@jandira.sp.gov.br')->first();
+        DB::disableQueryLog();
 
-        $infantilIds = GradeLevel::where('type', 'early_childhood')->pluck('id')->toArray();
+        $adminId = DB::table('users')
+            ->where('email', 'admin@jandira.sp.gov.br')
+            ->value('id');
 
-        $classGroupIds = ClassAssignment::where('status', 'active')
-            ->distinct()
-            ->pluck('class_group_id')
+        $infantilIds = DB::table('grade_levels')
+            ->where('type', 'early_childhood')
+            ->pluck('id')
             ->toArray();
 
-        $classGroups = ClassGroup::with('academicYear')
-            ->whereIn('id', $classGroupIds)
+        $classGroups = DB::table('class_groups')
             ->whereNotIn('grade_level_id', $infantilIds)
+            ->whereIn('id', function ($q) {
+                $q->select('class_group_id')
+                    ->from('class_assignments')
+                    ->where('status', 'active')
+                    ->distinct();
+            })
             ->get();
 
-        foreach ($classGroups as $classGroup) {
-            $this->processClassGroup($classGroup, $admin);
-        }
-    }
-
-    private function processClassGroup(ClassGroup $classGroup, ?\App\Models\User $admin): void
-    {
-        $studentIds = DB::table('class_assignments')
-            ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
-            ->where('class_assignments.class_group_id', $classGroup->id)
+        $studentsByClass = DB::table('class_assignments')
             ->where('class_assignments.status', 'active')
-            ->pluck('enrollments.student_id')
-            ->toArray();
+            ->whereIn('class_assignments.class_group_id', $classGroups->pluck('id'))
+            ->join('enrollments', 'enrollments.id', '=', 'class_assignments.enrollment_id')
+            ->select('class_assignments.class_group_id', 'enrollments.student_id')
+            ->get()
+            ->groupBy('class_group_id');
 
-        foreach ($studentIds as $studentId) {
-            $this->processStudent($studentId, $classGroup, $admin);
-        }
-    }
+        $now = now()->toDateTimeString();
+        $batch = [];
+        $total = $classGroups->count();
 
-    private function processStudent(int $studentId, ClassGroup $classGroup, ?\App\Models\User $admin): void
-    {
-        $periodAverages = PeriodAverage::where('student_id', $studentId)
-            ->where('class_group_id', $classGroup->id)
-            ->get();
+        foreach ($classGroups as $index => $cg) {
+            $students = $studentsByClass->get($cg->id);
 
-        if ($periodAverages->isEmpty()) {
-            return;
-        }
+            if (! $students) {
+                continue;
+            }
 
-        $overallAverage = round($periodAverages->avg('numeric_average'), 2);
-        $overallFrequency = round($periodAverages->avg('frequency_percentage'), 2);
+            foreach ($students as $student) {
+                $batch[] = [
+                    'student_id' => $student->student_id,
+                    'class_group_id' => $cg->id,
+                    'academic_year_id' => $cg->academic_year_id,
+                    'result' => 'in_progress',
+                    'overall_average' => null,
+                    'overall_frequency' => null,
+                    'council_override' => false,
+                    'observations' => null,
+                    'determined_by' => $adminId,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
 
-        $result = $this->determineResult($overallAverage, $overallFrequency);
+                if (count($batch) >= self::BATCH_SIZE) {
+                    DB::table('final_results')->insert($batch);
+                    $batch = [];
+                }
+            }
 
-        FinalResultRecord::updateOrCreate(
-            [
-                'student_id' => $studentId,
-                'class_group_id' => $classGroup->id,
-                'academic_year_id' => $classGroup->academicYear->id,
-            ],
-            [
-                'result' => $result,
-                'overall_average' => $overallAverage,
-                'overall_frequency' => $overallFrequency,
-                'council_override' => false,
-                'observations' => null,
-                'determined_by' => $admin?->id,
-            ],
-        );
-    }
-
-    private function determineResult(float $overallAverage, float $overallFrequency): string
-    {
-        if ($overallFrequency < self::MINIMUM_FREQUENCY) {
-            return 'retained';
+            if (($index + 1) % 200 === 0) {
+                $this->command->info("  FinalResults: " . ($index + 1) . "/$total turmas...");
+            }
         }
 
-        if ($overallAverage >= self::PASSING_AVERAGE) {
-            return 'approved';
+        if (! empty($batch)) {
+            DB::table('final_results')->insert($batch);
         }
 
-        return 'retained';
+        $this->command->info("  FinalResults: $total/$total turmas finalizadas.");
     }
 }

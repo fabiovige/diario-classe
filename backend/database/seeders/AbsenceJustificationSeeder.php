@@ -2,12 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Modules\Attendance\Domain\Entities\AbsenceJustification;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class AbsenceJustificationSeeder extends Seeder
 {
+    private const BATCH_SIZE = 1000;
+
+    private const BIMESTRE_1_START = '2025-02-10';
+
+    private const BIMESTRE_1_END = '2025-04-17';
+
     private const REASONS = [
         'Consulta médica',
         'Doença na família',
@@ -16,39 +21,55 @@ class AbsenceJustificationSeeder extends Seeder
         'Motivos familiares',
     ];
 
-    private const START_DATE = '2025-03-01';
-
-    private const END_DATE = '2025-03-03';
-
-    private const APPROVED_AT = '2025-03-10';
-
     public function run(): void
     {
-        $admin = \App\Models\User::where('email', 'admin@jandira.sp.gov.br')->first();
+        $adminId = DB::table('users')
+            ->where('email', 'admin@jandira.sp.gov.br')
+            ->value('id');
 
-        $absentStudentIds = DB::table('attendance_records')
+        $absentRecords = DB::table('attendance_records')
             ->where('status', 'absent')
-            ->distinct()
-            ->pluck('student_id')
-            ->toArray();
+            ->whereBetween('date', [self::BIMESTRE_1_START, self::BIMESTRE_1_END])
+            ->select('student_id', DB::raw('MIN(date) as first_absence'), DB::raw('COUNT(*) as total'))
+            ->groupBy('student_id')
+            ->having('total', '>=', 3)
+            ->orderByDesc('total')
+            ->limit(100)
+            ->get();
 
-        $limit = min(50, (int) ceil(count($absentStudentIds) * 0.2));
-        $selectedStudentIds = array_slice($absentStudentIds, 0, $limit);
+        $batch = [];
+        $reasons = self::REASONS;
+        $reasonCount = count($reasons);
 
-        foreach ($selectedStudentIds as $studentId) {
-            $approved = (bool) random_int(0, 1);
+        foreach ($absentRecords as $index => $record) {
+            $startDate = $record->first_absence;
+            $endDate = date('Y-m-d', strtotime($startDate . ' +2 days'));
+            $approved = $index % 3 !== 0;
 
-            AbsenceJustification::create([
-                'student_id' => $studentId,
-                'start_date' => self::START_DATE,
-                'end_date' => self::END_DATE,
-                'reason' => self::REASONS[array_rand(self::REASONS)],
+            $batch[] = [
+                'student_id' => $record->student_id,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'reason' => $reasons[$index % $reasonCount],
                 'document_path' => null,
                 'approved' => $approved,
-                'approved_by' => $approved ? $admin?->id : null,
-                'approved_at' => $approved ? self::APPROVED_AT : null,
-                'created_by' => $admin?->id,
-            ]);
+                'approved_by' => $approved ? $adminId : null,
+                'approved_at' => $approved ? date('Y-m-d', strtotime($endDate . ' +7 days')) : null,
+                'created_by' => $adminId,
+                'created_at' => now()->toDateTimeString(),
+                'updated_at' => now()->toDateTimeString(),
+            ];
+
+            if (count($batch) >= self::BATCH_SIZE) {
+                DB::table('absence_justifications')->insert($batch);
+                $batch = [];
+            }
         }
+
+        if (! empty($batch)) {
+            DB::table('absence_justifications')->insert($batch);
+        }
+
+        $this->command->info("  AbsenceJustifications: " . count($absentRecords) . " justificativas criadas.");
     }
 }

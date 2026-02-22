@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Modules\People\Domain\Entities\Student;
 use App\Modules\People\Domain\Enums\DisabilityType;
-use Faker\Factory as FakerFactory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StudentSeeder extends Seeder
 {
@@ -22,9 +21,13 @@ class StudentSeeder extends Seeder
 
     public function run(): void
     {
-        $faker = FakerFactory::create('pt_BR');
+        $faker = \Faker\Factory::create('pt_BR');
         $racePool = $this->buildRacePool();
         $disabilityTypes = DisabilityType::cases();
+        $disabilityCount = count($disabilityTypes);
+        $now = now()->toDateTimeString();
+
+        $batch = [];
 
         for ($i = 0; $i < self::TOTAL_STUDENTS; $i++) {
             $gender = $faker->randomElement(['male', 'female']);
@@ -33,7 +36,7 @@ class StudentSeeder extends Seeder
             $hasDisability = $faker->boolean(5);
             $hasSocialName = $faker->boolean(10);
 
-            Student::create([
+            $batch[] = [
                 'name' => $name,
                 'social_name' => $hasSocialName ? $faker->firstName() . ' ' . $faker->lastName() : null,
                 'birth_date' => $faker->dateTimeBetween('-14 years', '-4 years')->format('Y-m-d'),
@@ -45,9 +48,20 @@ class StudentSeeder extends Seeder
                 'birth_state' => 'SP',
                 'nationality' => 'brasileira',
                 'has_disability' => $hasDisability,
-                'disability_type' => $hasDisability ? $faker->randomElement($disabilityTypes) : null,
+                'disability_type' => $hasDisability ? $disabilityTypes[$i % $disabilityCount]->value : null,
                 'active' => true,
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            if (count($batch) >= 500) {
+                DB::table('students')->insert($batch);
+                $batch = [];
+            }
+        }
+
+        if (! empty($batch)) {
+            DB::table('students')->insert($batch);
         }
     }
 

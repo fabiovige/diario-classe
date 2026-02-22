@@ -2,29 +2,28 @@
 
 namespace Database\Seeders;
 
-use App\Modules\Curriculum\Domain\Entities\CurricularComponent;
-use App\Modules\Curriculum\Domain\Entities\ExperienceField;
-use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
-use App\Modules\People\Domain\Entities\Teacher;
-use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
-use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
-use App\Modules\SchoolStructure\Domain\Enums\GradeLevelType;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class TeacherAssignmentSeeder extends Seeder
 {
     private const ENROLLMENT_START = '2025-02-10';
 
+    private const BATCH_SIZE = 500;
+
     public function run(): void
     {
-        $components = CurricularComponent::where('active', true)->get();
-        $experienceFields = ExperienceField::where('active', true)->get();
+        $components = DB::table('curricular_components')->where('active', true)->get();
+        $experienceFields = DB::table('experience_fields')->where('active', true)->get();
+        $schools = DB::table('schools')->orderBy('id')->pluck('id');
+        $now = now()->toDateTimeString();
 
-        $schools = \App\Modules\SchoolStructure\Domain\Entities\School::orderBy('id')->get();
+        $batch = [];
+        $total = 0;
 
-        foreach ($schools as $school) {
-            $academicYear = AcademicYear::where('school_id', $school->id)
+        foreach ($schools as $schoolId) {
+            $academicYear = DB::table('academic_years')
+                ->where('school_id', $schoolId)
                 ->where('year', 2025)
                 ->first();
 
@@ -32,113 +31,99 @@ class TeacherAssignmentSeeder extends Seeder
                 continue;
             }
 
-            $classGroups = ClassGroup::with('gradeLevel')
-                ->where('academic_year_id', $academicYear->id)
+            $classGroups = DB::table('class_groups')
+                ->join('grade_levels', 'grade_levels.id', '=', 'class_groups.grade_level_id')
+                ->where('class_groups.academic_year_id', $academicYear->id)
+                ->select('class_groups.id', 'class_groups.grade_level_id', 'grade_levels.type')
                 ->get();
 
             if ($classGroups->isEmpty()) {
                 continue;
             }
 
-            $teachers = Teacher::where('school_id', $school->id)
+            $teachers = DB::table('teachers')
+                ->where('school_id', $schoolId)
                 ->where('active', true)
-                ->get();
+                ->pluck('id')
+                ->toArray();
 
-            if ($teachers->isEmpty()) {
+            if (empty($teachers)) {
                 continue;
             }
 
-            $this->assignSchool($classGroups, $teachers, $components, $experienceFields);
-        }
-    }
+            $teacherCount = count($teachers);
+            $polivalentIndex = 0;
 
-    private function assignSchool(
-        Collection $classGroups,
-        Collection $teachers,
-        Collection $components,
-        Collection $experienceFields,
-    ): void {
-        $polivalentIndex = 0;
-
-        $specialistMap = [];
-        foreach ($components as $i => $component) {
-            $specialistMap[$component->id] = $teachers[$i % $teachers->count()];
-        }
-
-        foreach ($classGroups as $classGroup) {
-            $type = $classGroup->gradeLevel->type;
-
-            if ($type === GradeLevelType::EarlyChildhood) {
-                $teacher = $teachers[$polivalentIndex % $teachers->count()];
-                $polivalentIndex++;
-                $this->assignPolivalentInfantil($classGroup, $teacher, $experienceFields);
-                continue;
+            $specialistMap = [];
+            foreach ($components as $i => $component) {
+                $specialistMap[$component->id] = $teachers[$i % $teacherCount];
             }
 
-            if ($type === GradeLevelType::ElementaryEarly) {
-                $teacher = $teachers[$polivalentIndex % $teachers->count()];
-                $polivalentIndex++;
-                $this->assignPolivalentFundamental($classGroup, $teacher, $components);
-                continue;
+            foreach ($classGroups as $cg) {
+                if ($cg->type === 'early_childhood') {
+                    $teacherId = $teachers[$polivalentIndex % $teacherCount];
+                    $polivalentIndex++;
+
+                    foreach ($experienceFields as $field) {
+                        $batch[] = [
+                            'class_group_id' => $cg->id,
+                            'teacher_id' => $teacherId,
+                            'curricular_component_id' => null,
+                            'experience_field_id' => $field->id,
+                            'start_date' => self::ENROLLMENT_START,
+                            'active' => true,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+                }
+
+                if ($cg->type === 'elementary_early') {
+                    $teacherId = $teachers[$polivalentIndex % $teacherCount];
+                    $polivalentIndex++;
+
+                    foreach ($components as $component) {
+                        $batch[] = [
+                            'class_group_id' => $cg->id,
+                            'teacher_id' => $teacherId,
+                            'curricular_component_id' => $component->id,
+                            'experience_field_id' => null,
+                            'start_date' => self::ENROLLMENT_START,
+                            'active' => true,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+                }
+
+                if ($cg->type === 'elementary_late') {
+                    foreach ($components as $component) {
+                        $batch[] = [
+                            'class_group_id' => $cg->id,
+                            'teacher_id' => $specialistMap[$component->id],
+                            'curricular_component_id' => $component->id,
+                            'experience_field_id' => null,
+                            'start_date' => self::ENROLLMENT_START,
+                            'active' => true,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+                }
+
+                if (count($batch) >= self::BATCH_SIZE) {
+                    DB::table('teacher_assignments')->insert($batch);
+                    $total += count($batch);
+                    $batch = [];
+                }
             }
-
-            $this->assignSpecialist($classGroup, $components, $specialistMap);
         }
-    }
 
-    private function assignPolivalentInfantil(ClassGroup $classGroup, Teacher $teacher, Collection $experienceFields): void
-    {
-        foreach ($experienceFields as $field) {
-            TeacherAssignment::updateOrCreate(
-                [
-                    'class_group_id' => $classGroup->id,
-                    'experience_field_id' => $field->id,
-                ],
-                [
-                    'teacher_id' => $teacher->id,
-                    'curricular_component_id' => null,
-                    'start_date' => self::ENROLLMENT_START,
-                    'active' => true,
-                ],
-            );
+        if (! empty($batch)) {
+            DB::table('teacher_assignments')->insert($batch);
+            $total += count($batch);
         }
-    }
 
-    private function assignPolivalentFundamental(ClassGroup $classGroup, Teacher $teacher, Collection $components): void
-    {
-        foreach ($components as $component) {
-            TeacherAssignment::updateOrCreate(
-                [
-                    'class_group_id' => $classGroup->id,
-                    'curricular_component_id' => $component->id,
-                ],
-                [
-                    'teacher_id' => $teacher->id,
-                    'experience_field_id' => null,
-                    'start_date' => self::ENROLLMENT_START,
-                    'active' => true,
-                ],
-            );
-        }
-    }
-
-    private function assignSpecialist(ClassGroup $classGroup, Collection $components, array $specialistMap): void
-    {
-        foreach ($components as $component) {
-            $teacher = $specialistMap[$component->id];
-
-            TeacherAssignment::updateOrCreate(
-                [
-                    'class_group_id' => $classGroup->id,
-                    'curricular_component_id' => $component->id,
-                ],
-                [
-                    'teacher_id' => $teacher->id,
-                    'experience_field_id' => null,
-                    'start_date' => self::ENROLLMENT_START,
-                    'active' => true,
-                ],
-            );
-        }
+        $this->command->info("  TeacherAssignments: $total atribuicoes criadas.");
     }
 }
