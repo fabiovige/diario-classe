@@ -25,6 +25,7 @@ interface StudentRecord {
   notes: string | null
 }
 
+
 const toast = useToast()
 
 const classGroups = ref<ClassGroup[]>([])
@@ -150,10 +151,10 @@ function resetStudentStatuses() {
 
 watch(
   () => [selectedAssignmentId.value, selectedDate.value],
-  () => {
+  async () => {
     if (!selectedClassGroupId.value || !selectedAssignmentId.value || !selectedDate.value || students.value.length === 0) return
     resetStudentStatuses()
-    loadExistingRecords()
+    await loadExistingRecords()
   },
 )
 
@@ -213,11 +214,17 @@ async function handleSubmit() {
   if (!selectedClassGroupId.value || !selectedAssignmentId.value) return
   submitting.value = true
   try {
-    await attendanceService.bulkRecord({
+    const saved = await attendanceService.bulkRecord({
       class_group_id: selectedClassGroupId.value,
       teacher_assignment_id: selectedAssignmentId.value,
       date: selectedDate.value,
       records: students.value.map(s => ({ student_id: s.student_id, status: s.status, notes: s.notes })),
+    })
+    const savedMap = new Map(saved.map(r => [r.student_id, { status: r.status, notes: r.notes }]))
+    students.value = students.value.map(s => {
+      const rec = savedMap.get(s.student_id)
+      if (!rec) return s
+      return { ...s, status: rec.status as AttendanceStatus, notes: rec.notes ?? null }
     })
     toast.success('Frequencia registrada')
   } catch (error: unknown) {
