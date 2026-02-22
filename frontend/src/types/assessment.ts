@@ -40,6 +40,10 @@ export interface DescriptiveReport {
   assessment_period_id: number
   content: string
   recorded_by: number
+  student?: { id: number; name: string }
+  class_group?: { id: number; name: string; label: string }
+  experience_field?: { id: number; name: string }
+  assessment_period?: { id: number; name: string }
   created_at: string
   updated_at: string
 }

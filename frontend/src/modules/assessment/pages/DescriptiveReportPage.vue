@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
@@ -19,8 +20,12 @@ interface StudentOption {
   name: string
 }
 
+const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
+const id = computed(() => route.params.id ? Number(route.params.id) : null)
+const isEdit = computed(() => !!id.value)
 const loading = ref(false)
 const loadingDeps = ref(false)
 
@@ -47,13 +52,17 @@ const depsPlaceholder = computed(() => {
   return 'Selecione'
 })
 
+function formatClassGroupLabel(cg: ClassGroup): string {
+  return [cg.grade_level?.name, cg.name, cg.shift?.name_label ?? cg.shift?.name].filter(Boolean).join(' - ')
+}
+
 async function loadInitialData() {
   try {
     const [cgRes, fieldsRes] = await Promise.all([
-      schoolStructureService.getClassGroups({ per_page: 100 }),
+      schoolStructureService.getClassGroups({ per_page: 200 }),
       curriculumService.getExperienceFields({ per_page: 100 }),
     ])
-    classGroups.value = cgRes.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ') }))
+    classGroups.value = cgRes.data.map(cg => ({ ...cg, label: formatClassGroupLabel(cg) }))
     experienceFields.value = fieldsRes.data
   } catch {
     toast.error('Erro ao carregar dados auxiliares')
@@ -89,12 +98,37 @@ function onClassGroupChange() {
   loadDependencies()
 }
 
+async function loadReport() {
+  if (!id.value) return
+  loading.value = true
+  try {
+    const report = await assessmentService.getDescriptiveReport(id.value)
+    form.value.class_group_id = report.class_group_id
+    form.value.student_id = report.student_id
+    form.value.experience_field_id = report.experience_field_id
+    form.value.assessment_period_id = report.assessment_period_id
+    form.value.content = report.content
+
+    await loadDependencies()
+  } catch {
+    toast.error('Erro ao carregar relatorio')
+    router.push('/assessment/descriptive')
+  } finally {
+    loading.value = false
+  }
+}
+
 async function handleSubmit() {
   loading.value = true
   try {
-    await assessmentService.createDescriptiveReport(form.value)
-    toast.success('Relatorio descritivo salvo')
-    form.value.content = ''
+    if (isEdit.value) {
+      await assessmentService.updateDescriptiveReport(id.value!, form.value)
+      toast.success('Relatorio atualizado')
+    } else {
+      await assessmentService.createDescriptiveReport(form.value)
+      toast.success('Relatorio criado')
+    }
+    router.push('/assessment/descriptive')
   } catch (error: unknown) {
     toast.error(extractApiError(error, 'Erro ao salvar relatorio'))
   } finally {
@@ -102,12 +136,15 @@ async function handleSubmit() {
   }
 }
 
-onMounted(loadInitialData)
+onMounted(async () => {
+  await loadInitialData()
+  await loadReport()
+})
 </script>
 
 <template>
   <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Relatorio Descritivo</h1>
+    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Relatorio Descritivo' : 'Novo Relatorio Descritivo' }}</h1>
 
     <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
@@ -133,7 +170,8 @@ onMounted(loadInitialData)
         </div>
 
         <div class="mt-4 flex justify-end gap-3">
-          <Button type="submit" label="Salvar Relatorio" icon="pi pi-check" :loading="loading" />
+          <Button label="Cancelar" severity="secondary" @click="router.push('/assessment/descriptive')" />
+          <Button type="submit" :label="isEdit ? 'Atualizar' : 'Salvar'" icon="pi pi-check" :loading="loading" />
         </div>
       </form>
     </div>

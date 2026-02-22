@@ -104,9 +104,27 @@ class AssessmentController extends ApiController
         return $this->created(new DescriptiveReportResource($report));
     }
 
+    public function showDescriptiveReport(int $id): JsonResponse
+    {
+        $report = DescriptiveReport::with(['student', 'classGroup.gradeLevel', 'classGroup.shift', 'experienceField', 'assessmentPeriod'])
+            ->findOrFail($id);
+
+        return $this->success(new DescriptiveReportResource($report));
+    }
+
+    public function updateDescriptiveReport(Request $request, int $id): JsonResponse
+    {
+        $report = DescriptiveReport::findOrFail($id);
+        $report->update($request->only(['student_id', 'class_group_id', 'experience_field_id', 'assessment_period_id', 'content']));
+
+        return $this->success(new DescriptiveReportResource(
+            $report->refresh()->load(['student', 'classGroup.gradeLevel', 'classGroup.shift', 'experienceField', 'assessmentPeriod'])
+        ));
+    }
+
     public function indexDescriptiveReports(Request $request): JsonResponse
     {
-        $reports = DescriptiveReport::query()
+        $reports = DescriptiveReport::with(['student', 'classGroup.gradeLevel', 'classGroup.shift', 'experienceField', 'assessmentPeriod'])
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
             ->when($request->query('assessment_period_id'), fn ($q, $id) => $q->where('assessment_period_id', $id))

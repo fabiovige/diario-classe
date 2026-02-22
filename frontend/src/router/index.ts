@@ -385,8 +385,20 @@ const router = createRouter({
     {
       path: '/assessment/descriptive',
       name: 'descriptive-reports',
+      component: () => import('@/modules/assessment/pages/DescriptiveReportListPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Relatorios Descritivos' },
+    },
+    {
+      path: '/assessment/descriptive/new',
+      name: 'descriptive-report-create',
       component: () => import('@/modules/assessment/pages/DescriptiveReportPage.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Relatorio Descritivo' },
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Novo Relatorio Descritivo' },
+    },
+    {
+      path: '/assessment/descriptive/:id/edit',
+      name: 'descriptive-report-edit',
+      component: () => import('@/modules/assessment/pages/DescriptiveReportPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'coordinator', 'teacher'], breadcrumb: 'Editar Relatorio Descritivo' },
     },
     {
       path: '/assessment/report-card/:studentId',

@@ -87,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('period-averages/calculate', [AssessmentController::class, 'calculatePeriodAverage']);
     Route::post('descriptive-reports', [AssessmentController::class, 'storeDescriptiveReport']);
     Route::get('descriptive-reports', [AssessmentController::class, 'indexDescriptiveReports']);
+    Route::get('descriptive-reports/{id}', [AssessmentController::class, 'showDescriptiveReport']);
+    Route::put('descriptive-reports/{id}', [AssessmentController::class, 'updateDescriptiveReport']);
     Route::get('report-cards/student/{studentId}', [AssessmentController::class, 'reportCard']);
     Route::get('assessment-configs', [AssessmentController::class, 'indexConfigs']);
     Route::post('assessment-configs', [AssessmentController::class, 'storeConfig']);

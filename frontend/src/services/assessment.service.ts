@@ -21,8 +21,14 @@ export const assessmentService = {
   getDescriptiveReports(params?: Record<string, unknown>): Promise<PaginatedData<DescriptiveReport>> {
     return apiGet<PaginatedData<DescriptiveReport>>('descriptive-reports', params)
   },
+  getDescriptiveReport(id: number): Promise<DescriptiveReport> {
+    return apiGet<DescriptiveReport>(`descriptive-reports/${id}`)
+  },
   createDescriptiveReport(data: Record<string, unknown>): Promise<DescriptiveReport> {
     return apiPost<DescriptiveReport>('descriptive-reports', data)
+  },
+  updateDescriptiveReport(id: number, data: Record<string, unknown>): Promise<DescriptiveReport> {
+    return apiPut<DescriptiveReport>(`descriptive-reports/${id}`, data)
   },
   getReportCard(studentId: number): Promise<any> {
     return apiGet(`report-cards/student/${studentId}`)
