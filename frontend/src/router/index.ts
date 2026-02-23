@@ -343,6 +343,14 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Minha Grade' },
     },
 
+    // Teacher Agenda (Calendar)
+    {
+      path: '/my-agenda',
+      name: 'my-agenda',
+      component: () => import('@/modules/curriculum/pages/TeacherAgendaPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Agenda' },
+    },
+
     // Attendance
     {
       path: '/attendance',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
@@ -12,13 +13,15 @@ import { useAuthStore } from '@/stores/auth'
 import type { DailyAssignmentSummary } from '@/types/curriculum'
 import type { Teacher } from '@/types/people'
 
+const route = useRoute()
 const toast = useToast()
 const authStore = useAuthStore()
 
 const isTeacher = computed(() => authStore.roleSlug === 'teacher')
 const isManager = computed(() => ['admin', 'director', 'coordinator'].includes(authStore.roleSlug ?? ''))
 
-const selectedDate = ref(new Date().toISOString().split('T')[0])
+const initialDate = typeof route.query.date === 'string' ? route.query.date : new Date().toISOString().split('T')[0]
+const selectedDate = ref(initialDate)
 const selectedTeacherId = ref<number | null>(null)
 const teachers = ref<(Teacher & { label: string })[]>([])
 const assignments = ref<DailyAssignmentSummary[]>([])

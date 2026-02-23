@@ -50,6 +50,7 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
         },
         {
           label: 'Calendario', icon: 'pi pi-calendar-plus', items: [
+            { label: 'Agenda', icon: 'pi pi-calendar-clock', to: '/my-agenda' },
             { label: 'Periodos Avaliativos', icon: 'pi pi-calendar', to: '/academic-calendar/periods' },
           ],
         },
@@ -165,6 +166,7 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
     { label: 'Minhas Aulas', icon: 'pi pi-book', to: '/my-classes' },
     { label: 'Minha Grade', icon: 'pi pi-table', to: '/my-schedule' },
+    { label: 'Agenda', icon: 'pi pi-calendar-clock', to: '/my-agenda' },
     { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
     { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/class-record' },
     {
