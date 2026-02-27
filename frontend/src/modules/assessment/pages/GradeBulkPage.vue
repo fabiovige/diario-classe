@@ -13,8 +13,10 @@ import { curriculumService } from '@/services/curriculum.service'
 import { academicCalendarService } from '@/services/academic-calendar.service'
 import { enrollmentService } from '@/services/enrollment.service'
 import { useToast } from '@/composables/useToast'
+import { useSchoolScope } from '@/composables/useSchoolScope'
+import { useListFilters } from '@/composables/useListFilters'
 import { extractApiError } from '@/shared/utils/api-error'
-import type { ClassGroup } from '@/types/school-structure'
+import type { School, ClassGroup } from '@/types/school-structure'
 import type { TeacherAssignment } from '@/types/curriculum'
 import type { AssessmentPeriod } from '@/types/academic-calendar'
 import type { AssessmentConfig, AssessmentInstrument, ConceptualScale } from '@/types/assessment'
@@ -27,7 +29,9 @@ interface StudentGrade {
 }
 
 const toast = useToast()
+const { shouldShowSchoolFilter, userSchoolId, userSchoolName } = useSchoolScope()
 
+const schools = ref<School[]>([])
 const classGroups = ref<(ClassGroup & { label: string })[]>([])
 const assignments = ref<(TeacherAssignment & { label: string })[]>([])
 const periods = ref<AssessmentPeriod[]>([])
@@ -35,10 +39,17 @@ const instruments = ref<AssessmentInstrument[]>([])
 const conceptualScales = ref<ConceptualScale[]>([])
 const config = ref<AssessmentConfig | null>(null)
 
+const selectedSchoolId = ref<number | null>(null)
 const selectedClassGroupId = ref<number | null>(null)
 const selectedAssignmentId = ref<number | null>(null)
 const selectedPeriodId = ref<number | null>(null)
 const selectedInstrumentId = ref<number | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl, clearAll } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'class_group_id', ref: selectedClassGroupId, type: 'number' },
+])
 
 const students = ref<StudentGrade[]>([])
 const loading = ref(false)
@@ -86,9 +97,24 @@ const conceptualOptions = computed(() =>
   conceptualScales.value.map(s => ({ label: `${s.code} - ${s.label}`, value: s.code }))
 )
 
-async function loadClassGroups() {
+const hasActiveFilters = computed(() => selectedSchoolId.value !== null || selectedClassGroupId.value !== null)
+
+async function loadSchools() {
   try {
-    const response = await schoolStructureService.getClassGroups({ per_page: 100 })
+    const response = await schoolStructureService.getSchools({ per_page: 200 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+}
+
+async function loadClassGroups() {
+  if (!selectedSchoolId.value) {
+    classGroups.value = []
+    return
+  }
+  try {
+    const response = await schoolStructureService.getClassGroups({ school_id: selectedSchoolId.value, per_page: 200 })
     classGroups.value = response.data.map(cg => ({
       ...cg,
       label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - '),
@@ -97,6 +123,15 @@ async function loadClassGroups() {
     toast.error('Erro ao carregar turmas')
   }
 }
+
+watch(selectedSchoolId, () => {
+  if (initializing) return
+  selectedClassGroupId.value = null
+  classGroups.value = []
+  resetDependencies()
+  loadClassGroups()
+  syncToUrl()
+})
 
 async function loadDependencies() {
   if (!selectedClassGroupId.value) return
@@ -171,7 +206,7 @@ async function loadExistingGrades() {
   }
 }
 
-function onClassGroupChange() {
+function resetDependencies() {
   assignments.value = []
   periods.value = []
   instruments.value = []
@@ -181,7 +216,18 @@ function onClassGroupChange() {
   selectedAssignmentId.value = null
   selectedPeriodId.value = null
   selectedInstrumentId.value = null
+}
+
+function onClassGroupChange() {
+  resetDependencies()
+  syncToUrl()
   loadDependencies()
+}
+
+function clearFilters() {
+  clearAll()
+  resetDependencies()
+  classGroups.value = []
 }
 
 watch(
@@ -223,18 +269,49 @@ async function handleSubmit() {
   }
 }
 
-onMounted(loadClassGroups)
+onMounted(async () => {
+  if (shouldShowSchoolFilter.value) {
+    await loadSchools()
+  }
+  initializing = true
+  initFromQuery()
+  initializing = false
+
+  if (!shouldShowSchoolFilter.value && userSchoolId.value && !selectedSchoolId.value) {
+    selectedSchoolId.value = userSchoolId.value
+    return
+  }
+
+  if (selectedSchoolId.value) {
+    await loadClassGroups()
+    if (selectedClassGroupId.value) {
+      await loadDependencies()
+    }
+  }
+})
 </script>
 
 <template>
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Lancamento de Notas</h1>
 
+    <div class="mb-6 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
+        <label class="text-[0.8125rem] font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
+      </div>
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-[0.8125rem] font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+    </div>
+
     <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
       <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Turma *</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
+          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter @change="onClassGroupChange" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[0.8125rem] font-medium">Disciplina *</label>
