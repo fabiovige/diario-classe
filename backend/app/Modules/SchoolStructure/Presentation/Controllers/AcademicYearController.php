@@ -3,6 +3,7 @@
 namespace App\Modules\SchoolStructure\Presentation\Controllers;
 
 use App\Modules\SchoolStructure\Application\DTOs\CreateAcademicYearDTO;
+use App\Modules\SchoolStructure\Application\UseCases\CloseAcademicYearUseCase;
 use App\Modules\SchoolStructure\Application\UseCases\CreateAcademicYearUseCase;
 use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
 use App\Modules\SchoolStructure\Presentation\Requests\CreateAcademicYearRequest;
@@ -58,5 +59,12 @@ class AcademicYearController extends ApiController
         AcademicYear::findOrFail($id)->delete();
 
         return $this->noContent();
+    }
+
+    public function close(int $id, CloseAcademicYearUseCase $useCase): JsonResponse
+    {
+        $year = $useCase->execute($id);
+
+        return $this->success(new AcademicYearResource($year));
     }
 }

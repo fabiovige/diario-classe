@@ -24,7 +24,7 @@ export type PeriodClosingStatus = 'pending' | 'in_validation' | 'approved' | 'cl
 
 export type PeriodType = 'bimestral' | 'trimestral' | 'semestral'
 
-export type FinalResultStatus = 'approved' | 'retained' | 'retained_by_absence' | 'council_approved'
+export type FinalResultStatus = 'approved' | 'retained' | 'partial_progression' | 'transferred' | 'abandoned' | 'retained_by_absence' | 'council_approved'
 
 export type DisabilityType = 'visual' | 'hearing' | 'physical' | 'intellectual' | 'autism' | 'gifted_talented' | 'multiple' | 'deafblind'
 

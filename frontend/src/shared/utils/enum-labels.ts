@@ -114,6 +114,9 @@ const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
 const FINAL_RESULT_STATUS_LABELS: Record<FinalResultStatus, string> = {
   approved: 'Aprovado',
   retained: 'Retido',
+  partial_progression: 'Progressao Parcial',
+  transferred: 'Transferido',
+  abandoned: 'Abandonou',
   retained_by_absence: 'Retido por Falta',
   council_approved: 'Aprovado pelo Conselho',
 }

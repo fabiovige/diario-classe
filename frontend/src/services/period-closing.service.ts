@@ -1,6 +1,6 @@
 import { apiGet, apiPost } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
-import type { PeriodClosing, Rectification, FinalResult } from '@/types/period-closing'
+import type { PeriodClosing, Rectification, FinalResult, AnnualResultResponse } from '@/types/period-closing'
 
 export const periodClosingService = {
   getClosings(params?: Record<string, unknown>): Promise<PaginatedData<PeriodClosing>> {
@@ -35,5 +35,11 @@ export const periodClosingService = {
   },
   getStudentFinalResult(studentId: number): Promise<FinalResult[]> {
     return apiGet<FinalResult[]>(`final-results/student/${studentId}`)
+  },
+  getClassGroupResults(classGroupId: number): Promise<AnnualResultResponse> {
+    return apiGet<AnnualResultResponse>(`final-results/class-group/${classGroupId}`)
+  },
+  calculateBulkResults(data: { class_group_id: number; academic_year_id: number }): Promise<FinalResult[]> {
+    return apiPost<FinalResult[]>('final-results/calculate-bulk', data)
   },
 }

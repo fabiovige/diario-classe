@@ -78,4 +78,7 @@ export const schoolStructureService = {
   deleteClassGroup(id: number): Promise<void> {
     return apiDelete(`class-groups/${id}`)
   },
+  closeAcademicYear(id: number): Promise<AcademicYear> {
+    return apiPost<AcademicYear>(`academic-years/${id}/close`)
+  },
 }

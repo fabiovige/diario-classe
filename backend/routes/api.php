@@ -110,4 +110,7 @@ Route::middleware(['auth:sanctum', 'school.scope'])->group(function () {
     Route::post('rectifications/{id}/approve', [PeriodClosingController::class, 'approveRectification']);
     Route::post('final-results/calculate', [PeriodClosingController::class, 'calculateFinalResult']);
     Route::get('final-results/student/{studentId}', [PeriodClosingController::class, 'studentFinalResult']);
+    Route::get('final-results/class-group/{classGroupId}', [PeriodClosingController::class, 'classGroupFinalResults']);
+    Route::post('final-results/calculate-bulk', [PeriodClosingController::class, 'calculateBulkFinalResults']);
+    Route::post('academic-years/{id}/close', [AcademicYearController::class, 'close']);
 });

@@ -1,4 +1,4 @@
-import type { PeriodClosingStatus, FinalResultStatus } from './enums'
+import type { PeriodClosingStatus, FinalResultStatus, AcademicYearStatus } from './enums'
 import type { AssessmentPeriod } from './academic-calendar'
 import type { ClassGroup } from './school-structure'
 import type { TeacherAssignment } from './curriculum'
@@ -57,4 +57,44 @@ export interface FinalResult {
   student?: Student
   created_at: string
   updated_at: string
+}
+
+export interface AnnualResultResponse {
+  class_group: {
+    id: number
+    name: string
+    grade_level: string | null
+    shift: string | null
+    academic_year: {
+      id: number
+      year: number
+      status: AcademicYearStatus
+      school_name: string | null
+    }
+  }
+  assessment_periods: { id: number; number: number; name: string }[]
+  students: AnnualStudentResult[]
+  summary: {
+    total: number
+    approved: number
+    retained: number
+    pending: number
+    passing_grade: number
+  }
+}
+
+export interface AnnualStudentResult {
+  student_id: number
+  name: string
+  subjects: AnnualSubjectResult[]
+  overall_average: number | null
+  overall_frequency: number | null
+  result: string | null
+}
+
+export interface AnnualSubjectResult {
+  name: string
+  periods: Record<string, number | null>
+  final_average: number | null
+  status: string
 }

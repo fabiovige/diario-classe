@@ -454,6 +454,12 @@ const router = createRouter({
       component: () => import('@/modules/period-closing/pages/FinalResultPage.vue'),
       meta: { requiresAuth: true, breadcrumb: 'Resultado Final' },
     },
+    {
+      path: '/period-closing/annual-results',
+      name: 'annual-results',
+      component: () => import('@/modules/period-closing/pages/AnnualResultPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator'], breadcrumb: 'Resultado Anual' },
+    },
 
     // 404
     {
