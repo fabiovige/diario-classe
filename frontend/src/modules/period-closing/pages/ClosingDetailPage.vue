@@ -44,7 +44,7 @@ function disciplineName(c: PeriodClosing): string {
 function turmaName(c: PeriodClosing): string {
   if (!c.class_group) return '--'
   const grade = c.class_group.grade_level?.name ?? ''
-  const shift = c.class_group.shift?.name ?? ''
+  const shift = c.class_group.shift?.name_label ?? ''
   const parts = [c.class_group.name, grade, shift].filter(Boolean)
   return parts.join(' - ')
 }

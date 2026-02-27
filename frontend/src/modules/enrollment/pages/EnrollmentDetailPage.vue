@@ -99,7 +99,7 @@ async function openAssignDialog() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
     classGroups.value = response.data.map(cg => {
-      const baseName = [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ')
+      const baseName = [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - ')
       const active = cg.active_students_count ?? 0
       const max = cg.max_students ?? 0
       const vacancy = max > 0 ? ` (${active}/${max} vagas)` : ''
@@ -169,7 +169,7 @@ async function openEditAssignment(assignment: ClassAssignment) {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
     classGroups.value = response.data.map(cg => {
-      const baseName = [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - ')
+      const baseName = [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - ')
       const active = cg.active_students_count ?? 0
       const max = cg.max_students ?? 0
       const vacancy = max > 0 ? ` (${active}/${max} vagas)` : ''
@@ -288,7 +288,7 @@ onMounted(loadEnrollment)
       <DataTable v-if="enrollment.class_assignments && enrollment.class_assignments.length > 0" :value="enrollment.class_assignments" stripedRows responsiveLayout="scroll">
         <Column header="Turma">
           <template #body="{ data }">
-            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name].filter(Boolean).join(' - ') || '--' }}
+            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
           </template>
         </Column>
         <Column header="Status">

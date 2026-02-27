@@ -19,7 +19,7 @@ class UserController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
-        $users = User::with('role')
+        $users = User::with('role', 'school')
             ->when($request->query('search'), fn ($q, $search) => $q->where(fn ($sub) => $sub->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))
             ->when($request->query('school_id'), fn ($q, $schoolId) => $q->where('school_id', $schoolId))
             ->when($request->query('role_id'), fn ($q, $roleId) => $q->where('role_id', $roleId))
