@@ -15,7 +15,6 @@ use App\Modules\PeriodClosing\Application\UseCases\RequestRectificationUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\RunCompletenessCheckUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\SubmitPeriodClosingUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\ValidatePeriodClosingUseCase;
-use App\Modules\PeriodClosing\Domain\Entities\FinalResultRecord;
 use App\Modules\PeriodClosing\Domain\Entities\PeriodClosing;
 use App\Modules\PeriodClosing\Domain\Entities\Rectification;
 use App\Modules\PeriodClosing\Presentation\Requests\RequestRectificationRequest;
@@ -27,6 +26,7 @@ use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
 use App\Modules\Shared\Presentation\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PeriodClosingController extends ApiController
 {
@@ -150,11 +150,11 @@ class PeriodClosingController extends ApiController
 
     public function studentFinalResult(int $studentId): JsonResponse
     {
-        $results = FinalResultRecord::where('student_id', $studentId)
-            ->with(['classGroup', 'academicYear'])
+        $results = DB::table('final_results')
+            ->where('student_id', $studentId)
             ->get();
 
-        return $this->success(FinalResultResource::collection($results));
+        return $this->success($results);
     }
 
     public function classGroupFinalResults(int $classGroupId): JsonResponse
@@ -195,7 +195,8 @@ class PeriodClosingController extends ApiController
             ->get()
             ->groupBy('student_id');
 
-        $allFinalResults = FinalResultRecord::where('class_group_id', $classGroupId)
+        $allFinalResults = DB::table('final_results')
+            ->where('class_group_id', $classGroupId)
             ->where('academic_year_id', $academicYearId)
             ->whereIn('student_id', $studentIds)
             ->get()
@@ -244,11 +245,7 @@ class PeriodClosingController extends ApiController
                 ];
             }
 
-            /** @var string|null $resultValue */
-            $resultValue = $finalResult !== null ? (string) ($finalResult->getRawOriginal('result') ?? '') : null;
-            if ($resultValue === '') {
-                $resultValue = null;
-            }
+            $resultValue = $finalResult !== null ? ($finalResult->result ?: null) : null;
 
             $summary['total']++;
             if ($resultValue === 'approved') {

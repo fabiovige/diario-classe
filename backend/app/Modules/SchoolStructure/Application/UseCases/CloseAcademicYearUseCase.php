@@ -2,8 +2,8 @@
 
 namespace App\Modules\SchoolStructure\Application\UseCases;
 
-use App\Modules\PeriodClosing\Domain\Entities\FinalResultRecord;
 use App\Modules\PeriodClosing\Domain\Entities\PeriodClosing;
+use Illuminate\Support\Facades\DB;
 use App\Modules\PeriodClosing\Domain\Enums\ClosingStatus;
 use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
 use App\Modules\SchoolStructure\Domain\Enums\AcademicYearStatus;
@@ -62,7 +62,8 @@ final class CloseAcademicYearUseCase
             ->distinct()
             ->count('enrollments.student_id');
 
-        $studentsWithResults = FinalResultRecord::where('academic_year_id', $academicYear->id)
+        $studentsWithResults = DB::table('final_results')
+            ->where('academic_year_id', $academicYear->id)
             ->whereIn('class_group_id', $classGroupIds)
             ->distinct()
             ->count('student_id');

@@ -8,6 +8,7 @@ use App\Modules\Attendance\Domain\Services\FrequencyCalculator;
 use App\Modules\PeriodClosing\Domain\Entities\FinalResultRecord;
 use App\Modules\PeriodClosing\Domain\Enums\FinalResult;
 use App\Modules\SchoolStructure\Domain\Entities\ClassGroup;
+use Illuminate\Support\Facades\DB;
 
 final class CalculateFinalResultUseCase
 {
@@ -40,20 +41,32 @@ final class CalculateFinalResultUseCase
 
         $result = $this->determineResult($overallAverage, $frequency['frequency_percentage'], $config);
 
-        return FinalResultRecord::updateOrCreate(
-            [
+        $attributes = [
+            'result' => $result->value,
+            'overall_average' => $overallAverage ? round($overallAverage, 2) : null,
+            'overall_frequency' => $frequency['frequency_percentage'],
+            'council_override' => false,
+            'determined_by' => auth()->id(),
+        ];
+
+        $now = now();
+
+        DB::table('final_results')->upsert(
+            [array_merge([
                 'student_id' => $studentId,
                 'class_group_id' => $classGroupId,
                 'academic_year_id' => $academicYearId,
-            ],
-            [
-                'result' => $result->value,
-                'overall_average' => $overallAverage ? round($overallAverage, 2) : null,
-                'overall_frequency' => $frequency['frequency_percentage'],
-                'council_override' => false,
-                'determined_by' => auth()->id(),
-            ],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], $attributes)],
+            ['student_id', 'class_group_id', 'academic_year_id'],
+            array_merge(array_keys($attributes), ['updated_at']),
         );
+
+        return FinalResultRecord::where('student_id', $studentId)
+            ->where('class_group_id', $classGroupId)
+            ->where('academic_year_id', $academicYearId)
+            ->first();
     }
 
     private function determineResult(?float $average, float $frequency, ?AssessmentConfig $config): FinalResult
