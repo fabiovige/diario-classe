@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useListFilters } from '@/composables/useListFilters'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -31,6 +32,13 @@ const search = ref('')
 
 const schools = ref<School[]>([])
 const selectedSchoolId = ref<number | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl, clearAll } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'search', ref: search, type: 'string' },
+  { key: 'page', ref: currentPage, type: 'number' },
+])
 
 const hasActiveFilters = computed(() => selectedSchoolId.value !== null)
 
@@ -44,12 +52,14 @@ async function loadSchools() {
 }
 
 watch(selectedSchoolId, () => {
+  if (initializing) return
   currentPage.value = 1
   loadData()
 })
 
 async function loadData() {
   loading.value = true
+  syncToUrl()
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
@@ -76,7 +86,7 @@ function onSearch() {
 }
 
 function clearFilters() {
-  selectedSchoolId.value = null
+  clearAll()
   currentPage.value = 1
   loadData()
 }
@@ -97,7 +107,10 @@ onMounted(() => {
   if (shouldShowSchoolFilter.value) {
     loadSchools()
   }
-  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+  initializing = true
+  initFromQuery()
+  initializing = false
+  if (!shouldShowSchoolFilter.value && userSchoolId.value && !selectedSchoolId.value) {
     selectedSchoolId.value = userSchoolId.value
     return
   }

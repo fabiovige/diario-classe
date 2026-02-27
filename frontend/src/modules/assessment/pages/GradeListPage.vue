@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useListFilters } from '@/composables/useListFilters'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -29,6 +30,14 @@ const schools = ref<School[]>([])
 const classGroups = ref<(ClassGroup & { label: string })[]>([])
 const selectedSchoolId = ref<number | null>(null)
 const selectedClassGroupId = ref<number | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl, clearAll } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'class_group_id', ref: selectedClassGroupId, type: 'number' },
+  { key: 'search', ref: search, type: 'string' },
+  { key: 'page', ref: currentPage, type: 'number' },
+])
 
 const hasActiveFilters = computed(() =>
   selectedSchoolId.value !== null || selectedClassGroupId.value !== null
@@ -52,7 +61,7 @@ async function loadClassGroups() {
     const response = await schoolStructureService.getClassGroups({ school_id: selectedSchoolId.value, per_page: 200 })
     classGroups.value = response.data.map(cg => ({
       ...cg,
-      label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - '),
+      label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - '),
     }))
   } catch {
     toast.error('Erro ao carregar turmas')
@@ -60,6 +69,7 @@ async function loadClassGroups() {
 }
 
 watch(selectedSchoolId, () => {
+  if (initializing) return
   selectedClassGroupId.value = null
   classGroups.value = []
   loadClassGroups()
@@ -67,11 +77,13 @@ watch(selectedSchoolId, () => {
 })
 
 watch(selectedClassGroupId, () => {
+  if (initializing) return
   onFilter()
 })
 
 async function loadData() {
   loading.value = true
+  syncToUrl()
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
@@ -104,20 +116,25 @@ function onFilter() {
 }
 
 function clearFilters() {
-  selectedSchoolId.value = null
-  selectedClassGroupId.value = null
+  clearAll()
   classGroups.value = []
   currentPage.value = 1
   loadData()
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (shouldShowSchoolFilter.value) {
     loadSchools()
   }
-  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+  initializing = true
+  initFromQuery()
+  initializing = false
+  if (!shouldShowSchoolFilter.value && userSchoolId.value && !selectedSchoolId.value) {
     selectedSchoolId.value = userSchoolId.value
     return
+  }
+  if (selectedSchoolId.value) {
+    await loadClassGroups()
   }
   loadData()
 })

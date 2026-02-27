@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useListFilters } from '@/composables/useListFilters'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -29,6 +30,12 @@ const perPage = ref(15)
 
 const schools = ref<School[]>([])
 const selectedSchoolId = ref<number | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl, clearAll } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'page', ref: currentPage, type: 'number' },
+])
 
 const dashboard = ref<Record<string, number> | null>(null)
 
@@ -44,6 +51,7 @@ async function loadSchools() {
 }
 
 watch(selectedSchoolId, () => {
+  if (initializing) return
   currentPage.value = 1
   loadDashboard()
   loadData()
@@ -61,6 +69,7 @@ async function loadDashboard() {
 
 async function loadData() {
   loading.value = true
+  syncToUrl()
   try {
     const params: Record<string, unknown> = {
       page: currentPage.value,
@@ -86,7 +95,7 @@ function disciplineName(row: PeriodClosing): string {
 function turmaName(row: PeriodClosing): string {
   if (!row.class_group) return '--'
   const grade = row.class_group.grade_level?.name ?? ''
-  const shift = row.class_group.shift?.name ?? ''
+  const shift = row.class_group.shift?.name_label ?? ''
   const parts = [row.class_group.name, grade, shift].filter(Boolean)
   return parts.join(' - ')
 }
@@ -98,7 +107,7 @@ function onPageChange(event: { page: number; rows: number }) {
 }
 
 function clearFilters() {
-  selectedSchoolId.value = null
+  clearAll()
   currentPage.value = 1
   loadDashboard()
   loadData()
@@ -108,7 +117,10 @@ onMounted(() => {
   if (shouldShowSchoolFilter.value) {
     loadSchools()
   }
-  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+  initializing = true
+  initFromQuery()
+  initializing = false
+  if (!shouldShowSchoolFilter.value && userSchoolId.value && !selectedSchoolId.value) {
     selectedSchoolId.value = userSchoolId.value
     return
   }

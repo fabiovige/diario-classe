@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useListFilters } from '@/composables/useListFilters'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -29,6 +30,14 @@ const teacherId = ref<number | null>(null)
 const schools = ref<School[]>([])
 const selectedSchoolId = ref<number | null>(null)
 const selectedTeacherId = ref<number | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'teacher_id', ref: selectedTeacherId, type: 'number' },
+  { key: 'month', ref: currentMonth, type: 'number' },
+  { key: 'year', ref: currentYear, type: 'number' },
+])
 const teachers = ref<(Teacher & { label: string })[]>([])
 const loadingTeachers = ref(false)
 
@@ -123,24 +132,27 @@ function prevMonth() {
   if (currentMonth.value === 0) {
     currentMonth.value = 11
     currentYear.value--
-    return
+  } else {
+    currentMonth.value--
   }
-  currentMonth.value--
+  syncToUrl()
 }
 
 function nextMonth() {
   if (currentMonth.value === 11) {
     currentMonth.value = 0
     currentYear.value++
-    return
+  } else {
+    currentMonth.value++
   }
-  currentMonth.value++
+  syncToUrl()
 }
 
 function goToday() {
   const now = new Date()
   currentYear.value = now.getFullYear()
   currentMonth.value = now.getMonth()
+  syncToUrl()
 }
 
 function openDay(day: CalendarDay) {
@@ -240,6 +252,7 @@ async function loadTeachers() {
 }
 
 watch(selectedSchoolId, () => {
+  if (initializing) return
   selectedTeacherId.value = null
   schedules.value = []
   timeSlots.value = []
@@ -273,14 +286,30 @@ async function loadSchedules() {
   }
 }
 
-watch(selectedTeacherId, loadSchedules)
+watch(selectedTeacherId, () => {
+  if (initializing) return
+  loadSchedules()
+  syncToUrl()
+})
 
 onMounted(async () => {
+  initializing = true
+  initFromQuery()
+  initializing = false
   if (isManager.value) {
     if (shouldShowSchoolFilter.value) {
       await loadSchools()
+      if (selectedSchoolId.value) {
+        await loadTeachers()
+        if (selectedTeacherId.value) {
+          await loadSchedules()
+        }
+      }
     } else {
       await loadTeachers()
+      if (selectedTeacherId.value) {
+        await loadSchedules()
+      }
     }
     return
   }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useListFilters } from '@/composables/useListFilters'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -35,6 +36,15 @@ const schools = ref<School[]>([])
 const selectedRoleId = ref<number | null>(null)
 const selectedSchoolId = ref<number | null>(null)
 const selectedStatus = ref<string | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'role_id', ref: selectedRoleId, type: 'number' },
+  { key: 'status', ref: selectedStatus, type: 'string' },
+  { key: 'search', ref: search, type: 'string' },
+  { key: 'page', ref: currentPage, type: 'number' },
+])
 
 const statusOptions = [
   { label: 'Ativo', value: 'active' },
@@ -57,6 +67,7 @@ async function loadFilters() {
 
 async function loadData() {
   loading.value = true
+  syncToUrl()
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
@@ -74,6 +85,7 @@ async function loadData() {
 }
 
 watch([selectedRoleId, selectedSchoolId, selectedStatus], () => {
+  if (initializing) return
   currentPage.value = 1
   loadData()
 })
@@ -103,6 +115,9 @@ function handleDelete(user: User) {
 
 onMounted(() => {
   loadFilters()
+  initializing = true
+  initFromQuery()
+  initializing = false
   loadData()
 })
 </script>

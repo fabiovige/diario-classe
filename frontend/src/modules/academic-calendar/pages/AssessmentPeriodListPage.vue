@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useListFilters } from '@/composables/useListFilters'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -35,6 +36,14 @@ const schools = ref<School[]>([])
 const academicYears = ref<AcademicYear[]>([])
 const selectedSchoolId = ref<number | null>(null)
 const selectedAcademicYearId = ref<number | null>(null)
+let initializing = false
+
+const { initFromQuery, syncToUrl, clearAll } = useListFilters([
+  { key: 'school_id', ref: selectedSchoolId, type: 'number' },
+  { key: 'academic_year_id', ref: selectedAcademicYearId, type: 'number' },
+  { key: 'search', ref: search, type: 'string' },
+  { key: 'page', ref: currentPage, type: 'number' },
+])
 
 const hasActiveFilters = computed(() =>
   selectedSchoolId.value !== null || selectedAcademicYearId.value !== null
@@ -63,6 +72,7 @@ async function loadAcademicYears() {
 }
 
 watch(selectedSchoolId, () => {
+  if (initializing) return
   selectedAcademicYearId.value = null
   academicYears.value = []
   loadAcademicYears()
@@ -70,11 +80,13 @@ watch(selectedSchoolId, () => {
 })
 
 watch(selectedAcademicYearId, () => {
+  if (initializing) return
   onFilter()
 })
 
 async function loadData() {
   loading.value = true
+  syncToUrl()
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
@@ -107,8 +119,7 @@ function onFilter() {
 }
 
 function clearFilters() {
-  selectedSchoolId.value = null
-  selectedAcademicYearId.value = null
+  clearAll()
   academicYears.value = []
   currentPage.value = 1
   loadData()
@@ -126,13 +137,19 @@ function handleDelete(period: AssessmentPeriod) {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (shouldShowSchoolFilter.value) {
     loadSchools()
   }
-  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+  initializing = true
+  initFromQuery()
+  initializing = false
+  if (!shouldShowSchoolFilter.value && userSchoolId.value && !selectedSchoolId.value) {
     selectedSchoolId.value = userSchoolId.value
     return
+  }
+  if (selectedSchoolId.value) {
+    await loadAcademicYears()
   }
   loadData()
 })
