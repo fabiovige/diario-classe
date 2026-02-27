@@ -20,6 +20,7 @@ class AssessmentPeriodController extends ApiController
     {
         $periods = AssessmentPeriod::with('academicYear')
             ->when($request->query('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
+            ->when($request->query('school_id'), fn ($q, $schoolId) => $q->whereHas('academicYear', fn ($ay) => $ay->where('school_id', $schoolId)))
             ->when($request->query('academic_year_id'), fn ($q, $id) => $q->where('academic_year_id', $id))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
             ->when($request->query('type'), fn ($q, $type) => $q->where('type', $type))

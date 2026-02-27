@@ -106,9 +106,9 @@ const PERIOD_CLOSING_STATUS_LABELS: Record<PeriodClosingStatus, string> = {
 }
 
 const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
-  bimester: 'Bimestre',
-  trimester: 'Trimestre',
-  semester: 'Semestre',
+  bimestral: 'Bimestral',
+  trimestral: 'Trimestral',
+  semestral: 'Semestral',
 }
 
 const FINAL_RESULT_STATUS_LABELS: Record<FinalResultStatus, string> = {

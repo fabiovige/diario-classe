@@ -3,7 +3,6 @@ import { onMounted, ref, watch } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
-import Toolbar from 'primevue/toolbar'
 import Select from 'primevue/select'
 import InputMask from 'primevue/inputmask'
 import InputNumber from 'primevue/inputnumber'
@@ -162,8 +161,8 @@ onMounted(() => {
     <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Horarios de Aula</h1>
 
     <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
-      <div class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5">
+      <div class="mb-4 flex flex-wrap items-end gap-4">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
           <label class="text-[0.8125rem] font-medium">Escola</label>
           <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
         </div>
@@ -171,17 +170,14 @@ onMounted(() => {
           <label class="text-[0.8125rem] font-medium">Escola</label>
           <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1.5 w-48">
           <label class="text-[0.8125rem] font-medium">Turno</label>
           <Select v-model="selectedShiftId" :options="shifts" optionLabel="name_label" optionValue="id" placeholder="Selecione o turno" class="w-full" :disabled="!selectedSchoolId && shouldShowSchoolFilter" />
         </div>
-      </div>
-
-      <Toolbar v-if="selectedShiftId" class="mb-4 border-none bg-transparent p-0">
-        <template #end>
+        <div v-if="selectedShiftId" class="ml-auto">
           <Button label="Novo Horario" icon="pi pi-plus" @click="openCreate" />
-        </template>
-      </Toolbar>
+        </div>
+      </div>
 
       <EmptyState v-if="!loading && items.length === 0 && selectedShiftId" message="Nenhum horario cadastrado para este turno" />
       <EmptyState v-if="!selectedShiftId" message="Selecione uma escola e um turno para visualizar os horarios" />

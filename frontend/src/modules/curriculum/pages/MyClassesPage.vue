@@ -22,7 +22,8 @@ const isManager = computed(() => ['admin', 'director', 'coordinator'].includes(a
 
 const initialDate = typeof route.query.date === 'string' ? route.query.date : new Date().toISOString().split('T')[0]
 const selectedDate = ref(initialDate)
-const selectedTeacherId = ref<number | null>(null)
+const initialTeacherId = typeof route.query.teacher_id === 'string' ? Number(route.query.teacher_id) : null
+const selectedTeacherId = ref<number | null>(initialTeacherId)
 const teachers = ref<(Teacher & { label: string })[]>([])
 const assignments = ref<DailyAssignmentSummary[]>([])
 const loading = ref(false)
@@ -88,7 +89,7 @@ watch(selectedTeacherId, () => {
 
 onMounted(async () => {
   await loadTeachers()
-  if (isTeacher.value) {
+  if (canLoad.value) {
     loadSummary()
   }
 })

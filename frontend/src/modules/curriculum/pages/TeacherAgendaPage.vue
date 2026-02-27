@@ -7,14 +7,18 @@ import ProgressSpinner from 'primevue/progressspinner'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { curriculumService } from '@/services/curriculum.service'
 import { peopleService } from '@/services/people.service'
+import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
+import { useSchoolScope } from '@/composables/useSchoolScope'
 import type { ClassSchedule, TimeSlot } from '@/types/curriculum'
 import type { Teacher } from '@/types/people'
+import type { School } from '@/types/school-structure'
 
 const router = useRouter()
 const toast = useToast()
 const authStore = useAuthStore()
+const { shouldShowSchoolFilter, userSchoolName } = useSchoolScope()
 
 const isTeacher = computed(() => authStore.roleSlug === 'teacher')
 const isManager = computed(() => ['admin', 'director', 'coordinator'].includes(authStore.roleSlug ?? ''))
@@ -22,6 +26,8 @@ const isManager = computed(() => ['admin', 'director', 'coordinator'].includes(a
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth())
 const teacherId = ref<number | null>(null)
+const schools = ref<School[]>([])
+const selectedSchoolId = ref<number | null>(null)
 const selectedTeacherId = ref<number | null>(null)
 const teachers = ref<(Teacher & { label: string })[]>([])
 const loadingTeachers = ref(false)
@@ -141,7 +147,11 @@ function openDay(day: CalendarDay) {
   if (!day.isCurrentMonth) return
   if (day.isWeekend) return
   if (day.classes.length === 0) return
-  router.push(`/my-classes?date=${day.fullDate}`)
+  const query: Record<string, string> = { date: day.fullDate }
+  if (isManager.value && selectedTeacherId.value) {
+    query.teacher_id = String(selectedTeacherId.value)
+  }
+  router.push({ path: '/my-classes', query })
 }
 
 const COMPONENT_COLORS: Record<string, string> = {
@@ -197,11 +207,27 @@ async function resolveTeacherId() {
   }
 }
 
+async function loadSchools() {
+  try {
+    const response = await schoolStructureService.getSchools({ per_page: 200 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+}
+
 async function loadTeachers() {
   if (!isManager.value) return
+  const schoolId = selectedSchoolId.value
+  if (shouldShowSchoolFilter.value && !schoolId) {
+    teachers.value = []
+    return
+  }
   loadingTeachers.value = true
   try {
-    const response = await peopleService.getTeachers({ active: true, per_page: 200 })
+    const params: Record<string, unknown> = { active: true, per_page: 200 }
+    if (schoolId) params.school_id = schoolId
+    const response = await peopleService.getTeachers(params)
     teachers.value = response.data.map(t => ({
       ...t,
       label: t.user?.name ?? `Professor #${t.id}`,
@@ -212,6 +238,13 @@ async function loadTeachers() {
     loadingTeachers.value = false
   }
 }
+
+watch(selectedSchoolId, () => {
+  selectedTeacherId.value = null
+  schedules.value = []
+  timeSlots.value = []
+  loadTeachers()
+})
 
 async function loadSchedules() {
   const tid = isManager.value ? selectedTeacherId.value : teacherId.value
@@ -244,7 +277,11 @@ watch(selectedTeacherId, loadSchedules)
 
 onMounted(async () => {
   if (isManager.value) {
-    await loadTeachers()
+    if (shouldShowSchoolFilter.value) {
+      await loadSchools()
+    } else {
+      await loadTeachers()
+    }
     return
   }
   await resolveTeacherId()
@@ -254,24 +291,33 @@ onMounted(async () => {
 
 <template>
   <div class="p-6">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-      <h1 class="text-2xl font-semibold text-fluent-primary">Agenda</h1>
-      <div v-if="isManager" class="flex items-center gap-2">
-        <label class="text-[0.8125rem] font-medium">Professor:</label>
-        <Select
-          v-model="selectedTeacherId"
-          :options="teachers"
-          optionLabel="label"
-          optionValue="id"
-          :placeholder="loadingTeachers ? 'Carregando...' : 'Selecione'"
-          :disabled="loadingTeachers"
-          filter
-          class="w-64"
-        />
-      </div>
-    </div>
+    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Agenda</h1>
 
     <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
+      <div v-if="isManager" class="mb-4 flex flex-wrap items-end gap-4">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
+        </div>
+        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+        </div>
+        <div class="flex flex-col gap-1.5 w-64">
+          <label class="text-[0.8125rem] font-medium">Professor</label>
+          <Select
+            v-model="selectedTeacherId"
+            :options="teachers"
+            optionLabel="label"
+            optionValue="id"
+            :placeholder="loadingTeachers ? 'Carregando...' : 'Selecione'"
+            :disabled="loadingTeachers || (shouldShowSchoolFilter && !selectedSchoolId)"
+            filter
+            class="w-full"
+          />
+        </div>
+      </div>
+
       <div v-if="isManager && !selectedTeacherId && !loading">
         <EmptyState icon="pi pi-user" message="Selecione um professor para visualizar a agenda" />
       </div>

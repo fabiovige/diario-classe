@@ -21,7 +21,7 @@ const loading = ref(false)
 
 const form = ref({
   academic_year_id: null as number | null,
-  type: 'bimester' as string,
+  type: 'bimestral' as string,
   number: 1,
   name: '',
   start_date: '',
@@ -31,9 +31,9 @@ const form = ref({
 const academicYears = ref<AcademicYear[]>([])
 
 const typeOptions = [
-  { label: 'Bimestre', value: 'bimester' },
-  { label: 'Trimestre', value: 'trimester' },
-  { label: 'Semestre', value: 'semester' },
+  { label: 'Bimestral', value: 'bimestral' },
+  { label: 'Trimestral', value: 'trimestral' },
+  { label: 'Semestral', value: 'semestral' },
 ]
 
 async function loadAuxData() {

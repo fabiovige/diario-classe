@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import MetricCard from '@/shared/components/MetricCard.vue'
 import { periodClosingService } from '@/services/period-closing.service'
+import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
+import { useSchoolScope } from '@/composables/useSchoolScope'
 import { periodClosingStatusLabel } from '@/shared/utils/enum-labels'
 import type { PeriodClosing } from '@/types/period-closing'
+import type { School } from '@/types/school-structure'
 
 const router = useRouter()
 const toast = useToast()
+const { shouldShowSchoolFilter, userSchoolId, userSchoolName } = useSchoolScope()
 
 const items = ref<PeriodClosing[]>([])
 const loading = ref(false)
@@ -22,11 +27,33 @@ const totalRecords = ref(0)
 const currentPage = ref(1)
 const perPage = ref(15)
 
+const schools = ref<School[]>([])
+const selectedSchoolId = ref<number | null>(null)
+
 const dashboard = ref<Record<string, number> | null>(null)
+
+const hasActiveFilters = computed(() => selectedSchoolId.value !== null)
+
+async function loadSchools() {
+  try {
+    const response = await schoolStructureService.getSchools({ per_page: 200 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+}
+
+watch(selectedSchoolId, () => {
+  currentPage.value = 1
+  loadDashboard()
+  loadData()
+})
 
 async function loadDashboard() {
   try {
-    dashboard.value = await periodClosingService.getDashboard()
+    const params: Record<string, unknown> = {}
+    if (selectedSchoolId.value) params.school_id = selectedSchoolId.value
+    dashboard.value = await periodClosingService.getDashboard(params)
   } catch {
     toast.error('Erro ao carregar dashboard')
   }
@@ -35,10 +62,12 @@ async function loadDashboard() {
 async function loadData() {
   loading.value = true
   try {
-    const response = await periodClosingService.getClosings({
+    const params: Record<string, unknown> = {
       page: currentPage.value,
       per_page: perPage.value,
-    })
+    }
+    if (selectedSchoolId.value) params.school_id = selectedSchoolId.value
+    const response = await periodClosingService.getClosings(params)
     items.value = response.data
     totalRecords.value = response.meta.total
   } catch {
@@ -68,8 +97,23 @@ function onPageChange(event: { page: number; rows: number }) {
   loadData()
 }
 
-onMounted(async () => {
-  await Promise.all([loadDashboard(), loadData()])
+function clearFilters() {
+  selectedSchoolId.value = null
+  currentPage.value = 1
+  loadDashboard()
+  loadData()
+}
+
+onMounted(() => {
+  if (shouldShowSchoolFilter.value) {
+    loadSchools()
+  }
+  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+    selectedSchoolId.value = userSchoolId.value
+    return
+  }
+  loadDashboard()
+  loadData()
 })
 </script>
 
@@ -77,7 +121,19 @@ onMounted(async () => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Fechamento de Periodo</h1>
 
-    <div v-if="dashboard" class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 mb-6">
+    <div class="mb-6 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
+        <label class="text-[0.8125rem] font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
+      </div>
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-[0.8125rem] font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+    </div>
+
+    <div v-if="dashboard" class="mb-6 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
       <MetricCard title="Total" :value="dashboard.total ?? 0" label="Fechamentos" color="#0078D4" icon="pi pi-list" />
       <MetricCard title="Pendentes" :value="dashboard.pending ?? 0" label="Aguardando envio" color="#9D5D00" icon="pi pi-clock" />
       <MetricCard title="Em Validacao" :value="dashboard.in_validation ?? 0" label="Aguardando aprovacao" color="#005A9E" icon="pi pi-hourglass" />

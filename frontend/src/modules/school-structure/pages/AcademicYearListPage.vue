@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import Toolbar from 'primevue/toolbar'
 import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { useSchoolScope } from '@/composables/useSchoolScope'
 import { academicYearStatusLabel } from '@/shared/utils/enum-labels'
 import { formatDate } from '@/shared/utils/formatters'
-import type { AcademicYear } from '@/types/school-structure'
+import type { AcademicYear, School } from '@/types/school-structure'
 
 const router = useRouter()
 const toast = useToast()
 const { confirmDelete } = useConfirm()
+const { shouldShowSchoolFilter, userSchoolId, userSchoolName } = useSchoolScope()
 
 const items = ref<AcademicYear[]>([])
 const loading = ref(false)
@@ -27,11 +29,31 @@ const currentPage = ref(1)
 const perPage = ref(15)
 const search = ref('')
 
+const schools = ref<School[]>([])
+const selectedSchoolId = ref<number | null>(null)
+
+const hasActiveFilters = computed(() => selectedSchoolId.value !== null)
+
+async function loadSchools() {
+  try {
+    const response = await schoolStructureService.getSchools({ per_page: 200 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+}
+
+watch(selectedSchoolId, () => {
+  currentPage.value = 1
+  loadData()
+})
+
 async function loadData() {
   loading.value = true
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
     if (search.value) params.search = search.value
+    if (selectedSchoolId.value) params.school_id = selectedSchoolId.value
     const response = await schoolStructureService.getAcademicYears(params)
     items.value = response.data
     totalRecords.value = response.meta.total
@@ -53,6 +75,12 @@ function onSearch() {
   loadData()
 }
 
+function clearFilters() {
+  selectedSchoolId.value = null
+  currentPage.value = 1
+  loadData()
+}
+
 function handleDelete(item: AcademicYear) {
   confirmDelete(async () => {
     try {
@@ -65,7 +93,16 @@ function handleDelete(item: AcademicYear) {
   })
 }
 
-onMounted(loadData)
+onMounted(() => {
+  if (shouldShowSchoolFilter.value) {
+    loadSchools()
+  }
+  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+    selectedSchoolId.value = userSchoolId.value
+    return
+  }
+  loadData()
+})
 </script>
 
 <template>
@@ -73,15 +110,24 @@ onMounted(loadData)
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Anos Letivos</h1>
 
     <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-      <Toolbar class="mb-4 border-none bg-transparent p-0">
-        <template #start>
+      <div class="mb-4 flex flex-wrap items-end gap-4">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
+        </div>
+        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+        </div>
+        <div class="flex flex-col gap-1.5">
           <InputText v-model="search" placeholder="Buscar ano letivo..." @keyup.enter="onSearch" />
-          <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
-        </template>
-        <template #end>
+        </div>
+        <Button icon="pi pi-search" @click="onSearch" />
+        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+        <div class="ml-auto">
           <Button label="Novo Ano Letivo" icon="pi pi-plus" @click="router.push('/school-structure/academic-years/new')" />
-        </template>
-      </Toolbar>
+        </div>
+      </div>
 
       <EmptyState v-if="!loading && items.length === 0" message="Nenhum ano letivo encontrado" />
 
@@ -121,8 +167,8 @@ onMounted(loadData)
         :totalRecords="totalRecords"
         :first="(currentPage - 1) * perPage"
         :rowsPerPageOptions="[10, 15, 25, 50]"
-        @page="onPageChange"
         class="mt-4 border-t border-[#E0E0E0] pt-3"
+        @page="onPageChange"
       />
     </div>
   </div>

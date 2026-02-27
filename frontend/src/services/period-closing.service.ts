@@ -21,8 +21,8 @@ export const periodClosingService = {
   close(id: number): Promise<PeriodClosing> {
     return apiPost<PeriodClosing>(`period-closings/${id}/close`)
   },
-  getDashboard(): Promise<any> {
-    return apiGet('period-closings/dashboard')
+  getDashboard(params?: Record<string, unknown>): Promise<any> {
+    return apiGet('period-closings/dashboard', params)
   },
   createRectification(data: Partial<Rectification>): Promise<Rectification> {
     return apiPost<Rectification>('rectifications', data)

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
-import Toolbar from 'primevue/toolbar'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
 import EmptyState from '@/shared/components/EmptyState.vue'
@@ -12,12 +11,14 @@ import { assessmentService } from '@/services/assessment.service'
 import { schoolStructureService } from '@/services/school-structure.service'
 import { academicCalendarService } from '@/services/academic-calendar.service'
 import { useToast } from '@/composables/useToast'
+import { useSchoolScope } from '@/composables/useSchoolScope'
 import type { DescriptiveReport } from '@/types/assessment'
-import type { ClassGroup } from '@/types/school-structure'
+import type { ClassGroup, School } from '@/types/school-structure'
 import type { AssessmentPeriod } from '@/types/academic-calendar'
 
 const router = useRouter()
 const toast = useToast()
+const { shouldShowSchoolFilter, userSchoolId, userSchoolName } = useSchoolScope()
 
 const items = ref<DescriptiveReport[]>([])
 const loading = ref(false)
@@ -25,22 +26,37 @@ const totalRecords = ref(0)
 const currentPage = ref(1)
 const perPage = ref(15)
 
+const schools = ref<School[]>([])
 const classGroups = ref<(ClassGroup & { label: string })[]>([])
 const periods = ref<AssessmentPeriod[]>([])
+const selectedSchoolId = ref<number | null>(null)
 const selectedClassGroupId = ref<number | null>(null)
 const selectedPeriodId = ref<number | null>(null)
 
 const hasActiveFilters = computed(() =>
-  selectedClassGroupId.value !== null || selectedPeriodId.value !== null
+  selectedSchoolId.value !== null || selectedClassGroupId.value !== null || selectedPeriodId.value !== null
 )
 
 const selectedClassGroup = computed(() =>
   classGroups.value.find(cg => cg.id === selectedClassGroupId.value)
 )
 
-async function loadClassGroups() {
+async function loadSchools() {
   try {
-    const response = await schoolStructureService.getClassGroups({ per_page: 200 })
+    const response = await schoolStructureService.getSchools({ per_page: 200 })
+    schools.value = response.data
+  } catch {
+    toast.error('Erro ao carregar escolas')
+  }
+}
+
+async function loadClassGroups() {
+  if (!selectedSchoolId.value) {
+    classGroups.value = []
+    return
+  }
+  try {
+    const response = await schoolStructureService.getClassGroups({ school_id: selectedSchoolId.value, per_page: 200 })
     classGroups.value = response.data.map(cg => ({
       ...cg,
       label: [cg.grade_level?.name, cg.name, cg.shift?.name].filter(Boolean).join(' - '),
@@ -64,10 +80,31 @@ async function loadPeriods() {
   }
 }
 
+watch(selectedSchoolId, () => {
+  selectedClassGroupId.value = null
+  selectedPeriodId.value = null
+  classGroups.value = []
+  periods.value = []
+  loadClassGroups()
+  onFilter()
+})
+
+watch(selectedClassGroupId, () => {
+  selectedPeriodId.value = null
+  periods.value = []
+  loadPeriods()
+  onFilter()
+})
+
+watch(selectedPeriodId, () => {
+  onFilter()
+})
+
 async function loadData() {
   loading.value = true
   try {
     const params: Record<string, unknown> = { page: currentPage.value, per_page: perPage.value }
+    if (selectedSchoolId.value) params.school_id = selectedSchoolId.value
     if (selectedClassGroupId.value) params.class_group_id = selectedClassGroupId.value
     if (selectedPeriodId.value) params.assessment_period_id = selectedPeriodId.value
     const response = await assessmentService.getDescriptiveReports(params)
@@ -86,21 +123,16 @@ function onPageChange(event: { page: number; rows: number }) {
   loadData()
 }
 
-function onClassGroupChange() {
-  selectedPeriodId.value = null
-  currentPage.value = 1
-  loadPeriods()
-  loadData()
-}
-
-function onPeriodChange() {
+function onFilter() {
   currentPage.value = 1
   loadData()
 }
 
 function clearFilters() {
+  selectedSchoolId.value = null
   selectedClassGroupId.value = null
   selectedPeriodId.value = null
+  classGroups.value = []
   periods.value = []
   currentPage.value = 1
   loadData()
@@ -113,7 +145,13 @@ function truncate(text: string, maxLength = 60): string {
 }
 
 onMounted(() => {
-  loadClassGroups()
+  if (shouldShowSchoolFilter.value) {
+    loadSchools()
+  }
+  if (!shouldShowSchoolFilter.value && userSchoolId.value) {
+    selectedSchoolId.value = userSchoolId.value
+    return
+  }
   loadData()
 })
 </script>
@@ -123,25 +161,28 @@ onMounted(() => {
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Relatorios Descritivos</h1>
 
     <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-      <div class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Turma</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas as turmas" class="w-full" filter showClear @change="onClassGroupChange" />
+      <div class="mb-4 flex flex-wrap items-end gap-4">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+        </div>
+        <div class="flex flex-col gap-1.5 w-56">
+          <label class="text-[0.8125rem] font-medium">Turma</label>
+          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas as turmas" class="w-full" filter showClear :disabled="!selectedSchoolId" />
+        </div>
+        <div class="flex flex-col gap-1.5 w-48">
           <label class="text-[0.8125rem] font-medium">Periodo</label>
-          <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Todos os periodos" class="w-full" showClear :disabled="!selectedClassGroupId" @change="onPeriodChange" />
+          <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Todos os periodos" class="w-full" showClear :disabled="!selectedClassGroupId" />
+        </div>
+        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+        <div class="ml-auto">
+          <Button label="Novo Relatorio" icon="pi pi-plus" @click="router.push('/assessment/descriptive/new')" />
         </div>
       </div>
-
-      <Toolbar class="mb-4 border-none bg-transparent p-0">
-        <template #start>
-          <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-        </template>
-        <template #end>
-          <Button label="Novo Relatorio" icon="pi pi-plus" @click="router.push('/assessment/descriptive/new')" />
-        </template>
-      </Toolbar>
 
       <EmptyState v-if="!loading && items.length === 0" message="Nenhum relatorio descritivo encontrado" />
 

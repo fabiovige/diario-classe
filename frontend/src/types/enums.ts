@@ -22,7 +22,7 @@ export type GradeType = 'numeric' | 'conceptual' | 'descriptive'
 
 export type PeriodClosingStatus = 'pending' | 'in_validation' | 'approved' | 'closed'
 
-export type PeriodType = 'bimester' | 'trimester' | 'semester'
+export type PeriodType = 'bimestral' | 'trimestral' | 'semestral'
 
 export type FinalResultStatus = 'approved' | 'retained' | 'retained_by_absence' | 'council_approved'
 
