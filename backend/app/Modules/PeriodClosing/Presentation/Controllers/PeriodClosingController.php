@@ -176,8 +176,8 @@ class PeriodClosingController extends ApiController
             ->where('grade_level_id', $classGroup->grade_level_id)
             ->first();
 
-        $studentIds = ClassAssignment::where('class_group_id', $classGroupId)
-            ->where('status', 'active')
+        $studentIds = ClassAssignment::where('class_assignments.class_group_id', $classGroupId)
+            ->where('class_assignments.status', 'active')
             ->join('enrollments', 'class_assignments.enrollment_id', '=', 'enrollments.id')
             ->where('enrollments.status', 'active')
             ->join('students', 'enrollments.student_id', '=', 'students.id')

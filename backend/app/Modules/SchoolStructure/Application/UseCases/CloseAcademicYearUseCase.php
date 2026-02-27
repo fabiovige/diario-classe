@@ -55,8 +55,8 @@ final class CloseAcademicYearUseCase
     {
         $classGroupIds = $academicYear->classGroups->pluck('id');
 
-        $studentsInClasses = \App\Modules\Enrollment\Domain\Entities\ClassAssignment::whereIn('class_group_id', $classGroupIds)
-            ->where('status', 'active')
+        $studentsInClasses = \App\Modules\Enrollment\Domain\Entities\ClassAssignment::whereIn('class_assignments.class_group_id', $classGroupIds)
+            ->where('class_assignments.status', 'active')
             ->join('enrollments', 'class_assignments.enrollment_id', '=', 'enrollments.id')
             ->where('enrollments.status', 'active')
             ->distinct()

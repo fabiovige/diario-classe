@@ -18,8 +18,8 @@ final class CalculateBulkFinalResultsUseCase
     {
         $classGroup = ClassGroup::findOrFail($classGroupId);
 
-        $studentIds = ClassAssignment::where('class_group_id', $classGroup->id)
-            ->where('status', 'active')
+        $studentIds = ClassAssignment::where('class_assignments.class_group_id', $classGroup->id)
+            ->where('class_assignments.status', 'active')
             ->join('enrollments', 'class_assignments.enrollment_id', '=', 'enrollments.id')
             ->where('enrollments.status', 'active')
             ->pluck('enrollments.student_id')
