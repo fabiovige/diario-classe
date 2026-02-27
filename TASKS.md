@@ -79,7 +79,7 @@
 - [x] Enums: SchoolType, ShiftName, GradeLevelType, AcademicYearStatus
 - [x] CRUD completo com validacoes de dominio
 - [x] Regra: turma sempre vinculada a ano letivo + serie + turno + escola
-- [ ] Regra: ano letivo so pode fechar se todos os periodos avaliativos estiverem fechados
+- [x] Regra: ano letivo so pode fechar se todos os periodos avaliativos estiverem fechados
 - [x] Seeders com as 30 EMEBs de Jandira
 - [x] Escrever testes (SchoolTest, ClassGroupTest)
 
@@ -87,6 +87,7 @@
 
 - [x] Tela de listagem/cadastro de escolas (SchoolListPage, SchoolFormPage)
 - [x] Tela de configuracao de ano letivo (AcademicYearListPage, AcademicYearFormPage)
+- [x] Endpoint e UseCase para encerramento do ano letivo (CloseAcademicYearUseCase + POST /academic-years/{id}/close)
 - [x] Tela de gestao de turnos (ShiftListPage, ShiftFormPage)
 - [x] Tela de gestao de series/anos (GradeLevelListPage, GradeLevelFormPage)
 - [x] Tela de gestao de turmas (ClassGroupListPage, ClassGroupFormPage)
@@ -125,7 +126,7 @@
 - [x] Tipos de movimentacao: matricula_inicial, transferencia_interna, transferencia_externa, abandono, falecimento, reclassificacao
 - [x] Regra: aluno so pode ter uma enturmacao ativa por turno
 - [x] Regra: transferencia encerra enturmacao anterior e cria nova
-- [ ] Regra: movimentacoes geram audit trail automatico
+- [x] Regra: movimentacoes geram audit trail automatico
 - [x] UseCase: CreateEnrollment, AssignToClass, TransferEnrollment
 - [x] Service: EnrollmentNumberGenerator (geracao automatica de numero de matricula)
 - [x] Escrever testes (EnrollmentTest)
@@ -151,16 +152,21 @@
 - [x] Entidade ExperienceField (campo de experiencia - Ed. Infantil)
 - [ ] Entidade CurriculumMatrix (matriz: escola + serie + ano_letivo + componentes + carga_horaria)
 - [x] Entidade TeacherAssignment (vinculo professor + turma + componente/campo_experiencia)
+- [x] Entidade TimeSlot (faixa horaria: turno + numero + horario_inicio + horario_fim)
+- [x] Entidade ClassSchedule (grade horaria: atribuicao + dia_semana + faixa_horaria)
+- [x] Service: DailyClassSummary (resumo diario do professor com flags de pendencias)
 - [x] Regra: Ed. Infantil usa ExperienceField, Fundamental usa CurricularComponent
 - [ ] Regra: matriz configuravel por escola e ano letivo
 - [x] CRUD + validacoes
-- [x] Escrever testes (CurricularComponentTest, TeacherAssignmentTest, DailyClassSummaryTest)
+- [x] Escrever testes (CurricularComponentTest, TeacherAssignmentTest, DailyClassSummaryTest, ClassScheduleTest, TimeSlotTest)
 
 **Frontend:**
 
 - [x] Tela de configuracao de componentes curriculares (CurricularComponentListPage, CurricularComponentFormPage)
 - [x] Tela de campos de experiencia (ExperienceFieldListPage, ExperienceFieldFormPage)
 - [x] Tela de atribuicao professor-turma-componente (TeacherAssignmentListPage, TeacherAssignmentFormPage)
+- [x] Tela de gestao de horarios (TimeSlotListPage, ClassSchedulePage, TeacherSchedulePage)
+- [x] Tela de agenda mensal do professor (TeacherAgendaPage)
 - [x] Workspace unificado do professor (MyClassesPage, ClassSessionPage)
 
 ### 2.2 Calendario Escolar — `Modules/AcademicCalendar`
@@ -196,8 +202,8 @@
 - [ ] Entidade ActiveSearch (busca ativa: aluno + tentativas de contato)
 - [x] Service: FrequencyCalculator (calculo de % frequencia)
 - [x] Service: AttendanceAlertChecker (motor de alertas com limiares configuraveis)
-- [ ] Regra: alerta ao atingir X faltas consecutivas (parametro configuravel)
-- [ ] Regra: alerta ao atingir X faltas alternadas no mes (parametro configuravel)
+- [x] Regra: alerta ao atingir X faltas consecutivas (parametro configuravel)
+- [x] Regra: alerta ao atingir X faltas no mes (parametro configuravel)
 - [ ] Regra: alerta ao atingir X% de faltas no bimestre (parametro configuravel)
 - [x] UseCase: RecordBulkAttendance, JustifyAbsence, ApproveAbsenceJustification
 - [x] Escrever testes (AttendanceTest)
@@ -256,7 +262,7 @@
 - [x] Tela de lancamento de notas em lote (GradeBulkPage)
 - [x] Tela de consulta de notas (GradeListPage)
 - [x] Tela de lancamento descritivo (DescriptiveReportPage)
-- [x] Tela de boletim do aluno (ReportCardPage)
+- [x] Tela de boletim do aluno (ReportCardPage) com exportacao PDF client-side
 
 ### 3.2 Recuperacao — `Modules/Assessment`
 
@@ -302,7 +308,7 @@
 - [x] Entidade Rectification (retificacao: fechamento + campo_alterado + valor_anterior + valor_novo + justificativa)
 - [x] Workflow: Draft -> Submitted -> Validated -> Approved -> Closed
 - [x] Specification Pattern: LessonRecordsComplete, AttendanceComplete, GradesComplete
-- [x] UseCase: ClosePeriod, SubmitPeriodClosing, ValidatePeriodClosing, RunCompletenessCheck, CalculateFinalResult, RequestRectification
+- [x] UseCase: ClosePeriod, SubmitPeriodClosing, ValidatePeriodClosing, RunCompletenessCheck, CalculateFinalResult, RequestRectification, CalculateBulkFinalResults, CloseAcademicYear
 - [x] Regra: fechamento exige todas as notas e frequencia lancadas (specifications)
 - [ ] Regra: aprovacao hierarquica (professor -> coordenador -> diretor)
 - [x] Regra: dados imutaveis apos status "fechado"
@@ -316,6 +322,7 @@
 - [x] Tela de detalhe do fechamento (ClosingDetailPage)
 - [ ] Tela de retificacao pos-fechamento
 - [x] Tela de resultado final do ano letivo (FinalResultPage)
+- [x] Tela de resultado anual por turma com calculo em lote e exportacao PDF (AnnualResultPage)
 
 ---
 
@@ -456,7 +463,24 @@
 - [x] ExperienceFieldListPage: migrado para ExperienceFieldFormPage (usa router.push)
 - [x] TeacherAssignmentListPage: migrado para TeacherAssignmentFormPage (usa router.push)
 
-### U.2 Acoes faltantes nas listas
+### U.2 Filtros por escola padronizados (useSchoolScope + useListFilters)
+
+- [x] StudentListPage: filtro escola + ano letivo + turma
+- [x] EnrollmentListPage: filtro escola + ano letivo + turma + status
+- [x] AssessmentPeriodListPage: filtro escola + ano letivo
+- [x] TeacherAssignmentListPage: filtro escola + turma
+- [x] TeacherListPage: filtro escola
+- [x] UserListPage: filtro escola + perfil + status
+- [x] LessonRecordListPage: filtro escola + turma + data
+- [x] AttendanceBulkPage: filtro escola
+- [x] GradeBulkPage: filtro escola
+- [x] ClosingDashboardPage: filtro escola
+- [x] AnnualResultPage: filtro escola + ano letivo + turma
+- [x] FinalResultPage: filtro escola + turma + aluno
+- [x] TeacherAgendaPage: filtro escola + professor
+- [x] Persistencia de filtros na URL via query params (useListFilters)
+
+### U.3 Acoes faltantes nas listas
 
 - [x] AcademicYearListPage: possui editar, excluir, busca e criar
 - [x] AssessmentPeriodListPage: possui editar, excluir, busca e criar
