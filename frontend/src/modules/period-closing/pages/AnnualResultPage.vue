@@ -394,17 +394,9 @@ onMounted(async () => {
         <MetricCard title="Pendentes" :value="data.summary.pending" label="Sem resultado" color="#9D5D00" icon="pi pi-clock" />
       </div>
 
-      <div class="mb-4 flex flex-wrap gap-2">
+      <div class="mb-4 flex flex-wrap items-center gap-2">
         <Button label="Calcular Resultados" icon="pi pi-calculator" severity="info" :loading="calculating" :disabled="isYearClosed" @click="calculateBulk" />
         <Button label="Exportar PDF" icon="pi pi-file-pdf" severity="secondary" @click="exportPdf" />
-        <Button
-          label="Encerrar Ano Letivo"
-          icon="pi pi-lock"
-          severity="danger"
-          :disabled="isYearClosed || !allClassGroupsReady"
-          v-tooltip.top="!allClassGroupsReady && !isYearClosed ? `${notReadyCount} turma(s) nao estao prontas` : ''"
-          @click="showCloseDialog = true"
-        />
         <span v-if="isYearClosed" class="flex items-center gap-1 text-sm font-semibold text-[#0F7B0F]">
           <i class="pi pi-lock" /> Ano letivo encerrado
         </span>

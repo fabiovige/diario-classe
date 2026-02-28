@@ -23,6 +23,11 @@ const { confirmAction } = useConfirm()
 const closingId = Number(route.params.id)
 const closing = ref<PeriodClosing | null>(null)
 const loading = ref(true)
+const checking = ref(false)
+const closing_ = ref(false)
+const approving = ref(false)
+const rejecting = ref(false)
+const reopening = ref(false)
 const rejectionReason = ref('')
 const reopenReason = ref('')
 
@@ -57,33 +62,42 @@ function turmaName(c: PeriodClosing): string {
 
 function handleCheck() {
   confirmAction('Deseja verificar os dados deste fechamento? Isso vai checar se notas, frequencia e registros de aula estao completos.', async () => {
+    checking.value = true
     try {
       closing.value = await periodClosingService.check(closingId)
       toast.success('Verificacao concluida')
     } catch (error: unknown) {
       toast.error(extractApiError(error, 'Erro na verificacao'))
+    } finally {
+      checking.value = false
     }
   })
 }
 
 function handleTeacherClose() {
   confirmAction('Deseja fechar este bimestre? O sistema verificara automaticamente se todos os dados estao completos.', async () => {
+    closing_.value = true
     try {
       closing.value = await periodClosingService.teacherClose(closingId)
       toast.success('Bimestre fechado com sucesso')
     } catch (error: unknown) {
       toast.error(extractApiError(error, 'Erro ao fechar bimestre'))
+    } finally {
+      closing_.value = false
     }
   }, 'Fechar Bimestre')
 }
 
 function handleApprove() {
   confirmAction('Deseja aprovar este fechamento?', async () => {
+    approving.value = true
     try {
       closing.value = await periodClosingService.validate(closingId, { approve: true })
       toast.success('Fechamento aprovado')
     } catch (error: unknown) {
       toast.error(extractApiError(error, 'Erro ao aprovar'))
+    } finally {
+      approving.value = false
     }
   })
 }
@@ -94,6 +108,7 @@ function handleReject() {
     return
   }
   confirmAction('Deseja rejeitar este fechamento e devolver ao professor?', async () => {
+    rejecting.value = true
     try {
       closing.value = await periodClosingService.validate(closingId, {
         approve: false,
@@ -103,17 +118,22 @@ function handleReject() {
       toast.success('Fechamento rejeitado e devolvido')
     } catch (error: unknown) {
       toast.error(extractApiError(error, 'Erro ao rejeitar'))
+    } finally {
+      rejecting.value = false
     }
   })
 }
 
 function handleClose() {
   confirmAction('Deseja fechar definitivamente este periodo? Esta acao nao pode ser desfeita.', async () => {
+    closing_.value = true
     try {
       closing.value = await periodClosingService.close(closingId)
       toast.success('Periodo fechado com sucesso')
     } catch (error: unknown) {
       toast.error(extractApiError(error, 'Erro ao fechar'))
+    } finally {
+      closing_.value = false
     }
   }, 'Fechar Periodo')
 }
@@ -124,12 +144,15 @@ function handleReopen() {
     return
   }
   confirmAction('Deseja reabrir este fechamento? O professor podera fazer alteracoes novamente.', async () => {
+    reopening.value = true
     try {
       closing.value = await periodClosingService.reopen(closingId, reopenReason.value.trim())
       reopenReason.value = ''
       toast.success('Fechamento reaberto')
     } catch (error: unknown) {
       toast.error(extractApiError(error, 'Erro ao reabrir'))
+    } finally {
+      reopening.value = false
     }
   }, 'Reabrir')
 }
@@ -214,8 +237,8 @@ onMounted(loadClosing)
               Clique em <strong>Fechar Bimestre</strong> para fechar diretamente (o sistema verificara automaticamente se os dados estao completos).
             </p>
             <div class="flex flex-wrap gap-3">
-              <Button label="Fechar Bimestre" icon="pi pi-check-circle" severity="success" @click="handleTeacherClose" />
-              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined @click="handleCheck" />
+              <Button label="Fechar Bimestre" icon="pi pi-check-circle" severity="success" :loading="closing_" @click="handleTeacherClose" />
+              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined :loading="checking" @click="handleCheck" />
             </div>
           </template>
           <template v-else>
@@ -224,8 +247,8 @@ onMounted(loadClosing)
               Quando tudo estiver OK, clique em <strong>Fechar</strong>.
             </p>
             <div class="flex flex-wrap gap-3">
-              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined @click="handleCheck" />
-              <Button label="Fechar" icon="pi pi-lock" severity="success" @click="handleClose" />
+              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined :loading="checking" @click="handleCheck" />
+              <Button label="Fechar" icon="pi pi-lock" severity="success" :loading="closing_" @click="handleClose" />
             </div>
           </template>
         </div>
@@ -241,8 +264,8 @@ onMounted(loadClosing)
               <InputText v-model="rejectionReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
             </div>
             <div class="flex flex-wrap gap-3">
-              <Button label="Aprovar" icon="pi pi-check" severity="success" @click="handleApprove" />
-              <Button label="Rejeitar" icon="pi pi-times" severity="danger" @click="handleReject" />
+              <Button label="Aprovar" icon="pi pi-check" severity="success" :loading="approving" @click="handleApprove" />
+              <Button label="Rejeitar" icon="pi pi-times" severity="danger" :loading="rejecting" @click="handleReject" />
             </div>
           </div>
         </div>
@@ -253,7 +276,7 @@ onMounted(loadClosing)
             Fechamento aprovado. Clique para fechar definitivamente o periodo.
           </p>
           <div class="flex flex-wrap gap-3">
-            <Button label="Fechar Periodo" icon="pi pi-lock" severity="success" @click="handleClose" />
+            <Button label="Fechar Periodo" icon="pi pi-lock" severity="success" :loading="closing_" @click="handleClose" />
           </div>
         </div>
 
@@ -274,7 +297,7 @@ onMounted(loadClosing)
                   <InputText v-model="reopenReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
                 </div>
                 <div>
-                  <Button label="Reabrir Fechamento" icon="pi pi-replay" severity="warn" @click="handleReopen" />
+                  <Button label="Reabrir Fechamento" icon="pi pi-replay" severity="warn" :loading="reopening" @click="handleReopen" />
                 </div>
               </div>
             </div>
