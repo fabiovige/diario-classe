@@ -101,11 +101,17 @@ Route::middleware(['auth:sanctum', 'school.scope'])->group(function () {
 
     Route::get('period-closings', [PeriodClosingController::class, 'index']);
     Route::get('period-closings/dashboard', [PeriodClosingController::class, 'dashboard']);
+    Route::get('period-closings/pendencies', [PeriodClosingController::class, 'pendencies']);
+    Route::get('period-closings/my-closings', [PeriodClosingController::class, 'myClosings']);
+    Route::get('period-closings/class-group-status', [PeriodClosingController::class, 'classGroupStatus']);
+    Route::post('period-closings/bulk-teacher-close', [PeriodClosingController::class, 'bulkTeacherClose']);
     Route::get('period-closings/{id}', [PeriodClosingController::class, 'show']);
     Route::post('period-closings/{id}/check', [PeriodClosingController::class, 'check']);
     Route::post('period-closings/{id}/submit', [PeriodClosingController::class, 'submit']);
     Route::post('period-closings/{id}/validate', [PeriodClosingController::class, 'validate']);
     Route::post('period-closings/{id}/close', [PeriodClosingController::class, 'close']);
+    Route::post('period-closings/{id}/teacher-close', [PeriodClosingController::class, 'teacherClose']);
+    Route::post('period-closings/{id}/reopen', [PeriodClosingController::class, 'reopen']);
     Route::post('rectifications', [PeriodClosingController::class, 'storeRectification']);
     Route::post('rectifications/{id}/approve', [PeriodClosingController::class, 'approveRectification']);
     Route::post('final-results/calculate', [PeriodClosingController::class, 'calculateFinalResult']);

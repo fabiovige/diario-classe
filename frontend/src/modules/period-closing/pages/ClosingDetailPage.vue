@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -8,6 +8,7 @@ import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { periodClosingService } from '@/services/period-closing.service'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { useAuthStore } from '@/stores/auth'
 import { periodClosingStatusLabel } from '@/shared/utils/enum-labels'
 import { formatDateTime } from '@/shared/utils/formatters'
 import { extractApiError } from '@/shared/utils/api-error'
@@ -16,12 +17,17 @@ import type { PeriodClosing } from '@/types/period-closing'
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const auth = useAuthStore()
 const { confirmAction } = useConfirm()
 
 const closingId = Number(route.params.id)
 const closing = ref<PeriodClosing | null>(null)
 const loading = ref(true)
 const rejectionReason = ref('')
+const reopenReason = ref('')
+
+const isTeacher = computed(() => auth.hasRole('teacher'))
+const isCoordinatorOrDirector = computed(() => auth.hasRole('coordinator', 'director', 'admin'))
 
 async function loadClosing() {
   loading.value = true
@@ -58,6 +64,17 @@ function handleCheck() {
       toast.error(extractApiError(error, 'Erro na verificacao'))
     }
   })
+}
+
+function handleTeacherClose() {
+  confirmAction('Deseja fechar este bimestre? O sistema verificara automaticamente se todos os dados estao completos.', async () => {
+    try {
+      closing.value = await periodClosingService.teacherClose(closingId)
+      toast.success('Bimestre fechado com sucesso')
+    } catch (error: unknown) {
+      toast.error(extractApiError(error, 'Erro ao fechar bimestre'))
+    }
+  }, 'Fechar Bimestre')
 }
 
 function handleSubmit() {
@@ -112,6 +129,22 @@ function handleClose() {
   }, 'Fechar Periodo')
 }
 
+function handleReopen() {
+  if (!reopenReason.value.trim()) {
+    toast.warn('Informe o motivo da reabertura')
+    return
+  }
+  confirmAction('Deseja reabrir este fechamento? O professor podera fazer alteracoes novamente.', async () => {
+    try {
+      closing.value = await periodClosingService.reopen(closingId, reopenReason.value.trim())
+      reopenReason.value = ''
+      toast.success('Fechamento reaberto')
+    } catch (error: unknown) {
+      toast.error(extractApiError(error, 'Erro ao reabrir'))
+    }
+  }, 'Reabrir')
+}
+
 onMounted(loadClosing)
 </script>
 
@@ -158,7 +191,7 @@ onMounted(loadClosing)
             <span class="text-[0.9375rem]">{{ closing.approved_at ? formatDateTime(closing.approved_at) : '--' }}</span>
           </div>
           <div v-if="closing.rejection_reason" class="col-span-full flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Motivo Rejeicao</span>
+            <span class="text-xs font-semibold uppercase text-[#616161]">Motivo Rejeicao/Reabertura</span>
             <span class="text-[0.9375rem] text-[#C42B1C]">{{ closing.rejection_reason }}</span>
           </div>
         </div>
@@ -185,17 +218,30 @@ onMounted(loadClosing)
       <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold mb-4">Acoes</h2>
 
+        <!-- PENDING: Professor pode fechar direto ou enviar para validacao -->
         <div v-if="closing.status === 'pending'" class="flex flex-col gap-4">
-          <p class="text-sm text-[#616161]">
-            Use <strong>Verificar</strong> para checar se notas, frequencia e registros estao completos.
-            Quando tudo estiver completo, clique em <strong>Enviar</strong> para submeter a coordenacao.
-          </p>
-          <div class="flex flex-wrap gap-3">
-            <Button label="Verificar Completude" icon="pi pi-search" severity="info" @click="handleCheck" />
-            <Button label="Enviar para Validacao" icon="pi pi-send" severity="warn" @click="handleSubmit" />
-          </div>
+          <template v-if="isTeacher">
+            <p class="text-sm text-[#616161]">
+              Clique em <strong>Fechar Bimestre</strong> para fechar diretamente (o sistema verificara automaticamente se os dados estao completos).
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <Button label="Fechar Bimestre" icon="pi pi-check-circle" severity="success" @click="handleTeacherClose" />
+              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined @click="handleCheck" />
+            </div>
+          </template>
+          <template v-else>
+            <p class="text-sm text-[#616161]">
+              Use <strong>Verificar</strong> para checar se notas, frequencia e registros estao completos.
+              Quando tudo estiver completo, clique em <strong>Enviar</strong> para submeter a coordenacao.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <Button label="Verificar Completude" icon="pi pi-search" severity="info" @click="handleCheck" />
+              <Button label="Enviar para Validacao" icon="pi pi-send" severity="warn" @click="handleSubmit" />
+            </div>
+          </template>
         </div>
 
+        <!-- IN_VALIDATION: Coordenacao aprova ou rejeita -->
         <div v-else-if="closing.status === 'in_validation'" class="flex flex-col gap-4">
           <p class="text-sm text-[#616161]">
             Este fechamento esta aguardando validacao da coordenacao. Aprove ou rejeite com justificativa.
@@ -212,19 +258,38 @@ onMounted(loadClosing)
           </div>
         </div>
 
+        <!-- APPROVED: Fechar definitivamente -->
         <div v-else-if="closing.status === 'approved'" class="flex flex-col gap-4">
           <p class="text-sm text-[#616161]">
-            Fechamento aprovado. Clique para fechar definitivamente o periodo. <strong>Esta acao e irreversivel.</strong>
+            Fechamento aprovado. Clique para fechar definitivamente o periodo.
           </p>
           <div class="flex flex-wrap gap-3">
             <Button label="Fechar Periodo" icon="pi pi-lock" severity="success" @click="handleClose" />
           </div>
         </div>
 
+        <!-- CLOSED: Mensagem + opcao de reabrir para coordenador/diretor -->
         <div v-else-if="closing.status === 'closed'" class="flex flex-col gap-4">
           <p class="text-sm text-[#0F7B0F] font-medium">
-            <i class="pi pi-lock mr-1" /> Este periodo esta fechado. Nenhuma alteracao e permitida.
+            <i class="pi pi-lock mr-1" /> Este periodo esta fechado.
           </p>
+
+          <template v-if="isCoordinatorOrDirector">
+            <div class="border-t border-[#E0E0E0] pt-4">
+              <p class="text-sm text-[#616161] mb-3">
+                Como coordenador/diretor, voce pode reabrir este fechamento para que o professor faca correcoes.
+              </p>
+              <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[0.8125rem] font-medium">Motivo da reabertura</label>
+                  <InputText v-model="reopenReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
+                </div>
+                <div>
+                  <Button label="Reabrir Fechamento" icon="pi pi-replay" severity="warn" @click="handleReopen" />
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </template>

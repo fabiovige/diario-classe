@@ -98,3 +98,38 @@ export interface AnnualSubjectResult {
   final_average: number | null
   status: string
 }
+
+export interface BulkCloseResult {
+  closed: number[]
+  failed: { id: number; errors: string }[]
+}
+
+export interface TeacherPendencyClosing {
+  id: number
+  class_group: string
+  subject: string
+  period: string
+  status: string
+  grades_complete: boolean
+  attendance_complete: boolean
+  lesson_records_complete: boolean
+}
+
+export interface TeacherPendency {
+  teacher_id: number
+  teacher_name: string
+  total_pending: number
+  closings: TeacherPendencyClosing[]
+}
+
+export interface ClassGroupClosingStatus {
+  class_group_id: number
+  name: string
+  grade_level: string | null
+  shift: string | null
+  total_closings: number
+  closed_closings: number
+  total_students: number
+  students_with_results: number
+  ready: boolean
+}

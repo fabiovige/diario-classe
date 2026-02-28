@@ -23,10 +23,10 @@ enum ClosingStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Pending => [self::InValidation],
+            self::Pending => [self::InValidation, self::Closed],
             self::InValidation => [self::Pending, self::Approved],
             self::Approved => [self::Closed],
-            self::Closed => [],
+            self::Closed => [self::Pending],
         };
     }
 

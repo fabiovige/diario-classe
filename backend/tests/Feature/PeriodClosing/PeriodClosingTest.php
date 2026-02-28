@@ -7,6 +7,7 @@ use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
 use App\Modules\Identity\Domain\Entities\Role;
 use App\Modules\Identity\Domain\Enums\RoleSlug;
 use App\Modules\People\Domain\Entities\Teacher;
+use App\Modules\People\Domain\Entities\Student;
 use App\Modules\PeriodClosing\Domain\Entities\PeriodClosing;
 use App\Modules\PeriodClosing\Domain\Enums\ClosingStatus;
 use App\Modules\SchoolStructure\Domain\Entities\AcademicYear;
@@ -127,11 +128,191 @@ it('can close an approved period', function () {
         ->assertJsonPath('data.status', 'closed');
 });
 
-it('cannot close a pending period', function () {
+it('can close a pending period via standard close', function () {
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/period-closings/{$this->closing->id}/close");
+
+    $response->assertOk()
+        ->assertJsonPath('data.status', 'closed');
+});
+
+it('cannot close an in_validation period via standard close', function () {
+    $this->closing->update(['status' => ClosingStatus::InValidation->value]);
+
     $response = $this->actingAs($this->admin)
         ->postJson("/api/period-closings/{$this->closing->id}/close");
 
     $response->assertUnprocessable();
+});
+
+it('can teacher-close with complete data', function () {
+    $student = Student::factory()->create();
+
+    \App\Modules\Attendance\Domain\Entities\AttendanceRecord::create([
+        'class_group_id' => $this->classGroup->id,
+        'teacher_assignment_id' => $this->assignment->id,
+        'student_id' => $student->id,
+        'date' => $this->period->start_date->format('Y-m-d'),
+        'status' => 'present',
+    ]);
+    \App\Modules\ClassRecord\Domain\Entities\LessonRecord::create([
+        'teacher_assignment_id' => $this->assignment->id,
+        'class_group_id' => $this->classGroup->id,
+        'date' => $this->period->start_date->format('Y-m-d'),
+        'content' => 'Aula teste',
+        'methodology' => 'Expositiva',
+    ]);
+
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/period-closings/{$this->closing->id}/teacher-close");
+
+    $response->assertOk()
+        ->assertJsonPath('data.status', 'closed');
+
+    $this->closing->refresh();
+    expect($this->closing->submitted_by)->toBe($this->admin->id);
+    expect($this->closing->approved_by)->toBe($this->admin->id);
+});
+
+it('cannot teacher-close with incomplete data', function () {
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/period-closings/{$this->closing->id}/teacher-close");
+
+    $response->assertUnprocessable()
+        ->assertJsonPath('errors.completeness.0', fn ($msg) => str_contains($msg, 'Itens pendentes'));
+});
+
+it('cannot teacher-close a non-pending period', function () {
+    $this->closing->update(['status' => ClosingStatus::Closed->value]);
+
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/period-closings/{$this->closing->id}/teacher-close");
+
+    $response->assertUnprocessable();
+});
+
+it('can bulk teacher-close multiple periods', function () {
+    $student = Student::factory()->create();
+
+    $period2 = AssessmentPeriod::factory()->create([
+        'academic_year_id' => $this->academicYear->id,
+        'number' => 2,
+        'name' => '2º Bimestre',
+        'start_date' => '2026-04-20',
+        'end_date' => '2026-06-30',
+    ]);
+
+    PeriodClosing::create([
+        'class_group_id' => $this->classGroup->id,
+        'teacher_assignment_id' => $this->assignment->id,
+        'assessment_period_id' => $period2->id,
+        'status' => ClosingStatus::Pending->value,
+    ]);
+
+    \App\Modules\Attendance\Domain\Entities\AttendanceRecord::create([
+        'class_group_id' => $this->classGroup->id,
+        'teacher_assignment_id' => $this->assignment->id,
+        'student_id' => $student->id,
+        'date' => $this->period->start_date->format('Y-m-d'),
+        'status' => 'present',
+    ]);
+    \App\Modules\ClassRecord\Domain\Entities\LessonRecord::create([
+        'teacher_assignment_id' => $this->assignment->id,
+        'class_group_id' => $this->classGroup->id,
+        'date' => $this->period->start_date->format('Y-m-d'),
+        'content' => 'Aula teste',
+        'methodology' => 'Expositiva',
+    ]);
+    \App\Modules\Attendance\Domain\Entities\AttendanceRecord::create([
+        'class_group_id' => $this->classGroup->id,
+        'teacher_assignment_id' => $this->assignment->id,
+        'student_id' => $student->id,
+        'date' => '2026-04-25',
+        'status' => 'present',
+    ]);
+    \App\Modules\ClassRecord\Domain\Entities\LessonRecord::create([
+        'teacher_assignment_id' => $this->assignment->id,
+        'class_group_id' => $this->classGroup->id,
+        'date' => '2026-04-25',
+        'content' => 'Aula teste 2',
+        'methodology' => 'Expositiva',
+    ]);
+
+    $response = $this->actingAs($this->admin)
+        ->postJson('/api/period-closings/bulk-teacher-close', [
+            'class_group_id' => $this->classGroup->id,
+            'teacher_assignment_id' => $this->assignment->id,
+        ]);
+
+    $response->assertOk();
+    $data = $response->json('data');
+    expect($data['closed'])->toHaveCount(2);
+    expect($data['failed'])->toBeEmpty();
+});
+
+it('can reopen a closed period', function () {
+    $this->closing->update(['status' => ClosingStatus::Closed->value]);
+
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/period-closings/{$this->closing->id}/reopen", [
+            'reason' => 'Professor precisa corrigir notas',
+        ]);
+
+    $response->assertOk()
+        ->assertJsonPath('data.status', 'pending')
+        ->assertJsonPath('data.rejection_reason', 'Professor precisa corrigir notas');
+});
+
+it('cannot reopen a non-closed period', function () {
+    $response = $this->actingAs($this->admin)
+        ->postJson("/api/period-closings/{$this->closing->id}/reopen", [
+            'reason' => 'Teste',
+        ]);
+
+    $response->assertUnprocessable();
+});
+
+it('can get pendencies grouped by teacher', function () {
+    $response = $this->actingAs($this->admin)
+        ->getJson("/api/period-closings/pendencies?school_id={$this->school->id}&academic_year_id={$this->academicYear->id}");
+
+    $response->assertOk();
+    $data = $response->json('data');
+    expect($data)->toHaveCount(1);
+    expect($data[0]['teacher_name'])->not->toBeEmpty();
+    expect($data[0]['total_pending'])->toBe(1);
+});
+
+it('can get my-closings for teacher user', function () {
+    $teacherUser = $this->teacher->user;
+    $teacherUser->update(['school_id' => $this->school->id]);
+
+    $response = $this->actingAs($teacherUser)
+        ->getJson('/api/period-closings/my-closings');
+
+    $response->assertOk();
+    $data = $response->json('data');
+    expect($data)->toHaveCount(1);
+});
+
+it('returns empty for non-teacher user on my-closings', function () {
+    $response = $this->actingAs($this->admin)
+        ->getJson('/api/period-closings/my-closings');
+
+    $response->assertOk();
+    $data = $response->json('data');
+    expect($data)->toBeEmpty();
+});
+
+it('can get class-group-status', function () {
+    $response = $this->actingAs($this->admin)
+        ->getJson("/api/period-closings/class-group-status?academic_year_id={$this->academicYear->id}");
+
+    $response->assertOk();
+    $data = $response->json('data');
+    expect($data)->toHaveCount(1);
+    expect($data[0]['class_group_id'])->toBe($this->classGroup->id);
+    expect($data[0]['ready'])->toBeFalse();
 });
 
 it('can request a rectification on closed period', function () {

@@ -8,13 +8,18 @@ use App\Modules\Assessment\Domain\Entities\FinalAverage;
 use App\Modules\Assessment\Domain\Entities\PeriodAverage;
 use App\Modules\Curriculum\Domain\Entities\TeacherAssignment;
 use App\Modules\Enrollment\Domain\Entities\ClassAssignment;
+use App\Modules\PeriodClosing\Application\UseCases\BulkTeacherClosePeriodUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\CalculateBulkFinalResultsUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\CalculateFinalResultUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\ClosePeriodUseCase;
+use App\Modules\PeriodClosing\Application\UseCases\ReopenPeriodClosingUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\RequestRectificationUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\RunCompletenessCheckUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\SubmitPeriodClosingUseCase;
+use App\Modules\PeriodClosing\Application\UseCases\TeacherClosePeriodUseCase;
 use App\Modules\PeriodClosing\Application\UseCases\ValidatePeriodClosingUseCase;
+use App\Modules\PeriodClosing\Domain\Enums\ClosingStatus;
+use App\Modules\People\Domain\Entities\Teacher;
 use App\Modules\PeriodClosing\Domain\Entities\PeriodClosing;
 use App\Modules\PeriodClosing\Domain\Entities\Rectification;
 use App\Modules\PeriodClosing\Presentation\Requests\RequestRectificationRequest;
@@ -88,6 +93,191 @@ class PeriodClosingController extends ApiController
         $closing = $useCase->execute($id);
 
         return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
+    }
+
+    public function teacherClose(int $id, TeacherClosePeriodUseCase $useCase): JsonResponse
+    {
+        $closing = $useCase->execute($id);
+
+        return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
+    }
+
+    public function bulkTeacherClose(Request $request, BulkTeacherClosePeriodUseCase $useCase): JsonResponse
+    {
+        $result = $useCase->execute(
+            classGroupId: (int) $request->input('class_group_id'),
+            teacherAssignmentId: (int) $request->input('teacher_assignment_id'),
+        );
+
+        return $this->success($result);
+    }
+
+    public function reopen(Request $request, int $id, ReopenPeriodClosingUseCase $useCase): JsonResponse
+    {
+        $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $closing = $useCase->execute($id, $request->input('reason'));
+
+        return $this->success(new PeriodClosingResource($closing->load(self::EAGER_RELATIONS)));
+    }
+
+    public function pendencies(Request $request): JsonResponse
+    {
+        $request->validate([
+            'school_id' => 'required|integer',
+            'academic_year_id' => 'required|integer',
+        ]);
+
+        $rows = DB::table('period_closings as pc')
+            ->join('teacher_assignments as ta', 'pc.teacher_assignment_id', '=', 'ta.id')
+            ->join('teachers as t', 'ta.teacher_id', '=', 't.id')
+            ->join('users as u', 't.user_id', '=', 'u.id')
+            ->join('class_groups as cg', 'pc.class_group_id', '=', 'cg.id')
+            ->join('academic_years as ay', 'cg.academic_year_id', '=', 'ay.id')
+            ->join('assessment_periods as ap', 'pc.assessment_period_id', '=', 'ap.id')
+            ->leftJoin('curricular_components as cc', 'ta.curricular_component_id', '=', 'cc.id')
+            ->leftJoin('experience_fields as ef', 'ta.experience_field_id', '=', 'ef.id')
+            ->where('ay.school_id', $request->query('school_id'))
+            ->where('cg.academic_year_id', $request->query('academic_year_id'))
+            ->where('pc.status', '!=', ClosingStatus::Closed->value)
+            ->select([
+                't.id as teacher_id',
+                'u.name as teacher_name',
+                'pc.id as closing_id',
+                'cg.name as class_group_name',
+                DB::raw('COALESCE(cc.name, ef.name) as subject_name'),
+                'ap.name as period_name',
+                'pc.status',
+                'pc.all_grades_complete',
+                'pc.all_attendance_complete',
+                'pc.all_lesson_records_complete',
+            ])
+            ->orderBy('u.name')
+            ->orderBy('cg.name')
+            ->orderBy('ap.number')
+            ->get();
+
+        $grouped = $rows->groupBy('teacher_id')->map(function ($closings) {
+            $first = $closings->first();
+
+            return [
+                'teacher_id' => $first->teacher_id,
+                'teacher_name' => $first->teacher_name,
+                'total_pending' => $closings->count(),
+                'closings' => $closings->map(fn ($c) => [
+                    'id' => $c->closing_id,
+                    'class_group' => $c->class_group_name,
+                    'subject' => $c->subject_name,
+                    'period' => $c->period_name,
+                    'status' => $c->status,
+                    'grades_complete' => (bool) $c->all_grades_complete,
+                    'attendance_complete' => (bool) $c->all_attendance_complete,
+                    'lesson_records_complete' => (bool) $c->all_lesson_records_complete,
+                ])->values(),
+            ];
+        })->values();
+
+        return $this->success($grouped);
+    }
+
+    public function myClosings(Request $request): JsonResponse
+    {
+        $teacher = Teacher::where('user_id', auth()->id())->first();
+
+        if (! $teacher) {
+            return $this->success([]);
+        }
+
+        $assignmentIds = TeacherAssignment::where('teacher_id', $teacher->id)
+            ->pluck('id');
+
+        $closings = PeriodClosing::with(self::EAGER_RELATIONS)
+            ->whereIn('teacher_assignment_id', $assignmentIds)
+            ->when($request->query('academic_year_id'), fn ($q, $id) => $q->whereHas('classGroup', fn ($q2) => $q2->where('academic_year_id', $id)))
+            ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
+            ->orderByDesc('created_at')
+            ->get();
+
+        return $this->success(PeriodClosingResource::collection($closings));
+    }
+
+    public function classGroupStatus(Request $request): JsonResponse
+    {
+        $request->validate([
+            'academic_year_id' => 'required|integer',
+        ]);
+
+        $academicYearId = (int) $request->query('academic_year_id');
+
+        $classGroups = ClassGroup::with(['gradeLevel', 'shift'])
+            ->where('academic_year_id', $academicYearId)
+            ->orderBy('name')
+            ->get();
+
+        $closingCounts = DB::table('period_closings')
+            ->whereIn('class_group_id', $classGroups->pluck('id'))
+            ->select([
+                'class_group_id',
+                DB::raw('COUNT(*) as total'),
+                DB::raw("SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed_count"),
+            ])
+            ->groupBy('class_group_id')
+            ->get()
+            ->keyBy('class_group_id');
+
+        $studentCounts = DB::table('class_assignments')
+            ->join('enrollments', 'class_assignments.enrollment_id', '=', 'enrollments.id')
+            ->whereIn('class_assignments.class_group_id', $classGroups->pluck('id'))
+            ->where('class_assignments.status', 'active')
+            ->where('enrollments.status', 'active')
+            ->select([
+                'class_assignments.class_group_id',
+                DB::raw('COUNT(DISTINCT enrollments.student_id) as total_students'),
+            ])
+            ->groupBy('class_assignments.class_group_id')
+            ->get()
+            ->keyBy('class_group_id');
+
+        $resultCounts = DB::table('final_results')
+            ->where('academic_year_id', $academicYearId)
+            ->whereIn('class_group_id', $classGroups->pluck('id'))
+            ->select([
+                'class_group_id',
+                DB::raw('COUNT(DISTINCT student_id) as students_with_results'),
+            ])
+            ->groupBy('class_group_id')
+            ->get()
+            ->keyBy('class_group_id');
+
+        $data = $classGroups->map(function ($cg) use ($closingCounts, $studentCounts, $resultCounts) {
+            $closing = $closingCounts->get($cg->id);
+            $students = $studentCounts->get($cg->id);
+            $results = $resultCounts->get($cg->id);
+
+            $totalClosings = $closing ? (int) $closing->total : 0;
+            $closedClosings = $closing ? (int) $closing->closed_count : 0;
+            $totalStudents = $students ? (int) $students->total_students : 0;
+            $studentsWithResults = $results ? (int) $results->students_with_results : 0;
+
+            $allClosingsDone = $totalClosings > 0 && $closedClosings === $totalClosings;
+            $allResultsDone = $totalStudents > 0 && $studentsWithResults >= $totalStudents;
+
+            return [
+                'class_group_id' => $cg->id,
+                'name' => $cg->name,
+                'grade_level' => $cg->gradeLevel?->name,
+                'shift' => $cg->shift?->name?->label(),
+                'total_closings' => $totalClosings,
+                'closed_closings' => $closedClosings,
+                'total_students' => $totalStudents,
+                'students_with_results' => $studentsWithResults,
+                'ready' => $allClosingsDone && $allResultsDone,
+            ];
+        });
+
+        return $this->success($data);
     }
 
     public function dashboard(Request $request): JsonResponse
