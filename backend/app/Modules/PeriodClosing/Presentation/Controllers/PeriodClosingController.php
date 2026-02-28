@@ -92,18 +92,30 @@ class PeriodClosingController extends ApiController
 
     public function dashboard(Request $request): JsonResponse
     {
-        $closings = PeriodClosing::with('assessmentPeriod')
+        $query = DB::table('period_closings')
             ->when($request->query('school_id'), function ($q, $schoolId) {
-                $q->whereHas('classGroup.academicYear', fn ($sub) => $sub->where('school_id', $schoolId));
-            })
-            ->get();
+                $q->whereIn('class_group_id', function ($sub) use ($schoolId) {
+                    $sub->select('id')
+                        ->from('class_groups')
+                        ->whereIn('academic_year_id', function ($sub2) use ($schoolId) {
+                            $sub2->select('id')
+                                ->from('academic_years')
+                                ->where('school_id', $schoolId);
+                        });
+                });
+            });
+
+        $counts = (clone $query)
+            ->selectRaw("status, COUNT(*) as total")
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
         $summary = [
-            'total' => $closings->count(),
-            'pending' => $closings->where('status.value', 'pending')->count(),
-            'in_validation' => $closings->where('status.value', 'in_validation')->count(),
-            'approved' => $closings->where('status.value', 'approved')->count(),
-            'closed' => $closings->where('status.value', 'closed')->count(),
+            'total' => $counts->sum(),
+            'pending' => (int) ($counts['pending'] ?? 0),
+            'in_validation' => (int) ($counts['in_validation'] ?? 0),
+            'approved' => (int) ($counts['approved'] ?? 0),
+            'closed' => (int) ($counts['closed'] ?? 0),
         ];
 
         return $this->success($summary);
