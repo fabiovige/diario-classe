@@ -51,7 +51,7 @@ const isEmpty = computed(() => !props.loading && props.items.length === 0)
           <InputText
             v-if="showSearch"
             :placeholder="searchPlaceholder"
-            class="w-[280px]"
+            class="w-full md:w-[280px]"
             @input="emit('search', ($event.target as HTMLInputElement).value)"
           />
         </template>

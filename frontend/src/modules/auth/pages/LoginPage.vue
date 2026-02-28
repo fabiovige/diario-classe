@@ -43,12 +43,12 @@ async function handleLogin() {
 
     <form @submit.prevent="handleLogin" class="flex flex-col gap-5">
       <div class="flex flex-col gap-1.5">
-        <label for="email" class="text-[0.8125rem] font-medium text-[#1A1A1A]">E-mail</label>
+        <label for="email" class="text-sm font-medium text-[#1A1A1A]">E-mail</label>
         <InputText id="email" v-model="email" type="email" placeholder="seu@email.com" class="w-full" required autofocus />
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label for="password" class="text-[0.8125rem] font-medium text-[#1A1A1A]">Senha</label>
+        <label for="password" class="text-sm font-medium text-[#1A1A1A]">Senha</label>
         <Password id="password" v-model="password" :feedback="false" toggleMask class="w-full" inputClass="w-full" required />
       </div>
 

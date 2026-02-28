@@ -249,7 +249,7 @@ onMounted(loadEnrollment)
       </div>
     </div>
 
-    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
         <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase text-[#616161]">Numero</span>
@@ -282,7 +282,7 @@ onMounted(loadEnrollment)
       </div>
     </div>
 
-    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm mt-6">
+    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm mt-6">
       <h2 class="text-lg font-semibold mb-4">Enturmacoes</h2>
       <EmptyState v-if="!enrollment.class_assignments || enrollment.class_assignments.length === 0" message="Nenhuma enturmacao registrada" />
       <DataTable v-if="enrollment.class_assignments && enrollment.class_assignments.length > 0" :value="enrollment.class_assignments" stripedRows responsiveLayout="scroll">
@@ -315,7 +315,7 @@ onMounted(loadEnrollment)
       </DataTable>
     </div>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm mt-6">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm mt-6">
       <h2 class="text-lg font-semibold mb-4">Movimentacoes</h2>
       <EmptyState v-if="movements.length === 0" message="Nenhuma movimentacao registrada" />
       <DataTable v-if="movements.length > 0" :value="movements" stripedRows responsiveLayout="scroll">
@@ -353,11 +353,11 @@ onMounted(loadEnrollment)
     <FormDialog v-model:visible="assignDialogVisible" title="Enturmar Aluno" :loading="assignLoading" @save="handleAssign">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <label class="text-sm font-medium">Turma *</label>
           <Select v-model="assignForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data de Inicio *</label>
+          <label class="text-sm font-medium">Data de Inicio *</label>
           <DatePicker v-model="assignForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
         </div>
       </div>
@@ -366,19 +366,19 @@ onMounted(loadEnrollment)
     <FormDialog v-model:visible="movementDialogVisible" title="Registrar Movimentacao" :loading="movementLoading" @save="handleMovement">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Tipo *</label>
+          <label class="text-sm font-medium">Tipo *</label>
           <Select v-model="movementForm.type" :options="movementTypeOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data *</label>
+          <label class="text-sm font-medium">Data *</label>
           <DatePicker v-model="movementForm.movement_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
         </div>
         <div v-if="isTransferType(movementForm.type)" class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Escola Destino</label>
+          <label class="text-sm font-medium">Escola Destino</label>
           <Select v-model="movementForm.destination_school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Motivo</label>
+          <label class="text-sm font-medium">Motivo</label>
           <InputText v-model="movementForm.reason" placeholder="Motivo da movimentacao" class="w-full" />
         </div>
       </div>
@@ -387,19 +387,19 @@ onMounted(loadEnrollment)
     <FormDialog v-model:visible="editAssignmentDialogVisible" title="Editar Enturmacao" :loading="editAssignmentLoading" @save="handleEditAssignment">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <label class="text-sm font-medium">Turma *</label>
           <Select v-model="editAssignmentForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data de Inicio *</label>
+          <label class="text-sm font-medium">Data de Inicio *</label>
           <DatePicker v-model="editAssignmentForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data de Fim</label>
+          <label class="text-sm font-medium">Data de Fim</label>
           <DatePicker v-model="editAssignmentForm.end_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon showButtonBar />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Status *</label>
+          <label class="text-sm font-medium">Status *</label>
           <Select v-model="editAssignmentForm.status" :options="classAssignmentStatusOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
       </div>

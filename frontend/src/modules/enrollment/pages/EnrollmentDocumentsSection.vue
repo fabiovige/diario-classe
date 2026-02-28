@@ -175,7 +175,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm mt-6">
+  <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm mt-6">
     <div class="flex items-center justify-between mb-5">
       <h2 class="text-lg font-semibold">Documentos</h2>
       <span v-if="documents.length > 0" class="text-sm text-[#616161]">
@@ -313,7 +313,7 @@ onUnmounted(() => {
       v-model:visible="rejectVisible"
       header="Rejeitar Documento"
       modal
-      :style="{ width: '500px' }"
+      :style="{ width: 'min(500px, 95vw)' }"
     >
       <div class="flex flex-col gap-3">
         <p class="text-sm text-[#616161]">

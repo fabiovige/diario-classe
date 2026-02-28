@@ -292,7 +292,7 @@ onMounted(() => {
         <Button label="Fechar Todos Pendentes" icon="pi pi-check-circle" severity="success" @click="handleBulkTeacherClose" />
       </div>
 
-      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <EmptyState v-if="!myLoading && myClosings.length === 0" message="Nenhum fechamento encontrado" />
 
         <DataTable v-if="myClosings.length > 0" :value="myClosings" :loading="myLoading" stripedRows responsiveLayout="scroll">
@@ -342,16 +342,16 @@ onMounted(() => {
       <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Fechamento de Periodo</h1>
 
       <div class="mb-6 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
-          <label class="text-[0.8125rem] font-medium">Escola</label>
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+          <label class="text-sm font-medium">Escola</label>
           <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
         </div>
         <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <label class="text-sm font-medium">Escola</label>
           <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
         </div>
-        <div class="flex flex-col gap-1.5 w-48">
-          <label class="text-[0.8125rem] font-medium">Ano Letivo</label>
+        <div class="flex flex-col gap-1.5 w-full md:w-48">
+          <label class="text-sm font-medium">Ano Letivo</label>
           <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" showClear />
         </div>
         <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />

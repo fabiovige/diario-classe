@@ -83,7 +83,7 @@ onMounted(loadData)
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Justificativas de Falta</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start />
         <template #end>
@@ -121,23 +121,23 @@ onMounted(loadData)
     <FormDialog v-model:visible="dialogVisible" title="Nova Justificativa" :loading="dialogLoading" @save="handleSave">
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">ID do Aluno *</label>
+          <label class="text-sm font-medium">ID do Aluno *</label>
           <InputText :modelValue="String(form.student_id ?? '')" @update:modelValue="form.student_id = $event ? Number($event) : null" type="number" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data Inicio *</label>
+          <label class="text-sm font-medium">Data Inicio *</label>
           <InputText v-model="form.start_date" type="date" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data Fim *</label>
+          <label class="text-sm font-medium">Data Fim *</label>
           <InputText v-model="form.end_date" type="date" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Motivo *</label>
+          <label class="text-sm font-medium">Motivo *</label>
           <Textarea v-model="form.reason" rows="3" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Caminho do Documento</label>
+          <label class="text-sm font-medium">Caminho do Documento</label>
           <InputText v-model="form.document_path" class="w-full" />
         </div>
       </div>

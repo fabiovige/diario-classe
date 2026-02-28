@@ -90,7 +90,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <EmptyState v-if="!loading && records.length === 0" message="Nenhum registro de frequencia" />
 
       <DataTable v-if="records.length > 0" :value="records" :loading="loading" stripedRows responsiveLayout="scroll">

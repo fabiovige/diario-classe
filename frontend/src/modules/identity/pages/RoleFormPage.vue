@@ -146,19 +146,19 @@ onMounted(loadRole)
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">{{ isEdit ? 'Editar Perfil' : 'Novo Perfil' }}</h1>
 
-    <div class="max-w-175 rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
+    <div class="max-w-175 rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Nome *</label>
+          <label class="text-sm font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
         <div v-if="!isEdit" class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Slug *</label>
+          <label class="text-sm font-medium">Slug *</label>
           <InputText v-model="form.slug" required class="w-full" />
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-[0.8125rem] font-medium">Permissoes</label>
+          <label class="text-sm font-medium">Permissoes</label>
           <div class="grid grid-cols-2 gap-4 rounded-md border border-fluent-border p-4">
             <div v-for="group in permissionGroups" :key="group.label" class="flex flex-col gap-1.5">
               <span class="text-xs font-semibold text-gray-500 uppercase">{{ group.label }}</span>

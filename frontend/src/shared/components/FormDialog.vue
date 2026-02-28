@@ -11,7 +11,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   loading: false,
-  width: '500px',
+  width: 'min(500px, 95vw)',
 })
 
 const emit = defineEmits<{

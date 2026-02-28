@@ -101,7 +101,7 @@ onMounted(async () => {
       <h1 class="text-2xl font-semibold text-[#0078D4]">{{ isTeacher ? 'Minhas Aulas' : 'Aulas do Professor' }}</h1>
       <div class="flex flex-wrap items-center gap-3">
         <div v-if="isManager" class="flex items-center gap-2">
-          <label class="text-[0.8125rem] font-medium">Professor:</label>
+          <label class="text-sm font-medium">Professor:</label>
           <Select
             v-model="selectedTeacherId"
             :options="teachers"
@@ -110,17 +110,17 @@ onMounted(async () => {
             :placeholder="loadingTeachers ? 'Carregando...' : 'Selecione'"
             :disabled="loadingTeachers"
             filter
-            class="w-64"
+            class="w-full md:w-64"
           />
         </div>
         <div class="flex items-center gap-2">
-          <label class="text-[0.8125rem] font-medium">Data:</label>
+          <label class="text-sm font-medium">Data:</label>
           <InputText v-model="selectedDate" type="date" />
         </div>
       </div>
     </div>
 
-    <div v-if="isManager && !selectedTeacherId && !loading" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="isManager && !selectedTeacherId && !loading" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <EmptyState icon="pi pi-user" message="Selecione um professor para visualizar suas aulas" />
     </div>
 

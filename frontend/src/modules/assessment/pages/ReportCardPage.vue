@@ -188,7 +188,7 @@ onMounted(loadData)
     <EmptyState v-if="!loading && !report" message="Boletim nao disponivel" />
 
     <div v-if="report" id="report-card-content">
-      <div class="mb-6 flex items-center gap-4 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="mb-6 flex items-center gap-4 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#0078D4] text-xl font-bold text-white">
           {{ getInitials(report.student.display_name ?? report.student.name) }}
         </div>
@@ -201,17 +201,17 @@ onMounted(loadData)
         </div>
       </div>
 
-      <div class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <Toolbar class="mb-0 border-none bg-transparent p-0">
           <template #start>
             <div class="flex flex-wrap items-end gap-4">
               <div class="flex flex-col gap-1">
-                <label class="text-[0.8125rem] font-medium">Materia</label>
-                <Select v-model="selectedSubjectId" :options="subjectOptions" optionLabel="name" optionValue="id" placeholder="Todas as materias" class="w-56" filter showClear />
+                <label class="text-sm font-medium">Materia</label>
+                <Select v-model="selectedSubjectId" :options="subjectOptions" optionLabel="name" optionValue="id" placeholder="Todas as materias" class="w-full md:w-56" filter showClear />
               </div>
               <div class="flex flex-col gap-1">
-                <label class="text-[0.8125rem] font-medium">Periodo</label>
-                <Select v-model="selectedPeriodNumber" :options="periodOptions" optionLabel="name" optionValue="number" placeholder="Todos os periodos" class="w-56" showClear />
+                <label class="text-sm font-medium">Periodo</label>
+                <Select v-model="selectedPeriodNumber" :options="periodOptions" optionLabel="name" optionValue="number" placeholder="Todos os periodos" class="w-full md:w-56" showClear />
               </div>
               <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
             </div>
@@ -223,7 +223,7 @@ onMounted(loadData)
       </div>
 
       <div class="mb-6 grid gap-6" :class="isNumeric && radarDatasets.length > 0 ? 'grid-cols-1 lg:grid-cols-[1fr_320px]' : ''">
-        <div v-if="isNumeric && radarDatasets.length > 0" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+        <div v-if="isNumeric && radarDatasets.length > 0" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
           <h3 class="mb-4 text-base font-semibold">Desempenho por Materia</h3>
           <RadarChart
             :labels="radarLabels"
@@ -233,7 +233,7 @@ onMounted(loadData)
           />
         </div>
 
-        <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+        <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
           <h3 class="mb-4 text-base font-semibold">Frequencia</h3>
           <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col items-center gap-1 rounded-lg border border-[#E0E0E0] p-4 text-center">
@@ -248,7 +248,7 @@ onMounted(loadData)
         </div>
       </div>
 
-      <div class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <h3 class="mb-4 text-base font-semibold">Notas</h3>
         <EmptyState v-if="filteredSubjects.length === 0" message="Nenhuma materia encontrada" />
         <DataTable v-if="filteredSubjects.length > 0" :value="filteredSubjects" stripedRows responsiveLayout="scroll">
@@ -284,7 +284,7 @@ onMounted(loadData)
         </DataTable>
       </div>
 
-      <div v-if="report.descriptive_reports.length > 0" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div v-if="report.descriptive_reports.length > 0" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <h3 class="mb-4 text-base font-semibold">Relatorios Descritivos</h3>
         <DataTable :value="report.descriptive_reports" stripedRows responsiveLayout="scroll">
           <Column header="Campo de Experiencia" field="experience_field" :style="{ minWidth: '180px' }" />

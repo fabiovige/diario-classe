@@ -111,30 +111,30 @@ onMounted(loadStudent)
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Nome *</label>
+          <label class="text-sm font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Nome Social</label>
+          <label class="text-sm font-medium">Nome Social</label>
           <InputText v-model="form.social_name" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data de Nascimento *</label>
+          <label class="text-sm font-medium">Data de Nascimento *</label>
           <InputText v-model="form.birth_date" type="date" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Genero *</label>
+          <label class="text-sm font-medium">Genero *</label>
           <Select v-model="form.gender" :options="genderOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Raca/Cor *</label>
+          <label class="text-sm font-medium">Raca/Cor *</label>
           <Select v-model="form.race_color" :options="raceColorOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">CPF</label>
+          <label class="text-sm font-medium">CPF</label>
           <InputText v-model="form.cpf" class="w-full" />
         </div>
         <div class="flex items-center gap-2">
@@ -142,7 +142,7 @@ onMounted(loadStudent)
           <label for="has_disability">Possui deficiencia</label>
         </div>
         <div v-if="form.has_disability" class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Tipo de Deficiencia *</label>
+          <label class="text-sm font-medium">Tipo de Deficiencia *</label>
           <Select
             v-model="form.disability_type"
             :options="disabilityTypeOptions"

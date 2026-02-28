@@ -412,7 +412,7 @@ onMounted(loadInitialData)
 
       <TabPanels>
         <TabPanel value="attendance">
-          <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+          <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
             <div v-if="students.length > 0" class="mb-4 rounded-md border border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3">
               <p class="mb-2 text-[0.8125rem] font-semibold text-[#323130]">Legenda — clique no botao correspondente para cada aluno:</p>
               <div class="flex flex-wrap gap-x-6 gap-y-1.5">
@@ -470,7 +470,7 @@ onMounted(loadInitialData)
               <Button label="Salvar Chamada" icon="pi pi-check" :loading="submittingAttendance" @click="handleSaveAttendance" />
             </div>
 
-            <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: '480px' }" modal :draggable="false">
+            <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: 'min(480px, 95vw)' }" modal :draggable="false">
               <div class="flex flex-col gap-3">
                 <p class="text-[0.8125rem] text-[#605E5C]">
                   {{ notesDialogStatus === 'justified_absence' ? 'Informe o motivo da falta justificada:' : 'Informe o motivo da dispensa:' }}
@@ -486,22 +486,22 @@ onMounted(loadInitialData)
         </TabPanel>
 
         <TabPanel value="lesson">
-          <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+          <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
             <form @submit.prevent="handleSaveLesson" class="flex flex-col gap-4">
               <div class="flex flex-col gap-1.5">
-                <label class="text-[0.8125rem] font-medium">Conteudo *</label>
+                <label class="text-sm font-medium">Conteudo *</label>
                 <Textarea v-model="lessonForm.content" rows="4" class="w-full" />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-[0.8125rem] font-medium">Metodologia</label>
+                <label class="text-sm font-medium">Metodologia</label>
                 <Textarea v-model="lessonForm.methodology" rows="3" class="w-full" />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-[0.8125rem] font-medium">Observacoes</label>
+                <label class="text-sm font-medium">Observacoes</label>
                 <Textarea v-model="lessonForm.observations" rows="3" class="w-full" />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-[0.8125rem] font-medium">Quantidade de Aulas *</label>
+                <label class="text-sm font-medium">Quantidade de Aulas *</label>
                 <InputNumber v-model="lessonForm.class_count" :min="1" :max="10" class="w-full" />
               </div>
               <div class="mt-4 flex justify-end">
@@ -512,14 +512,14 @@ onMounted(loadInitialData)
         </TabPanel>
 
         <TabPanel v-if="hasOpenPeriod" value="assessment">
-          <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+          <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
             <div class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
               <div class="flex flex-col gap-1.5">
-                <label class="text-[0.8125rem] font-medium">Periodo *</label>
+                <label class="text-sm font-medium">Periodo *</label>
                 <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-[0.8125rem] font-medium">Instrumento *</label>
+                <label class="text-sm font-medium">Instrumento *</label>
                 <Select
                   v-model="selectedInstrumentId"
                   :options="instruments"

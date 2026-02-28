@@ -15,7 +15,7 @@ const contentMargin = computed(() =>
 <template>
   <div class="flex min-h-screen">
     <AppSidebar />
-    <div class="flex flex-1 flex-col transition-all duration-300" :style="{ marginLeft: contentMargin }">
+    <div class="main-content flex flex-1 flex-col transition-all duration-300" :style="{ marginLeft: contentMargin }">
       <AppHeader />
       <main class="flex-1 bg-fluent-bg p-6 max-md:p-4">
         <slot />
@@ -24,3 +24,11 @@ const contentMargin = computed(() =>
     </div>
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 767px) {
+  .main-content {
+    margin-left: 0 !important;
+  }
+}
+</style>

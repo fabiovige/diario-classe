@@ -114,7 +114,7 @@ onMounted(async () => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Minha Grade</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
       <EmptyState v-if="!loading && schedules.length === 0" message="Voce ainda nao possui horarios definidos" />
 
       <div v-if="loading" class="flex items-center justify-center py-12">

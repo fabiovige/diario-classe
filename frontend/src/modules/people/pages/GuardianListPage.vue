@@ -70,7 +70,7 @@ onMounted(loadData)
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Responsaveis</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <Toolbar class="mb-4 border-none bg-transparent p-0">
         <template #start>
           <InputText v-model="search" placeholder="Buscar responsavel..." @keyup.enter="onSearch" />

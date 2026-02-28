@@ -72,18 +72,18 @@ onMounted(loadGradeLevel)
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">{{ isEdit ? 'Editar Nivel de Ensino' : 'Novo Nivel de Ensino' }}</h1>
 
-    <div class="max-w-175 rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
+    <div class="max-w-175 rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Nome *</label>
+          <label class="text-sm font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Tipo *</label>
+          <label class="text-sm font-medium">Tipo *</label>
           <Select v-model="form.type" :options="educationLevelOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Ordem *</label>
+          <label class="text-sm font-medium">Ordem *</label>
           <InputNumber v-model="form.order" :min="1" class="w-full" />
         </div>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import PanelMenu from 'primevue/panelmenu'
 import Button from 'primevue/button'
 import { useAppStore } from '@/stores/app'
@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth'
 import { getMenuByRole } from '@/config/permissions'
 
 const router = useRouter()
+const route = useRoute()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 
@@ -33,12 +34,26 @@ function mapMenuItem(item: { label: string; icon: string; to?: string; items?: a
 
   return mapped
 }
+
+watch(() => route.path, () => {
+  appStore.closeMobileMenu()
+})
 </script>
 
 <template>
+  <div
+    v-if="appStore.mobileMenuOpen"
+    class="fixed inset-0 z-[99] bg-black/50 md:hidden"
+    @click="appStore.closeMobileMenu()"
+  />
+
   <aside
-    class="fixed inset-y-0 left-0 z-[100] flex flex-col overflow-y-auto border-r border-fluent-border bg-fluent-surface transition-all duration-300 max-md:-translate-x-full"
-    :class="appStore.sidebarCollapsed ? 'w-[var(--sidebar-collapsed-width)]' : 'w-[var(--sidebar-width)]'"
+    class="fixed inset-y-0 left-0 z-[100] flex flex-col overflow-y-auto border-r border-fluent-border bg-fluent-surface transition-all duration-300"
+    :class="[
+      appStore.mobileMenuOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full',
+      appStore.sidebarCollapsed ? 'md:w-[var(--sidebar-collapsed-width)]' : 'md:w-[var(--sidebar-width)]',
+      'max-md:w-[280px]',
+    ]"
   >
     <div class="flex min-h-[var(--header-height)] items-center gap-2 border-b border-fluent-border px-3 py-3">
       <template v-if="!appStore.sidebarCollapsed">
@@ -50,14 +65,22 @@ function mapMenuItem(item: { label: string; icon: string; to?: string; items?: a
         text
         rounded
         severity="secondary"
-        class="ml-auto"
+        class="ml-auto max-md:hidden"
         @click="appStore.toggleSidebar()"
       />
+      <Button
+        icon="pi pi-times"
+        text
+        rounded
+        severity="secondary"
+        class="ml-auto md:hidden"
+        @click="appStore.closeMobileMenu()"
+      />
     </div>
-    <div v-if="!appStore.sidebarCollapsed" class="flex-1 overflow-y-auto p-2">
+    <div v-if="!appStore.sidebarCollapsed || appStore.mobileMenuOpen" class="flex-1 overflow-y-auto p-2 max-md:block">
       <PanelMenu :model="menuItems" />
     </div>
-    <div v-if="appStore.sidebarCollapsed" class="flex flex-col items-center gap-1 py-2">
+    <div v-if="appStore.sidebarCollapsed && !appStore.mobileMenuOpen" class="flex flex-col items-center gap-1 py-2 max-md:hidden">
       <Button
         v-for="item in menuItems"
         :key="item.label"

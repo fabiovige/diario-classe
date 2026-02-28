@@ -241,40 +241,40 @@ onMounted(loadClassGroups)
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Registro de Frequencia</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <label class="text-sm font-medium">Turma *</label>
           <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Disciplina *</label>
+          <label class="text-sm font-medium">Disciplina *</label>
           <Select v-model="selectedAssignmentId" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!selectedClassGroupId || assignments.length === 0" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data *</label>
+          <label class="text-sm font-medium">Data *</label>
           <InputText v-model="selectedDate" type="date" class="w-full" :disabled="!selectedClassGroupId" />
         </div>
       </div>
     </div>
 
-    <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <div v-if="students.length > 0" class="mb-4 rounded-md border border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3">
-        <p class="mb-2 text-[0.8125rem] font-semibold text-[#323130]">Legenda — clique no botao correspondente para cada aluno:</p>
+        <p class="mb-2 text-sm font-semibold text-[#323130]">Legenda — clique no botao correspondente para cada aluno:</p>
         <div class="flex flex-wrap gap-x-6 gap-y-1.5">
-          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+          <span class="flex items-center gap-1.5 text-sm">
             <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-green-100 text-xs font-bold text-green-800">P</span>
             Presente
           </span>
-          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+          <span class="flex items-center gap-1.5 text-sm">
             <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-red-100 text-xs font-bold text-red-800">A</span>
             Ausente (falta)
           </span>
-          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+          <span class="flex items-center gap-1.5 text-sm">
             <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-bold text-blue-800">J</span>
             Falta Justificada (com atestado)
           </span>
-          <span class="flex items-center gap-1.5 text-[0.8125rem]">
+          <span class="flex items-center gap-1.5 text-sm">
             <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">D</span>
             Dispensado
           </span>
@@ -316,9 +316,9 @@ onMounted(loadClassGroups)
         <Button label="Salvar Frequencia" icon="pi pi-check" :loading="submitting" :disabled="!canSubmit" @click="handleSubmit" />
       </div>
 
-      <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: '480px' }" modal :draggable="false">
+      <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: 'min(480px, 95vw)' }" modal :draggable="false">
         <div class="flex flex-col gap-3">
-          <p class="text-[0.8125rem] text-[#605E5C]">
+          <p class="text-sm text-[#605E5C]">
             {{ notesDialogStatus === 'justified_absence' ? 'Informe o motivo da falta justificada:' : 'Informe o motivo da dispensa:' }}
           </p>
           <Textarea v-model="notesDialogText" :placeholder="notesDialogPlaceholder" rows="3" class="w-full" autofocus />

@@ -230,18 +230,18 @@ onMounted(() => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Grade de Aulas</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
       <div class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
-          <label class="text-[0.8125rem] font-medium">Escola</label>
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+          <label class="text-sm font-medium">Escola</label>
           <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
         </div>
         <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <label class="text-sm font-medium">Escola</label>
           <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
         </div>
-        <div class="flex flex-col gap-1.5 w-56">
-          <label class="text-[0.8125rem] font-medium">Turma</label>
+        <div class="flex flex-col gap-1.5 w-full md:w-56">
+          <label class="text-sm font-medium">Turma</label>
           <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione a turma" class="w-full" filter :disabled="!selectedSchoolId && shouldShowSchoolFilter" />
         </div>
       </div>

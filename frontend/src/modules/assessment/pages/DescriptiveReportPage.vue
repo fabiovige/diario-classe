@@ -151,26 +151,26 @@ onMounted(async () => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Relatorio Descritivo' : 'Novo Relatorio Descritivo' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Turma *</label>
+          <label class="text-sm font-medium">Turma *</label>
           <Select v-model="form.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Aluno *</label>
+          <label class="text-sm font-medium">Aluno *</label>
           <Select v-model="form.student_id" :options="students" optionLabel="name" optionValue="id" :placeholder="depsPlaceholder" :disabled="!form.class_group_id || loadingDeps" class="w-full" filter />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Campo de Experiencia *</label>
+          <label class="text-sm font-medium">Campo de Experiencia *</label>
           <Select v-model="form.experience_field_id" :options="experienceFields" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Periodo *</label>
+          <label class="text-sm font-medium">Periodo *</label>
           <Select v-model="form.assessment_period_id" :options="periods" optionLabel="name" optionValue="id" :placeholder="depsPlaceholder" :disabled="!form.class_group_id || loadingDeps" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Conteudo do Relatorio *</label>
+          <label class="text-sm font-medium">Conteudo do Relatorio *</label>
           <Textarea v-model="form.content" rows="8" class="w-full" />
         </div>
 

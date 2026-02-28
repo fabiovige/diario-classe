@@ -310,22 +310,22 @@ onMounted(async () => {
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Resultado Anual</h1>
 
     <div class="mb-6 flex flex-wrap items-end gap-4">
-      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
-        <label class="text-[0.8125rem] font-medium">Escola</label>
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
         <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
       </div>
       <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-        <label class="text-[0.8125rem] font-medium">Escola</label>
+        <label class="text-sm font-medium">Escola</label>
         <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
       </div>
 
-      <div class="flex flex-col gap-1.5 w-48">
-        <label class="text-[0.8125rem] font-medium">Ano Letivo</label>
+      <div class="flex flex-col gap-1.5 w-full md:w-48">
+        <label class="text-sm font-medium">Ano Letivo</label>
         <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" showClear />
       </div>
 
-      <div class="flex flex-col gap-1.5 w-72">
-        <label class="text-[0.8125rem] font-medium">Turma</label>
+      <div class="flex flex-col gap-1.5 w-full md:w-72">
+        <label class="text-sm font-medium">Turma</label>
         <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter showClear />
       </div>
 
@@ -333,7 +333,7 @@ onMounted(async () => {
     </div>
 
     <!-- PAINEL STATUS DAS TURMAS -->
-    <div v-if="showClassGroupOverview" class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="showClassGroupOverview" class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold">Status das Turmas</h2>
         <div v-if="classGroupStatusList.length > 0" class="flex items-center gap-3">
@@ -402,7 +402,7 @@ onMounted(async () => {
         </span>
       </div>
 
-      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <EmptyState v-if="!loading && data.students.length === 0" message="Nenhum aluno encontrado nesta turma" />
 
         <DataTable v-if="data.students.length > 0" :value="data.students" :loading="loading" stripedRows responsiveLayout="scroll" scrollable scrollHeight="600px">
@@ -440,12 +440,12 @@ onMounted(async () => {
       </div>
     </template>
 
-    <div v-if="!data && !showClassGroupOverview" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="!data && !showClassGroupOverview" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <EmptyState message="Selecione escola, ano letivo e turma para visualizar os resultados" />
     </div>
 
     <!-- DIALOG CONFIRMAR ENCERRAMENTO -->
-    <Dialog v-model:visible="showCloseDialog" header="Encerrar Ano Letivo" :modal="true" :style="{ width: '480px' }">
+    <Dialog v-model:visible="showCloseDialog" header="Encerrar Ano Letivo" :modal="true" :style="{ width: 'min(480px, 95vw)' }">
       <div class="flex flex-col gap-4">
         <p>Tem certeza que deseja encerrar o ano letivo <strong>{{ data?.class_group?.academic_year?.year ?? academicYears.find(a => a.id === selectedAcademicYearId)?.year }}</strong>?</p>
         <p class="text-sm text-[#616161]">Esta acao e irreversivel. Apos o encerramento, nenhuma alteracao podera ser feita nos resultados finais deste ano.</p>
@@ -457,7 +457,7 @@ onMounted(async () => {
     </Dialog>
 
     <!-- DIALOG BLOQUEIOS DETALHADOS -->
-    <Dialog v-model:visible="showBlockersDialog" header="Pendencias para Encerramento" :modal="true" :style="{ width: '700px' }">
+    <Dialog v-model:visible="showBlockersDialog" header="Pendencias para Encerramento" :modal="true" :style="{ width: 'min(700px, 95vw)' }">
       <div class="flex flex-col gap-6">
         <div v-if="closeErrors?.pending_closings_by_teacher && closeErrors.pending_closings_by_teacher.length > 0">
           <h3 class="text-base font-semibold mb-3 text-[#C42B1C]">

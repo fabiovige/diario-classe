@@ -172,44 +172,44 @@ onMounted(loadClosing)
     </div>
 
     <template v-if="closing">
-      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Turma</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Turma</span>
             <span class="text-[0.9375rem] font-medium">{{ turmaName(closing) }}</span>
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Disciplina</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Disciplina</span>
             <span class="text-[0.9375rem] font-medium">{{ disciplineName(closing) }}</span>
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Periodo</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Periodo</span>
             <span class="text-[0.9375rem]">{{ closing.assessment_period?.name ?? '--' }}</span>
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Status</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Status</span>
             <StatusBadge :status="closing.status" :label="periodClosingStatusLabel(closing.status)" />
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Enviado em</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Enviado em</span>
             <span class="text-[0.9375rem]">{{ closing.submitted_at ? formatDateTime(closing.submitted_at) : '--' }}</span>
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Validado em</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Validado em</span>
             <span class="text-[0.9375rem]">{{ closing.validated_at ? formatDateTime(closing.validated_at) : '--' }}</span>
           </div>
           <div class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Aprovado em</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Aprovado em</span>
             <span class="text-[0.9375rem]">{{ closing.approved_at ? formatDateTime(closing.approved_at) : '--' }}</span>
           </div>
           <div v-if="closing.rejection_reason" class="col-span-full flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase text-[#616161]">Motivo Rejeicao/Reabertura</span>
+            <span class="text-sm font-semibold uppercase text-[#616161]">Motivo Rejeicao/Reabertura</span>
             <span class="text-[0.9375rem] text-[#C42B1C]">{{ closing.rejection_reason }}</span>
           </div>
         </div>
       </div>
 
-      <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+      <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
         <h2 class="text-lg font-semibold mb-4">Acoes</h2>
 
         <!-- PENDING: Professor pode fechar direto ou enviar para validacao -->
@@ -242,7 +242,7 @@ onMounted(loadClosing)
           </p>
           <div class="flex flex-col gap-3">
             <div class="flex flex-col gap-1.5">
-              <label class="text-[0.8125rem] font-medium">Motivo da rejeicao (obrigatorio para rejeitar)</label>
+              <label class="text-sm font-medium">Motivo da rejeicao (obrigatorio para rejeitar)</label>
               <InputText v-model="rejectionReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
             </div>
             <div class="flex flex-wrap gap-3">
@@ -275,7 +275,7 @@ onMounted(loadClosing)
               </p>
               <div class="flex flex-col gap-3">
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-[0.8125rem] font-medium">Motivo da reabertura</label>
+                  <label class="text-sm font-medium">Motivo da reabertura</label>
                   <InputText v-model="reopenReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
                 </div>
                 <div>

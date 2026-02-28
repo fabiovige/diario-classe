@@ -85,7 +85,7 @@ onMounted(loadData)
       <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
     </div>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <EmptyState v-if="!loading && groupedData.length === 0" message="Nenhum registro de frequencia encontrado" />
 
       <div v-if="groupedData.length > 0" class="overflow-x-auto">

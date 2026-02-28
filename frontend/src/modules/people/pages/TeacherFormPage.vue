@@ -90,26 +90,26 @@ onMounted(async () => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Professor' : 'Novo Professor' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Usuario *</label>
+          <label class="text-sm font-medium">Usuario *</label>
           <Select v-model="form.user_id" :options="users" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Escola *</label>
+          <label class="text-sm font-medium">Escola *</label>
           <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Numero de Registro *</label>
+          <label class="text-sm font-medium">Numero de Registro *</label>
           <InputText v-model="form.registration_number" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Especializacao</label>
+          <label class="text-sm font-medium">Especializacao</label>
           <InputText v-model="form.specialization" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Data de Admissao</label>
+          <label class="text-sm font-medium">Data de Admissao</label>
           <InputText v-model="form.hire_date" type="date" class="w-full" />
         </div>
 

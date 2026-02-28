@@ -103,34 +103,34 @@ onMounted(async () => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Usuario' : 'Novo Usuario' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Nome *</label>
+          <label class="text-sm font-medium">Nome *</label>
           <InputText v-model="form.name" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">E-mail *</label>
+          <label class="text-sm font-medium">E-mail *</label>
           <InputText v-model="form.email" type="email" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">CPF *</label>
+          <label class="text-sm font-medium">CPF *</label>
           <InputText v-model="form.cpf" required class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">{{ isEdit ? 'Nova Senha' : 'Senha *' }}</label>
+          <label class="text-sm font-medium">{{ isEdit ? 'Nova Senha' : 'Senha *' }}</label>
           <Password v-model="form.password" :feedback="false" toggleMask class="w-full" inputClass="w-full" :required="!isEdit" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Perfil *</label>
+          <label class="text-sm font-medium">Perfil *</label>
           <Select v-model="form.role_id" :options="roles" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <label class="text-sm font-medium">Escola</label>
           <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" showClear class="w-full" />
         </div>
         <div v-if="isEdit" class="flex flex-col gap-1.5">
-          <label class="text-[0.8125rem] font-medium">Status</label>
+          <label class="text-sm font-medium">Status</label>
           <Select v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" />
         </div>
 

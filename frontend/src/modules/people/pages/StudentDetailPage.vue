@@ -44,7 +44,7 @@ onMounted(loadStudent)
       </div>
     </div>
 
-    <div v-if="student" class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="student" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
         <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase text-[#616161]">Nome</span>
@@ -81,7 +81,7 @@ onMounted(loadStudent)
       </div>
     </div>
 
-    <div v-if="student" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="student" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <h2 class="mb-4 text-lg font-semibold">Responsaveis</h2>
 
       <EmptyState v-if="!student.guardians || student.guardians.length === 0" message="Nenhum responsavel vinculado" />

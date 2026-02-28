@@ -199,22 +199,22 @@ onMounted(async () => {
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Resultado Final</h1>
 
     <div class="mb-6 flex flex-wrap items-end gap-4">
-      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
-        <label class="text-[0.8125rem] font-medium">Escola</label>
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
         <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas" class="w-full" filter showClear />
       </div>
       <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-        <label class="text-[0.8125rem] font-medium">Escola</label>
+        <label class="text-sm font-medium">Escola</label>
         <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
       </div>
 
-      <div class="flex flex-col gap-1.5 w-72">
-        <label class="text-[0.8125rem] font-medium">Turma</label>
+      <div class="flex flex-col gap-1.5 w-full md:w-72">
+        <label class="text-sm font-medium">Turma</label>
         <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas" class="w-full" :disabled="!selectedSchoolId" filter showClear />
       </div>
 
-      <div class="flex flex-col gap-1.5 w-72">
-        <label class="text-[0.8125rem] font-medium">Aluno *</label>
+      <div class="flex flex-col gap-1.5 w-full md:w-72">
+        <label class="text-sm font-medium">Aluno *</label>
         <Select v-model="selectedStudentId" :options="students" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
       </div>
 
@@ -225,38 +225,38 @@ onMounted(async () => {
       <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
     </div>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <EmptyState v-if="!loading && !result" message="Selecione um aluno para visualizar o resultado final" />
 
       <div v-if="result" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
         <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Aluno</span>
+          <span class="text-sm font-semibold uppercase text-[#616161]">Aluno</span>
           <span class="text-[0.9375rem]">{{ result.student?.name ?? `Aluno #${result.student_id}` }}</span>
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Resultado</span>
+          <span class="text-sm font-semibold uppercase text-[#616161]">Resultado</span>
           <StatusBadge :status="result.result" :label="finalResultStatusLabel(result.result)" />
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Media Geral</span>
+          <span class="text-sm font-semibold uppercase text-[#616161]">Media Geral</span>
           <span class="text-2xl font-bold">{{ result.overall_average ?? '--' }}</span>
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Frequencia Geral</span>
+          <span class="text-sm font-semibold uppercase text-[#616161]">Frequencia Geral</span>
           <span class="text-[0.9375rem]">{{ formatPercentage(result.overall_frequency) }}</span>
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Conselho</span>
+          <span class="text-sm font-semibold uppercase text-[#616161]">Conselho</span>
           <span class="text-[0.9375rem]">{{ result.council_override ? 'Sim' : 'Nao' }}</span>
         </div>
         <div v-if="result.observations" class="col-span-full flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Observacoes</span>
+          <span class="text-sm font-semibold uppercase text-[#616161]">Observacoes</span>
           <span class="text-[0.9375rem]">{{ result.observations }}</span>
         </div>
       </div>
     </div>
 
-    <div v-if="reportCard && reportCard.subjects.length > 0" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
+    <div v-if="reportCard && reportCard.subjects.length > 0" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
       <h2 class="mb-4 text-lg font-semibold text-[#0078D4]">Detalhamento por Disciplina</h2>
 
       <DataTable :value="reportCard.subjects" stripedRows responsiveLayout="scroll">
