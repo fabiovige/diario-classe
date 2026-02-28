@@ -381,12 +381,12 @@ onMounted(loadInitialData)
 
 <template>
   <div class="p-6">
-    <div class="mb-6">
-      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" size="small" @click="router.push('/my-classes')" />
-      <div v-if="assignment" class="mt-3">
+    <div class="mb-6 flex items-start justify-between">
+      <div v-if="assignment">
         <h1 class="text-2xl font-semibold text-[#0078D4]">{{ contextLabel }}</h1>
         <p class="mt-1 text-[0.875rem] text-[#605E5C]">{{ formattedDate }}</p>
       </div>
+      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" size="small" @click="router.push('/my-classes')" />
     </div>
 
     <div v-if="loading" class="flex items-center justify-center py-16">

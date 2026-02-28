@@ -214,7 +214,7 @@ onMounted(async () => {
         </Column>
         <Column header="Turma">
           <template #body="{ data }">
-            {{ data.class_group?.label ?? '--' }}
+            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
           </template>
         </Column>
         <Column header="Campo de Experiencia">

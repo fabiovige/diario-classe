@@ -1,5 +1,6 @@
 import type { GradeType } from './enums'
 import type { Student } from './people'
+import type { ClassGroup } from './school-structure'
 
 export interface Grade {
   id: number
@@ -41,7 +42,7 @@ export interface DescriptiveReport {
   content: string
   recorded_by: number
   student?: { id: number; name: string }
-  class_group?: { id: number; name: string; label: string }
+  class_group?: ClassGroup
   experience_field?: { id: number; name: string }
   assessment_period?: { id: number; name: string }
   created_at: string

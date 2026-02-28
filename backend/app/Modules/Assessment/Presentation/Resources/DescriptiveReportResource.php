@@ -2,6 +2,7 @@
 
 namespace App\Modules\Assessment\Presentation\Resources;
 
+use App\Modules\SchoolStructure\Presentation\Resources\ClassGroupResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,15 +24,7 @@ class DescriptiveReportResource extends JsonResource
                 'id' => $this->student->id,
                 'name' => $this->student->name,
             ]),
-            'class_group' => $this->whenLoaded('classGroup', fn () => [
-                'id' => $this->classGroup->id,
-                'name' => $this->classGroup->name,
-                'label' => collect([
-                    $this->classGroup->gradeLevel?->name,
-                    $this->classGroup->name,
-                    $this->classGroup->shift?->name?->label(),
-                ])->filter()->join(' - '),
-            ]),
+            'class_group' => new ClassGroupResource($this->whenLoaded('classGroup')),
             'experience_field' => $this->whenLoaded('experienceField', fn () => [
                 'id' => $this->experienceField->id,
                 'name' => $this->experienceField->name,

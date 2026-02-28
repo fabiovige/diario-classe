@@ -109,6 +109,11 @@ async function loadReport() {
     form.value.assessment_period_id = report.assessment_period_id
     form.value.content = report.content
 
+    if (report.class_group && !classGroups.value.some(cg => cg.id === report.class_group_id)) {
+      classGroups.value.push({ ...report.class_group, label: formatClassGroupLabel(report.class_group) })
+      classGroups.value.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
+    }
+
     await loadDependencies()
   } catch {
     toast.error('Erro ao carregar relatorio')
