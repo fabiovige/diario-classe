@@ -118,7 +118,7 @@ async function loadClassGroups() {
     classGroups.value = response.data.map(cg => ({
       ...cg,
       label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - '),
-    }))
+    })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
   } catch {
     toast.error('Erro ao carregar turmas')
   }

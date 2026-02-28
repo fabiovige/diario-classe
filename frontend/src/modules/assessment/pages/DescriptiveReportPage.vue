@@ -62,7 +62,7 @@ async function loadInitialData() {
       schoolStructureService.getClassGroups({ per_page: 200 }),
       curriculumService.getExperienceFields({ per_page: 100 }),
     ])
-    classGroups.value = cgRes.data.map(cg => ({ ...cg, label: formatClassGroupLabel(cg) }))
+    classGroups.value = cgRes.data.map(cg => ({ ...cg, label: formatClassGroupLabel(cg) })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
     experienceFields.value = fieldsRes.data
   } catch {
     toast.error('Erro ao carregar dados auxiliares')

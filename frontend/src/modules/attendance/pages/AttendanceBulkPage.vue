@@ -60,7 +60,7 @@ const assignmentPlaceholder = computed(() => {
 async function loadClassGroups() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 100 })
-    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - ') }))
+    classGroups.value = response.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - ') })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
   } catch {
     toast.error('Erro ao carregar turmas')
   }

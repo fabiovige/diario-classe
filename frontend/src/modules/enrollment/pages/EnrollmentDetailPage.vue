@@ -104,7 +104,7 @@ async function openAssignDialog() {
       const max = cg.max_students ?? 0
       const vacancy = max > 0 ? ` (${active}/${max} vagas)` : ''
       return { ...cg, label: baseName + vacancy }
-    })
+    }).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
     assignForm.value = { class_group_id: null, start_date: null }
     assignDialogVisible.value = true
   } catch {
@@ -174,7 +174,7 @@ async function openEditAssignment(assignment: ClassAssignment) {
       const max = cg.max_students ?? 0
       const vacancy = max > 0 ? ` (${active}/${max} vagas)` : ''
       return { ...cg, label: baseName + vacancy }
-    })
+    }).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
   } catch {
     toast.error('Erro ao carregar turmas')
     return

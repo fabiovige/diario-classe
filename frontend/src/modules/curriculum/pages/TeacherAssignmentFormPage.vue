@@ -82,7 +82,7 @@ async function loadAuxData() {
       curriculumService.getExperienceFields({ per_page: 100 }),
     ])
     teachers.value = teachersRes.data.map((t: Teacher) => ({ ...t, label: t.user?.name ?? `Professor #${t.id}` }))
-    classGroups.value = classGroupsRes.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - ') }))
+    classGroups.value = classGroupsRes.data.map(cg => ({ ...cg, label: [cg.grade_level?.name, cg.name, cg.shift?.name_label].filter(Boolean).join(' - ') })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
     components.value = componentsRes.data
     experienceFields.value = fieldsRes.data
   } catch {

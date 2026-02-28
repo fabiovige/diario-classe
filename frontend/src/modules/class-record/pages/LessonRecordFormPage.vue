@@ -50,7 +50,7 @@ function formatClassGroupLabel(cg: ClassGroup): string {
 async function loadClassGroups() {
   try {
     const response = await schoolStructureService.getClassGroups({ per_page: 200 })
-    classGroups.value = response.data.map(cg => ({ ...cg, label: formatClassGroupLabel(cg) }))
+    classGroups.value = response.data.map(cg => ({ ...cg, label: formatClassGroupLabel(cg) })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
   } catch {
     toast.error('Erro ao carregar turmas')
   }
