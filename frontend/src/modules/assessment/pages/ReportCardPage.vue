@@ -179,16 +179,16 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-semibold text-md-primary">Boletim Escolar</h1>
+  <div class="card flex items-center justify-between">
+    <h1 class="text-2xl font-semibold">Boletim Escolar</h1>
     <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
   </div>
 
   <EmptyState v-if="!loading && !report" message="Boletim nao disponivel" />
 
   <div v-if="report" id="report-card-content">
-    <div class="card mb-6 flex items-center gap-4">
-      <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-md-primary text-xl font-bold text-white">
+    <div class="card flex items-center gap-4">
+      <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white" style="background: var(--primary-color)">
         {{ getInitials(report.student.display_name ?? report.student.name) }}
       </div>
       <div class="flex flex-col gap-0.5">
@@ -200,7 +200,7 @@ onMounted(loadData)
       </div>
     </div>
 
-    <div class="card mb-6">
+    <div class="card">
       <Toolbar class="mb-0 border-none bg-transparent p-0">
         <template #start>
           <div class="flex flex-wrap items-end gap-4">
@@ -221,8 +221,8 @@ onMounted(loadData)
       </Toolbar>
     </div>
 
-    <div class="mb-6 grid gap-6" :class="isNumeric && radarDatasets.length > 0 ? 'grid-cols-1 lg:grid-cols-[1fr_320px]' : ''">
-      <div v-if="isNumeric && radarDatasets.length > 0" class="card">
+    <div class="mb-8 grid gap-6" :class="isNumeric && radarDatasets.length > 0 ? 'grid-cols-1 lg:grid-cols-[1fr_320px]' : ''">
+      <div v-if="isNumeric && radarDatasets.length > 0" class="card !mb-0">
         <h3 class="mb-4 text-base font-semibold">Desempenho por Materia</h3>
         <RadarChart
           :labels="radarLabels"
@@ -232,14 +232,14 @@ onMounted(loadData)
         />
       </div>
 
-      <div class="card">
+      <div class="card !mb-0">
         <h3 class="mb-4 text-base font-semibold">Frequencia</h3>
         <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col items-center gap-1 rounded-lg border border-md-border p-4 text-center">
+          <div class="flex flex-col items-center gap-1 rounded-lg p-4 text-center" style="background: var(--surface-hover)">
             <span class="text-2xl font-bold text-md-error">{{ frequencyCards.totalAbsences }}</span>
             <span class="text-xs uppercase text-md-text-secondary">Faltas</span>
           </div>
-          <div class="flex flex-col items-center gap-1 rounded-lg border border-md-border p-4 text-center">
+          <div class="flex flex-col items-center gap-1 rounded-lg p-4 text-center" style="background: var(--surface-hover)">
             <span class="text-2xl font-bold text-md-primary">{{ frequencyCards.avgFrequency !== null ? frequencyCards.avgFrequency.toFixed(1) + '%' : '--' }}</span>
             <span class="text-xs uppercase text-md-text-secondary">Frequencia</span>
           </div>
@@ -247,7 +247,7 @@ onMounted(loadData)
       </div>
     </div>
 
-    <div class="card mb-6">
+    <div class="card">
       <h3 class="mb-4 text-base font-semibold">Notas</h3>
       <EmptyState v-if="filteredSubjects.length === 0" message="Nenhuma materia encontrada" />
       <DataTable v-if="filteredSubjects.length > 0" :value="filteredSubjects" stripedRows responsiveLayout="scroll">

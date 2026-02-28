@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { Radar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -30,6 +30,15 @@ const props = withDefaults(defineProps<{
   passingGrade: 6,
 })
 
+const gridColor = ref('#E0E0E0')
+const labelColor = ref('#424242')
+
+onMounted(() => {
+  const styles = getComputedStyle(document.documentElement)
+  gridColor.value = styles.getPropertyValue('--surface-border').trim() || '#E0E0E0'
+  labelColor.value = styles.getPropertyValue('--text-color').trim() || '#424242'
+})
+
 const chartData = computed(() => ({
   labels: props.labels,
   datasets: props.datasets.map(ds => ({
@@ -53,16 +62,17 @@ const chartOptions = computed(() => ({
         stepSize: props.scaleMax <= 10 ? 2 : 5,
         backdropColor: 'transparent',
         font: { size: 11 },
+        color: labelColor.value,
       },
       grid: {
-        color: '#E0E0E0',
+        color: gridColor.value,
       },
       angleLines: {
-        color: '#E0E0E0',
+        color: gridColor.value,
       },
       pointLabels: {
         font: { size: 12 },
-        color: '#424242',
+        color: labelColor.value,
       },
     },
   },
@@ -73,6 +83,7 @@ const chartOptions = computed(() => ({
         usePointStyle: true,
         padding: 16,
         font: { size: 12 },
+        color: labelColor.value,
       },
     },
     tooltip: {
