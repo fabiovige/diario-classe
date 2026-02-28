@@ -210,24 +210,6 @@ onMounted(loadClosing)
       </div>
 
       <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold mb-4">Checklist de Completude</h2>
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center gap-3 text-[0.9375rem]">
-            <i :class="closing.all_grades_complete ? 'pi pi-check-circle text-[#0F7B0F] text-xl' : 'pi pi-times-circle text-[#C42B1C] text-xl'" />
-            <span>Todas as notas lancadas</span>
-          </div>
-          <div class="flex items-center gap-3 text-[0.9375rem]">
-            <i :class="closing.all_attendance_complete ? 'pi pi-check-circle text-[#0F7B0F] text-xl' : 'pi pi-times-circle text-[#C42B1C] text-xl'" />
-            <span>Toda frequencia registrada</span>
-          </div>
-          <div class="flex items-center gap-3 text-[0.9375rem]">
-            <i :class="closing.all_lesson_records_complete ? 'pi pi-check-circle text-[#0F7B0F] text-xl' : 'pi pi-times-circle text-[#C42B1C] text-xl'" />
-            <span>Todos registros de aula preenchidos</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold mb-4">Acoes</h2>
 
         <!-- PENDING: Professor pode fechar direto ou enviar para validacao -->
