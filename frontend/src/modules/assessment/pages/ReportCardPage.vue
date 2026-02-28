@@ -64,7 +64,7 @@ const radarLabels = computed(() =>
 )
 
 const radarColors = [
-  { border: '#0078D4', bg: 'rgba(0,120,212,0.15)' },
+  { border: '#1976D2', bg: 'rgba(25,118,210,0.15)' },
   { border: '#0F7B0F', bg: 'rgba(15,123,15,0.15)' },
   { border: '#C42B1C', bg: 'rgba(196,43,28,0.15)' },
   { border: '#8764B8', bg: 'rgba(135,100,184,0.15)' },
@@ -114,7 +114,7 @@ function getInitials(name: string): string {
 function gradeColor(value: number | null): string {
   if (value === null) return ''
   if (!report.value?.summary) return ''
-  return value >= report.value.summary.passing_grade ? 'text-[#0F7B0F] font-semibold' : 'text-[#C42B1C] font-semibold'
+  return value >= report.value.summary.passing_grade ? 'text-md-success font-semibold' : 'text-md-error font-semibold'
 }
 
 function formatGrade(value: number | null): string {
@@ -134,10 +134,10 @@ function statusLabel(status: string): string {
 
 function statusClass(status: string): string {
   const map: Record<string, string> = {
-    pending: 'text-[#616161]',
-    calculated: 'text-[#0078D4]',
-    approved: 'text-[#0F7B0F] font-semibold',
-    reproved: 'text-[#C42B1C] font-semibold',
+    pending: 'text-md-text-secondary',
+    calculated: 'text-md-primary',
+    approved: 'text-md-success font-semibold',
+    reproved: 'text-md-error font-semibold',
   }
   return map[status] ?? ''
 }
@@ -179,123 +179,121 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-semibold text-[#0078D4]">Boletim Escolar</h1>
-      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-md-primary">Boletim Escolar</h1>
+    <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
+  </div>
+
+  <EmptyState v-if="!loading && !report" message="Boletim nao disponivel" />
+
+  <div v-if="report" id="report-card-content">
+    <div class="card mb-6 flex items-center gap-4">
+      <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-md-primary text-xl font-bold text-white">
+        {{ getInitials(report.student.display_name ?? report.student.name) }}
+      </div>
+      <div class="flex flex-col gap-0.5">
+        <h2 class="text-lg font-semibold">{{ report.student.display_name ?? report.student.name }}</h2>
+        <div class="flex flex-wrap gap-x-4 text-sm text-md-text-secondary">
+          <span v-if="report.student.class_group">{{ report.student.class_group.label }}</span>
+          <span v-if="report.student.enrollment_number">Mat: {{ report.student.enrollment_number }}</span>
+        </div>
+      </div>
     </div>
 
-    <EmptyState v-if="!loading && !report" message="Boletim nao disponivel" />
+    <div class="card mb-6">
+      <Toolbar class="mb-0 border-none bg-transparent p-0">
+        <template #start>
+          <div class="flex flex-wrap items-end gap-4">
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-medium">Materia</label>
+              <Select v-model="selectedSubjectId" :options="subjectOptions" optionLabel="name" optionValue="id" placeholder="Todas as materias" class="w-full md:w-56" filter showClear />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-medium">Periodo</label>
+              <Select v-model="selectedPeriodNumber" :options="periodOptions" optionLabel="name" optionValue="number" placeholder="Todos os periodos" class="w-full md:w-56" showClear />
+            </div>
+            <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+          </div>
+        </template>
+        <template #end>
+          <Button label="Exportar PDF" icon="pi pi-file-pdf" severity="secondary" :loading="loading" @click="exportPdf" />
+        </template>
+      </Toolbar>
+    </div>
 
-    <div v-if="report" id="report-card-content">
-      <div class="mb-6 flex items-center gap-4 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#0078D4] text-xl font-bold text-white">
-          {{ getInitials(report.student.display_name ?? report.student.name) }}
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <h2 class="text-lg font-semibold">{{ report.student.display_name ?? report.student.name }}</h2>
-          <div class="flex flex-wrap gap-x-4 text-sm text-[#616161]">
-            <span v-if="report.student.class_group">{{ report.student.class_group.label }}</span>
-            <span v-if="report.student.enrollment_number">Mat: {{ report.student.enrollment_number }}</span>
+    <div class="mb-6 grid gap-6" :class="isNumeric && radarDatasets.length > 0 ? 'grid-cols-1 lg:grid-cols-[1fr_320px]' : ''">
+      <div v-if="isNumeric && radarDatasets.length > 0" class="card">
+        <h3 class="mb-4 text-base font-semibold">Desempenho por Materia</h3>
+        <RadarChart
+          :labels="radarLabels"
+          :datasets="radarDatasets"
+          :scale-max="report.summary?.scale_max ?? 10"
+          :passing-grade="report.summary?.passing_grade ?? 6"
+        />
+      </div>
+
+      <div class="card">
+        <h3 class="mb-4 text-base font-semibold">Frequencia</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col items-center gap-1 rounded-lg border border-md-border p-4 text-center">
+            <span class="text-2xl font-bold text-md-error">{{ frequencyCards.totalAbsences }}</span>
+            <span class="text-xs uppercase text-md-text-secondary">Faltas</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 rounded-lg border border-md-border p-4 text-center">
+            <span class="text-2xl font-bold text-md-primary">{{ frequencyCards.avgFrequency !== null ? frequencyCards.avgFrequency.toFixed(1) + '%' : '--' }}</span>
+            <span class="text-xs uppercase text-md-text-secondary">Frequencia</span>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <Toolbar class="mb-0 border-none bg-transparent p-0">
-          <template #start>
-            <div class="flex flex-wrap items-end gap-4">
-              <div class="flex flex-col gap-1">
-                <label class="text-sm font-medium">Materia</label>
-                <Select v-model="selectedSubjectId" :options="subjectOptions" optionLabel="name" optionValue="id" placeholder="Todas as materias" class="w-full md:w-56" filter showClear />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-sm font-medium">Periodo</label>
-                <Select v-model="selectedPeriodNumber" :options="periodOptions" optionLabel="name" optionValue="number" placeholder="Todos os periodos" class="w-full md:w-56" showClear />
-              </div>
-              <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-            </div>
+    <div class="card mb-6">
+      <h3 class="mb-4 text-base font-semibold">Notas</h3>
+      <EmptyState v-if="filteredSubjects.length === 0" message="Nenhuma materia encontrada" />
+      <DataTable v-if="filteredSubjects.length > 0" :value="filteredSubjects" stripedRows responsiveLayout="scroll">
+        <Column header="Materia" :style="{ minWidth: '160px' }">
+          <template #body="{ data }: { data: ReportCardSubject }">
+            <span class="font-medium">{{ data.name }}</span>
           </template>
-          <template #end>
-            <Button label="Exportar PDF" icon="pi pi-file-pdf" severity="secondary" :loading="loading" @click="exportPdf" />
+        </Column>
+        <Column header="Professor" :style="{ minWidth: '140px' }">
+          <template #body="{ data }: { data: ReportCardSubject }">
+            {{ data.teacher_name || '--' }}
           </template>
-        </Toolbar>
-      </div>
+        </Column>
+        <Column v-for="period in visiblePeriods" :key="period.number" :header="period.name" :style="{ width: '100px', textAlign: 'center' }">
+          <template #body="{ data }: { data: ReportCardSubject }">
+            <span :class="gradeColor(data.periods[String(period.number)]?.average ?? null)">
+              {{ formatGrade(data.periods[String(period.number)]?.average ?? null) }}
+            </span>
+          </template>
+        </Column>
+        <Column v-if="!selectedPeriodNumber" header="Media Final" :style="{ width: '110px', textAlign: 'center' }">
+          <template #body="{ data }: { data: ReportCardSubject }">
+            <span :class="gradeColor(data.final_grade ?? data.final_average)">
+              {{ formatGrade(data.final_grade ?? data.final_average) }}
+            </span>
+          </template>
+        </Column>
+        <Column v-if="!selectedPeriodNumber" header="Situacao" :style="{ width: '110px' }">
+          <template #body="{ data }: { data: ReportCardSubject }">
+            <span :class="statusClass(data.status)">{{ statusLabel(data.status) }}</span>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
 
-      <div class="mb-6 grid gap-6" :class="isNumeric && radarDatasets.length > 0 ? 'grid-cols-1 lg:grid-cols-[1fr_320px]' : ''">
-        <div v-if="isNumeric && radarDatasets.length > 0" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-          <h3 class="mb-4 text-base font-semibold">Desempenho por Materia</h3>
-          <RadarChart
-            :labels="radarLabels"
-            :datasets="radarDatasets"
-            :scale-max="report.summary?.scale_max ?? 10"
-            :passing-grade="report.summary?.passing_grade ?? 6"
-          />
-        </div>
-
-        <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-          <h3 class="mb-4 text-base font-semibold">Frequencia</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col items-center gap-1 rounded-lg border border-[#E0E0E0] p-4 text-center">
-              <span class="text-2xl font-bold text-[#C42B1C]">{{ frequencyCards.totalAbsences }}</span>
-              <span class="text-xs uppercase text-[#616161]">Faltas</span>
-            </div>
-            <div class="flex flex-col items-center gap-1 rounded-lg border border-[#E0E0E0] p-4 text-center">
-              <span class="text-2xl font-bold text-[#0078D4]">{{ frequencyCards.avgFrequency !== null ? frequencyCards.avgFrequency.toFixed(1) + '%' : '--' }}</span>
-              <span class="text-xs uppercase text-[#616161]">Frequencia</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <h3 class="mb-4 text-base font-semibold">Notas</h3>
-        <EmptyState v-if="filteredSubjects.length === 0" message="Nenhuma materia encontrada" />
-        <DataTable v-if="filteredSubjects.length > 0" :value="filteredSubjects" stripedRows responsiveLayout="scroll">
-          <Column header="Materia" :style="{ minWidth: '160px' }">
-            <template #body="{ data }: { data: ReportCardSubject }">
-              <span class="font-medium">{{ data.name }}</span>
-            </template>
-          </Column>
-          <Column header="Professor" :style="{ minWidth: '140px' }">
-            <template #body="{ data }: { data: ReportCardSubject }">
-              {{ data.teacher_name || '--' }}
-            </template>
-          </Column>
-          <Column v-for="period in visiblePeriods" :key="period.number" :header="period.name" :style="{ width: '100px', textAlign: 'center' }">
-            <template #body="{ data }: { data: ReportCardSubject }">
-              <span :class="gradeColor(data.periods[String(period.number)]?.average ?? null)">
-                {{ formatGrade(data.periods[String(period.number)]?.average ?? null) }}
-              </span>
-            </template>
-          </Column>
-          <Column v-if="!selectedPeriodNumber" header="Media Final" :style="{ width: '110px', textAlign: 'center' }">
-            <template #body="{ data }: { data: ReportCardSubject }">
-              <span :class="gradeColor(data.final_grade ?? data.final_average)">
-                {{ formatGrade(data.final_grade ?? data.final_average) }}
-              </span>
-            </template>
-          </Column>
-          <Column v-if="!selectedPeriodNumber" header="Situacao" :style="{ width: '110px' }">
-            <template #body="{ data }: { data: ReportCardSubject }">
-              <span :class="statusClass(data.status)">{{ statusLabel(data.status) }}</span>
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-
-      <div v-if="report.descriptive_reports.length > 0" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <h3 class="mb-4 text-base font-semibold">Relatorios Descritivos</h3>
-        <DataTable :value="report.descriptive_reports" stripedRows responsiveLayout="scroll">
-          <Column header="Campo de Experiencia" field="experience_field" :style="{ minWidth: '180px' }" />
-          <Column header="Periodo" field="period" :style="{ width: '140px' }" />
-          <Column header="Conteudo">
-            <template #body="{ data }">
-              <span :title="data.content">{{ truncate(data.content) }}</span>
-            </template>
-          </Column>
-        </DataTable>
-      </div>
+    <div v-if="report.descriptive_reports.length > 0" class="card">
+      <h3 class="mb-4 text-base font-semibold">Relatorios Descritivos</h3>
+      <DataTable :value="report.descriptive_reports" stripedRows responsiveLayout="scroll">
+        <Column header="Campo de Experiencia" field="experience_field" :style="{ minWidth: '180px' }" />
+        <Column header="Periodo" field="period" :style="{ width: '140px' }" />
+        <Column header="Conteudo">
+          <template #body="{ data }">
+            <span :title="data.content">{{ truncate(data.content) }}</span>
+          </template>
+        </Column>
+      </DataTable>
     </div>
   </div>
 </template>

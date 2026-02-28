@@ -129,76 +129,74 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Matriculas</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Matriculas</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <InputText v-model="search" placeholder="Buscar matricula..." @keyup.enter="onSearch" />
-        </div>
-        <Button icon="pi pi-search" @click="onSearch" />
-        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-        <div class="ml-auto">
-          <Button label="Nova Matricula" icon="pi pi-plus" @click="router.push('/enrollment/enrollments/new')" />
-        </div>
+  <div class="card">
+    <div class="mb-4 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
       </div>
-
-      <EmptyState v-if="!loading && items.length === 0" message="Nenhuma matricula encontrada" />
-
-      <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column field="enrollment_number" header="Numero" sortable />
-        <Column header="Aluno">
-          <template #body="{ data }">
-            {{ data.student?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Escola">
-          <template #body="{ data }">
-            {{ data.school?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Tipo">
-          <template #body="{ data }">
-            {{ data.enrollment_type_label ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Status">
-          <template #body="{ data }">
-            <StatusBadge :status="data.status" :label="enrollmentStatusLabel(data.status)" />
-          </template>
-        </Column>
-        <Column header="Data Matricula">
-          <template #body="{ data }">
-            {{ formatDate(data.enrollment_date) }}
-          </template>
-        </Column>
-        <Column header="Acoes" :style="{ width: '120px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-eye" text rounded @click="router.push(`/enrollment/enrollments/${data.id}`)" />
-            <Button v-if="data.status === 'active'" icon="pi pi-trash" text rounded severity="danger" @click="handleCancel(data)" />
-            <Button v-if="data.status === 'cancelled'" icon="pi pi-replay" text rounded severity="success" @click="handleReactivate(data)" />
-          </template>
-        </Column>
-      </DataTable>
-
-      <Paginator
-        v-if="totalRecords > perPage"
-        class="mt-4 border-t border-[#E0E0E0] pt-3"
-        :rows="perPage"
-        :totalRecords="totalRecords"
-        :first="(currentPage - 1) * perPage"
-        :rowsPerPageOptions="[10, 15, 25, 50]"
-        @page="onPageChange"
-      />
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <InputText v-model="search" placeholder="Buscar matricula..." @keyup.enter="onSearch" />
+      </div>
+      <Button icon="pi pi-search" @click="onSearch" />
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+      <div class="ml-auto">
+        <Button label="Nova Matricula" icon="pi pi-plus" @click="router.push('/enrollment/enrollments/new')" />
+      </div>
     </div>
+
+    <EmptyState v-if="!loading && items.length === 0" message="Nenhuma matricula encontrada" />
+
+    <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+      <Column field="enrollment_number" header="Numero" sortable />
+      <Column header="Aluno">
+        <template #body="{ data }">
+          {{ data.student?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Escola">
+        <template #body="{ data }">
+          {{ data.school?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Tipo">
+        <template #body="{ data }">
+          {{ data.enrollment_type_label ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Status">
+        <template #body="{ data }">
+          <StatusBadge :status="data.status" :label="enrollmentStatusLabel(data.status)" />
+        </template>
+      </Column>
+      <Column header="Data Matricula">
+        <template #body="{ data }">
+          {{ formatDate(data.enrollment_date) }}
+        </template>
+      </Column>
+      <Column header="Acoes" :style="{ width: '120px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-eye" text rounded @click="router.push(`/enrollment/enrollments/${data.id}`)" />
+          <Button v-if="data.status === 'active'" icon="pi pi-trash" text rounded severity="danger" @click="handleCancel(data)" />
+          <Button v-if="data.status === 'cancelled'" icon="pi pi-replay" text rounded severity="success" @click="handleReactivate(data)" />
+        </template>
+      </Column>
+    </DataTable>
+
+    <Paginator
+      v-if="totalRecords > perPage"
+      class="mt-4 border-t border-md-border pt-3"
+      :rows="perPage"
+      :totalRecords="totalRecords"
+      :first="(currentPage - 1) * perPage"
+      :rowsPerPageOptions="[10, 15, 25, 50]"
+      @page="onPageChange"
+    />
   </div>
 </template>

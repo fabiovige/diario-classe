@@ -1,39 +1,17 @@
-@import "tailwindcss";
+@import "./utilities.css";
+@import "./layout.css";
 @import "./primevue-overrides.css";
 
-@theme {
-  --color-fluent-primary: #0078D4;
-  --color-fluent-primary-light: #60CDFF;
-  --color-fluent-primary-dark: #005A9E;
-  --color-fluent-bg: #F3F3F3;
-  --color-fluent-surface: #FFFFFF;
-  --color-fluent-text: #1A1A1A;
-  --color-fluent-text-secondary: #616161;
-  --color-fluent-border: #E0E0E0;
-  --color-fluent-success: #0F7B0F;
-  --color-fluent-warning: #9D5D00;
-  --color-fluent-error: #C42B1C;
-  --color-fluent-selected: #EBF3FC;
-  --color-fluent-hover: #F5F5F5;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
-  --sidebar-width: 260px;
-  --sidebar-collapsed-width: 64px;
-  --header-height: 56px;
-  --footer-height: 48px;
-}
-
-body {
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-  color: var(--color-fluent-text);
-  background-color: var(--color-fluent-bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 16px;
-}
-
-a {
-  color: var(--color-fluent-primary);
-  text-decoration: none;
+  --color-md-success: #16A34A;
+  --color-md-warning: #EA580C;
+  --color-md-error: #DC2626;
 }

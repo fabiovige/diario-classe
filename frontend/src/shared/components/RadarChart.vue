@@ -88,7 +88,7 @@ const chartOptions = computed(() => ({
 <template>
   <div class="relative" style="height: 320px">
     <Radar v-if="labels.length > 0 && datasets.length > 0" :data="chartData" :options="(chartOptions as any)" />
-    <div v-else class="flex h-full items-center justify-center text-sm text-[#616161]">
+    <div v-else class="flex h-full items-center justify-center text-sm text-md-text-secondary">
       Sem dados para exibir
     </div>
   </div>

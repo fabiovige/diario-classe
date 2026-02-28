@@ -277,212 +277,210 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <!-- VISAO PROFESSOR -->
-    <template v-if="isTeacher">
-      <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Meus Fechamentos</h1>
+  <!-- VISAO PROFESSOR -->
+  <template v-if="isTeacher">
+    <h1 class="mb-6 text-2xl font-semibold text-md-primary">Meus Fechamentos</h1>
 
-      <div v-if="myClosings.length > 0" class="mb-6 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
-        <MetricCard title="Total" :value="myClosings.length" label="Fechamentos" color="#0078D4" icon="pi pi-list" />
-        <MetricCard title="Pendentes" :value="myPendingCount" label="Para fechar" color="#9D5D00" icon="pi pi-clock" />
-        <MetricCard title="Fechados" :value="myClosedCount" label="Concluidos" color="#0F7B0F" icon="pi pi-lock" />
+    <div v-if="myClosings.length > 0" class="mb-6 metric-grid-sm">
+      <MetricCard title="Total" :value="myClosings.length" label="Fechamentos" color="#1976D2" icon="pi pi-list" />
+      <MetricCard title="Pendentes" :value="myPendingCount" label="Para fechar" color="#9D5D00" icon="pi pi-clock" />
+      <MetricCard title="Fechados" :value="myClosedCount" label="Concluidos" color="#0F7B0F" icon="pi pi-lock" />
+    </div>
+
+    <div v-if="myPendingCount > 0" class="mb-4">
+      <Button label="Fechar Todos Pendentes" icon="pi pi-check-circle" severity="success" @click="handleBulkTeacherClose" />
+    </div>
+
+    <div class="card">
+      <EmptyState v-if="!myLoading && myClosings.length === 0" message="Nenhum fechamento encontrado" />
+
+      <DataTable v-if="myClosings.length > 0" :value="myClosings" :loading="myLoading" stripedRows responsiveLayout="scroll">
+        <Column header="Turma">
+          <template #body="{ data }">{{ turmaName(data) }}</template>
+        </Column>
+        <Column header="Disciplina">
+          <template #body="{ data }">{{ disciplineName(data) }}</template>
+        </Column>
+        <Column header="Periodo">
+          <template #body="{ data }">{{ data.assessment_period?.name ?? '--' }}</template>
+        </Column>
+        <Column header="Notas">
+          <template #body="{ data }">
+            <i :class="data.all_grades_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+          </template>
+        </Column>
+        <Column header="Frequencia">
+          <template #body="{ data }">
+            <i :class="data.all_attendance_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+          </template>
+        </Column>
+        <Column header="Diario">
+          <template #body="{ data }">
+            <i :class="data.all_lesson_records_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+          </template>
+        </Column>
+        <Column header="Status">
+          <template #body="{ data }">
+            <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
+          </template>
+        </Column>
+        <Column header="Acoes" :style="{ width: '140px' }">
+          <template #body="{ data }">
+            <div class="flex gap-1">
+              <Button v-if="data.status === 'pending'" label="Fechar" icon="pi pi-check" size="small" severity="success" @click="handleTeacherClose(data)" />
+              <Button icon="pi pi-eye" text rounded size="small" @click="router.push(`/period-closing/${data.id}`)" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+  </template>
+
+  <!-- VISAO ADMIN/DIRETOR/COORDENADOR -->
+  <template v-else>
+    <h1 class="mb-6 text-2xl font-semibold text-md-primary">Fechamento de Periodo</h1>
+
+    <div class="mb-6 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
       </div>
-
-      <div v-if="myPendingCount > 0" class="mb-4">
-        <Button label="Fechar Todos Pendentes" icon="pi pi-check-circle" severity="success" @click="handleBulkTeacherClose" />
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
       </div>
-
-      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <EmptyState v-if="!myLoading && myClosings.length === 0" message="Nenhum fechamento encontrado" />
-
-        <DataTable v-if="myClosings.length > 0" :value="myClosings" :loading="myLoading" stripedRows responsiveLayout="scroll">
-          <Column header="Turma">
-            <template #body="{ data }">{{ turmaName(data) }}</template>
-          </Column>
-          <Column header="Disciplina">
-            <template #body="{ data }">{{ disciplineName(data) }}</template>
-          </Column>
-          <Column header="Periodo">
-            <template #body="{ data }">{{ data.assessment_period?.name ?? '--' }}</template>
-          </Column>
-          <Column header="Notas">
-            <template #body="{ data }">
-              <i :class="data.all_grades_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-            </template>
-          </Column>
-          <Column header="Frequencia">
-            <template #body="{ data }">
-              <i :class="data.all_attendance_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-            </template>
-          </Column>
-          <Column header="Diario">
-            <template #body="{ data }">
-              <i :class="data.all_lesson_records_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-            </template>
-          </Column>
-          <Column header="Status">
-            <template #body="{ data }">
-              <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
-            </template>
-          </Column>
-          <Column header="Acoes" :style="{ width: '140px' }">
-            <template #body="{ data }">
-              <div class="flex gap-1">
-                <Button v-if="data.status === 'pending'" label="Fechar" icon="pi pi-check" size="small" severity="success" @click="handleTeacherClose(data)" />
-                <Button icon="pi pi-eye" text rounded size="small" @click="router.push(`/period-closing/${data.id}`)" />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
+      <div class="flex flex-col gap-1.5 w-full md:w-48">
+        <label class="text-sm font-medium">Ano Letivo</label>
+        <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" showClear />
       </div>
-    </template>
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+    </div>
 
-    <!-- VISAO ADMIN/DIRETOR/COORDENADOR -->
-    <template v-else>
-      <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Fechamento de Periodo</h1>
+    <div v-if="dashboard" class="mb-6 metric-grid-sm">
+      <MetricCard title="Total" :value="dashboard.total ?? 0" label="Fechamentos" color="#1976D2" icon="pi pi-list" />
+      <MetricCard title="Pendentes" :value="dashboard.pending ?? 0" label="Aguardando envio" color="#9D5D00" icon="pi pi-clock" />
+      <MetricCard title="Em Validacao" :value="dashboard.in_validation ?? 0" label="Aguardando aprovacao" color="#005A9E" icon="pi pi-hourglass" />
+      <MetricCard title="Aprovados" :value="dashboard.approved ?? 0" label="Prontos para fechar" color="#0F7B0F" icon="pi pi-check" />
+      <MetricCard title="Fechados" :value="dashboard.closed ?? 0" label="Concluidos" color="#0F7B0F" icon="pi pi-lock" />
+    </div>
 
-      <div class="mb-6 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-48">
-          <label class="text-sm font-medium">Ano Letivo</label>
-          <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" showClear />
-        </div>
-        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-      </div>
+    <div class="card">
+      <Tabs v-model:value="activeTab">
+        <TabList>
+          <Tab value="0">Por Professor</Tab>
+          <Tab value="1">Por Turma</Tab>
+        </TabList>
+        <TabPanels>
+          <!-- ABA POR PROFESSOR -->
+          <TabPanel value="0">
+            <div class="p-6">
+              <EmptyState v-if="!pendenciesLoading && pendencies.length === 0 && selectedSchoolId && selectedAcademicYearId" message="Nenhuma pendencia encontrada. Todos os fechamentos estao concluidos." />
+              <EmptyState v-if="!pendenciesLoading && (!selectedSchoolId || !selectedAcademicYearId)" message="Selecione uma escola e um ano letivo para ver as pendencias por professor." />
 
-      <div v-if="dashboard" class="mb-6 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
-        <MetricCard title="Total" :value="dashboard.total ?? 0" label="Fechamentos" color="#0078D4" icon="pi pi-list" />
-        <MetricCard title="Pendentes" :value="dashboard.pending ?? 0" label="Aguardando envio" color="#9D5D00" icon="pi pi-clock" />
-        <MetricCard title="Em Validacao" :value="dashboard.in_validation ?? 0" label="Aguardando aprovacao" color="#005A9E" icon="pi pi-hourglass" />
-        <MetricCard title="Aprovados" :value="dashboard.approved ?? 0" label="Prontos para fechar" color="#0F7B0F" icon="pi pi-check" />
-        <MetricCard title="Fechados" :value="dashboard.closed ?? 0" label="Concluidos" color="#0F7B0F" icon="pi pi-lock" />
-      </div>
-
-      <div class="rounded-lg border border-[#E0E0E0] bg-white shadow-sm">
-        <Tabs v-model:value="activeTab">
-          <TabList>
-            <Tab value="0">Por Professor</Tab>
-            <Tab value="1">Por Turma</Tab>
-          </TabList>
-          <TabPanels>
-            <!-- ABA POR PROFESSOR -->
-            <TabPanel value="0">
-              <div class="p-6">
-                <EmptyState v-if="!pendenciesLoading && pendencies.length === 0 && selectedSchoolId && selectedAcademicYearId" message="Nenhuma pendencia encontrada. Todos os fechamentos estao concluidos." />
-                <EmptyState v-if="!pendenciesLoading && (!selectedSchoolId || !selectedAcademicYearId)" message="Selecione uma escola e um ano letivo para ver as pendencias por professor." />
-
-                <div v-if="pendencies.length > 0" class="space-y-3">
-                  <div v-for="teacher in pendencies" :key="teacher.teacher_id" class="rounded-lg border border-[#E0E0E0]">
-                    <div class="flex cursor-pointer items-center gap-4 px-4 py-3 hover:bg-[#F5F5F5]" @click="toggleTeacher(teacher.teacher_id)">
-                      <i :class="expandedTeachers[teacher.teacher_id] ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="text-sm text-[#616161]" />
-                      <div class="flex-1">
-                        <span class="font-medium">{{ teacher.teacher_name }}</span>
-                        <span class="ml-2 text-sm text-[#616161]">({{ teacher.total_pending }} pendente(s))</span>
-                      </div>
-                      <div class="w-32">
-                        <ProgressBar :value="pendencyProgress(teacher)" :showValue="true" class="h-5" />
-                      </div>
+              <div v-if="pendencies.length > 0" class="space-y-3">
+                <div v-for="teacher in pendencies" :key="teacher.teacher_id" class="rounded-lg border border-md-border">
+                  <div class="flex cursor-pointer items-center gap-4 px-4 py-3 hover:bg-md-hover" @click="toggleTeacher(teacher.teacher_id)">
+                    <i :class="expandedTeachers[teacher.teacher_id] ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="text-sm text-md-text-secondary" />
+                    <div class="flex-1">
+                      <span class="font-medium">{{ teacher.teacher_name }}</span>
+                      <span class="ml-2 text-sm text-md-text-secondary">({{ teacher.total_pending }} pendente(s))</span>
                     </div>
-                    <div v-if="expandedTeachers[teacher.teacher_id]" class="border-t border-[#E0E0E0] px-4 py-3">
-                      <DataTable :value="teacher.closings" stripedRows size="small">
-                        <Column header="Turma" field="class_group" />
-                        <Column header="Disciplina" field="subject" />
-                        <Column header="Periodo" field="period" />
-                        <Column header="Notas">
-                          <template #body="{ data }">
-                            <i :class="data.grades_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-                          </template>
-                        </Column>
-                        <Column header="Frequencia">
-                          <template #body="{ data }">
-                            <i :class="data.attendance_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-                          </template>
-                        </Column>
-                        <Column header="Diario">
-                          <template #body="{ data }">
-                            <i :class="data.lesson_records_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-                          </template>
-                        </Column>
-                        <Column header="Status">
-                          <template #body="{ data }">
-                            <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
-                          </template>
-                        </Column>
-                        <Column header="Acoes" :style="{ width: '80px' }">
-                          <template #body="{ data }">
-                            <Button icon="pi pi-eye" text rounded size="small" @click="router.push(`/period-closing/${data.id}`)" />
-                          </template>
-                        </Column>
-                      </DataTable>
+                    <div class="w-32">
+                      <ProgressBar :value="pendencyProgress(teacher)" :showValue="true" class="h-5" />
                     </div>
+                  </div>
+                  <div v-if="expandedTeachers[teacher.teacher_id]" class="border-t border-md-border px-4 py-3">
+                    <DataTable :value="teacher.closings" stripedRows size="small">
+                      <Column header="Turma" field="class_group" />
+                      <Column header="Disciplina" field="subject" />
+                      <Column header="Periodo" field="period" />
+                      <Column header="Notas">
+                        <template #body="{ data }">
+                          <i :class="data.grades_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+                        </template>
+                      </Column>
+                      <Column header="Frequencia">
+                        <template #body="{ data }">
+                          <i :class="data.attendance_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+                        </template>
+                      </Column>
+                      <Column header="Diario">
+                        <template #body="{ data }">
+                          <i :class="data.lesson_records_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+                        </template>
+                      </Column>
+                      <Column header="Status">
+                        <template #body="{ data }">
+                          <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
+                        </template>
+                      </Column>
+                      <Column header="Acoes" :style="{ width: '80px' }">
+                        <template #body="{ data }">
+                          <Button icon="pi pi-eye" text rounded size="small" @click="router.push(`/period-closing/${data.id}`)" />
+                        </template>
+                      </Column>
+                    </DataTable>
                   </div>
                 </div>
               </div>
-            </TabPanel>
+            </div>
+          </TabPanel>
 
-            <!-- ABA POR TURMA -->
-            <TabPanel value="1">
-              <div class="p-6">
-                <EmptyState v-if="!loading && items.length === 0" message="Nenhum fechamento encontrado" />
+          <!-- ABA POR TURMA -->
+          <TabPanel value="1">
+            <div class="p-6">
+              <EmptyState v-if="!loading && items.length === 0" message="Nenhum fechamento encontrado" />
 
-                <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-                  <Column header="Turma">
-                    <template #body="{ data }">{{ turmaName(data) }}</template>
-                  </Column>
-                  <Column header="Disciplina">
-                    <template #body="{ data }">{{ disciplineName(data) }}</template>
-                  </Column>
-                  <Column header="Periodo">
-                    <template #body="{ data }">{{ data.assessment_period?.name ?? '--' }}</template>
-                  </Column>
-                  <Column header="Status">
-                    <template #body="{ data }">
-                      <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
-                    </template>
-                  </Column>
-                  <Column header="Notas">
-                    <template #body="{ data }">
-                      <i :class="data.all_grades_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-                    </template>
-                  </Column>
-                  <Column header="Frequencia">
-                    <template #body="{ data }">
-                      <i :class="data.all_attendance_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-                    </template>
-                  </Column>
-                  <Column header="Diario">
-                    <template #body="{ data }">
-                      <i :class="data.all_lesson_records_complete ? 'pi pi-check-circle text-[#0F7B0F]' : 'pi pi-times-circle text-[#C42B1C]'" />
-                    </template>
-                  </Column>
-                  <Column header="Acoes" :style="{ width: '80px' }">
-                    <template #body="{ data }">
-                      <Button icon="pi pi-eye" text rounded @click="router.push(`/period-closing/${data.id}`)" />
-                    </template>
-                  </Column>
-                </DataTable>
+              <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+                <Column header="Turma">
+                  <template #body="{ data }">{{ turmaName(data) }}</template>
+                </Column>
+                <Column header="Disciplina">
+                  <template #body="{ data }">{{ disciplineName(data) }}</template>
+                </Column>
+                <Column header="Periodo">
+                  <template #body="{ data }">{{ data.assessment_period?.name ?? '--' }}</template>
+                </Column>
+                <Column header="Status">
+                  <template #body="{ data }">
+                    <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
+                  </template>
+                </Column>
+                <Column header="Notas">
+                  <template #body="{ data }">
+                    <i :class="data.all_grades_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+                  </template>
+                </Column>
+                <Column header="Frequencia">
+                  <template #body="{ data }">
+                    <i :class="data.all_attendance_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+                  </template>
+                </Column>
+                <Column header="Diario">
+                  <template #body="{ data }">
+                    <i :class="data.all_lesson_records_complete ? 'pi pi-check-circle text-md-success' : 'pi pi-times-circle text-md-error'" />
+                  </template>
+                </Column>
+                <Column header="Acoes" :style="{ width: '80px' }">
+                  <template #body="{ data }">
+                    <Button icon="pi pi-eye" text rounded @click="router.push(`/period-closing/${data.id}`)" />
+                  </template>
+                </Column>
+              </DataTable>
 
-                <Paginator
-                  v-if="totalRecords > perPage"
-                  :rows="perPage"
-                  :totalRecords="totalRecords"
-                  :first="(currentPage - 1) * perPage"
-                  :rowsPerPageOptions="[10, 15, 25, 50]"
-                  class="mt-4 border-t border-[#E0E0E0] pt-3"
-                  @page="onPageChange"
-                />
-              </div>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </div>
-    </template>
-  </div>
+              <Paginator
+                v-if="totalRecords > perPage"
+                :rows="perPage"
+                :totalRecords="totalRecords"
+                :first="(currentPage - 1) * perPage"
+                :rowsPerPageOptions="[10, 15, 25, 50]"
+                class="mt-4 border-t border-md-border pt-3"
+                @page="onPageChange"
+              />
+            </div>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+  </template>
 </template>

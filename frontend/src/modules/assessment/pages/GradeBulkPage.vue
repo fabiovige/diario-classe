@@ -292,66 +292,64 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Lancamento de Notas</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Lancamento de Notas</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-56">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-56">
-          <label class="text-sm font-medium">Turma *</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter @change="onClassGroupChange" />
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-56">
-          <label class="text-sm font-medium">Disciplina *</label>
-          <Select v-model="selectedAssignmentId" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || assignments.length === 0" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-48">
-          <label class="text-sm font-medium">Periodo *</label>
-          <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" :placeholder="depsPlaceholder" :disabled="!selectedClassGroupId || loadingDeps" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-56">
-          <label class="text-sm font-medium">Instrumento *</label>
-          <Select v-model="selectedInstrumentId" :options="instruments" optionLabel="name" optionValue="id" :placeholder="instrumentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || instruments.length === 0" class="w-full" />
-        </div>
-        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+  <div class="card">
+    <div class="flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-56">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
       </div>
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-56">
+        <label class="text-sm font-medium">Turma *</label>
+        <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter @change="onClassGroupChange" />
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-56">
+        <label class="text-sm font-medium">Disciplina *</label>
+        <Select v-model="selectedAssignmentId" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || assignments.length === 0" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-48">
+        <label class="text-sm font-medium">Periodo *</label>
+        <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" :placeholder="depsPlaceholder" :disabled="!selectedClassGroupId || loadingDeps" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-56">
+        <label class="text-sm font-medium">Instrumento *</label>
+        <Select v-model="selectedInstrumentId" :options="instruments" optionLabel="name" optionValue="id" :placeholder="instrumentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || instruments.length === 0" class="w-full" />
+      </div>
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
     </div>
+  </div>
 
-    <Message v-if="isDescriptive" severity="info" class="mt-4" :closable="false">
-      Esta turma utiliza avaliacao descritiva. Acesse a pagina de
-      <router-link to="/assessment/descriptive" class="font-semibold underline">Relatorios Descritivos</router-link>
-      para registrar as avaliacoes.
-    </Message>
+  <Message v-if="isDescriptive" severity="info" class="mt-4" :closable="false">
+    Esta turma utiliza avaliacao descritiva. Acesse a pagina de
+    <router-link to="/assessment/descriptive" class="font-semibold underline">Relatorios Descritivos</router-link>
+    para registrar as avaliacoes.
+  </Message>
 
-    <div v-if="!isDescriptive" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <EmptyState v-if="!loading && !loadingGrades && !loadingDeps && !selectedClassGroupId && students.length === 0" message="Selecione uma turma para carregar os alunos" />
-      <EmptyState v-if="!loading && !loadingGrades && !loadingDeps && selectedClassGroupId && students.length === 0" message="Nenhum aluno enturmado nesta turma" />
+  <div v-if="!isDescriptive" class="card mt-6">
+    <EmptyState v-if="!loading && !loadingGrades && !loadingDeps && !selectedClassGroupId && students.length === 0" message="Selecione uma turma para carregar os alunos" />
+    <EmptyState v-if="!loading && !loadingGrades && !loadingDeps && selectedClassGroupId && students.length === 0" message="Nenhum aluno enturmado nesta turma" />
 
-      <DataTable v-if="students.length > 0" :value="students" :loading="loading || loadingGrades" stripedRows responsiveLayout="scroll">
-        <Column field="student_name" header="Aluno" sortable />
-        <Column v-if="isNumeric" header="Nota" :style="{ width: '150px' }">
-          <template #body="{ data }">
-            <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :minFractionDigits="0" :maxFractionDigits="config?.rounding_precision ?? 2" :maxlength="5" inputmode="decimal" @blur="clampGrade(data)" class="w-full" />
-          </template>
-        </Column>
-        <Column v-if="isConceptual" header="Conceito" :style="{ width: '180px' }">
-          <template #body="{ data }">
-            <Select v-model="data.conceptual_value" :options="conceptualOptions" optionLabel="label" optionValue="value" placeholder="--" class="w-full" showClear />
-          </template>
-        </Column>
-      </DataTable>
+    <DataTable v-if="students.length > 0" :value="students" :loading="loading || loadingGrades" stripedRows responsiveLayout="scroll">
+      <Column field="student_name" header="Aluno" sortable />
+      <Column v-if="isNumeric" header="Nota" :style="{ width: '150px' }">
+        <template #body="{ data }">
+          <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :minFractionDigits="0" :maxFractionDigits="config?.rounding_precision ?? 2" :maxlength="5" inputmode="decimal" @blur="clampGrade(data)" class="w-full" />
+        </template>
+      </Column>
+      <Column v-if="isConceptual" header="Conceito" :style="{ width: '180px' }">
+        <template #body="{ data }">
+          <Select v-model="data.conceptual_value" :options="conceptualOptions" optionLabel="label" optionValue="value" placeholder="--" class="w-full" showClear />
+        </template>
+      </Column>
+    </DataTable>
 
-      <div v-if="students.length > 0" class="mt-4 flex justify-end border-t border-[#E0E0E0] pt-4">
-        <Button label="Salvar Notas" icon="pi pi-check" :loading="submitting" :disabled="!canSubmit" @click="handleSubmit" />
-      </div>
+    <div v-if="students.length > 0" class="mt-4 flex justify-end border-t border-md-border pt-4">
+      <Button label="Salvar Notas" icon="pi pi-check" :loading="submitting" :disabled="!canSubmit" @click="handleSubmit" />
     </div>
   </div>
 </template>

@@ -80,36 +80,34 @@ onMounted(loadAuxData)
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Nova Matricula</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Nova Matricula</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm max-w-[700px]">
-      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Aluno *</label>
-          <Select v-model="form.student_id" :options="students" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola *</label>
-          <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Ano Letivo *</label>
-          <Select v-model="form.academic_year_id" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Tipo de Matricula *</label>
-          <Select v-model="form.enrollment_type" :options="enrollmentTypeOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data da Matricula *</label>
-          <DatePicker v-model="form.enrollment_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
-        </div>
-        <div class="mt-4 flex justify-end gap-3">
-          <Button label="Cancelar" severity="secondary" @click="router.push('/enrollment/enrollments')" />
-          <Button type="submit" label="Matricular" icon="pi pi-check" :loading="loading" />
-        </div>
-      </form>
-    </div>
+  <div class="card max-w-[700px]">
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Aluno *</label>
+        <Select v-model="form.student_id" :options="students" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola *</label>
+        <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Ano Letivo *</label>
+        <Select v-model="form.academic_year_id" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Tipo de Matricula *</label>
+        <Select v-model="form.enrollment_type" :options="enrollmentTypeOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data da Matricula *</label>
+        <DatePicker v-model="form.enrollment_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+      </div>
+      <div class="mt-4 flex justify-end gap-3">
+        <Button label="Cancelar" severity="secondary" @click="router.push('/enrollment/enrollments')" />
+        <Button type="submit" label="Matricular" icon="pi pi-check" :loading="loading" />
+      </div>
+    </form>
   </div>
 </template>

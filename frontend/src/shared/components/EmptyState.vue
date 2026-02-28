@@ -12,8 +12,10 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div class="flex flex-col items-center justify-center px-4 py-12 text-center">
-    <i :class="icon" class="mb-4 text-5xl text-fluent-border" />
-    <p class="text-[0.9375rem] text-fluent-text-secondary">{{ message }}</p>
+    <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-md-bg">
+      <i :class="icon" class="text-3xl text-md-text-secondary" />
+    </div>
+    <p class="text-[0.9375rem] text-md-text-secondary">{{ message }}</p>
     <slot />
   </div>
 </template>

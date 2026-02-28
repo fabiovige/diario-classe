@@ -238,171 +238,169 @@ onMounted(loadEnrollment)
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold text-[#0078D4]">Detalhes da Matricula</h1>
-      <div class="flex gap-2">
-        <Button v-if="enrollment?.status === 'active'" label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
-        <Button v-if="enrollment?.status === 'active'" label="Movimentar" icon="pi pi-arrow-right-arrow-left" severity="warning" @click="openMovementDialog" />
-        <Button v-if="enrollment?.status === 'cancelled'" label="Reativar" icon="pi pi-replay" severity="success" @click="handleReactivate" />
-        <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/enrollment/enrollments')" />
-      </div>
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-semibold text-md-primary">Detalhes da Matricula</h1>
+    <div class="flex gap-2">
+      <Button v-if="enrollment?.status === 'active'" label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
+      <Button v-if="enrollment?.status === 'active'" label="Movimentar" icon="pi pi-arrow-right-arrow-left" severity="warning" @click="openMovementDialog" />
+      <Button v-if="enrollment?.status === 'cancelled'" label="Reativar" icon="pi pi-replay" severity="success" @click="handleReactivate" />
+      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/enrollment/enrollments')" />
     </div>
-
-    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Numero</span>
-          <span class="text-[0.9375rem]">{{ enrollment.enrollment_number }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Aluno</span>
-          <span class="text-[0.9375rem]">{{ enrollment.student?.name ?? '--' }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Escola</span>
-          <span class="text-[0.9375rem]">{{ enrollment.school?.name ?? '--' }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Ano Letivo</span>
-          <span class="text-[0.9375rem]">{{ enrollment.academic_year?.year ?? '--' }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Tipo</span>
-          <span class="text-[0.9375rem]">{{ enrollment.enrollment_type_label ?? '--' }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Status</span>
-          <StatusBadge :status="enrollment.status" :label="enrollmentStatusLabel(enrollment.status)" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-semibold uppercase text-[#616161]">Data Matricula</span>
-          <span class="text-[0.9375rem]">{{ formatDate(enrollment.enrollment_date) }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="enrollment" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm mt-6">
-      <h2 class="text-lg font-semibold mb-4">Enturmacoes</h2>
-      <EmptyState v-if="!enrollment.class_assignments || enrollment.class_assignments.length === 0" message="Nenhuma enturmacao registrada" />
-      <DataTable v-if="enrollment.class_assignments && enrollment.class_assignments.length > 0" :value="enrollment.class_assignments" stripedRows responsiveLayout="scroll">
-        <Column header="Turma">
-          <template #body="{ data }">
-            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
-          </template>
-        </Column>
-        <Column header="Status">
-          <template #body="{ data }">
-            <StatusBadge :status="data.status" :label="classAssignmentStatusLabel(data.status)" />
-          </template>
-        </Column>
-        <Column header="Inicio">
-          <template #body="{ data }">
-            {{ formatDate(data.start_date) }}
-          </template>
-        </Column>
-        <Column header="Fim">
-          <template #body="{ data }">
-            {{ formatDate(data.end_date) }}
-          </template>
-        </Column>
-        <Column header="Acoes" :style="{ width: '120px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="openEditAssignment(data)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDeleteAssignment(data)" />
-          </template>
-        </Column>
-      </DataTable>
-    </div>
-
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm mt-6">
-      <h2 class="text-lg font-semibold mb-4">Movimentacoes</h2>
-      <EmptyState v-if="movements.length === 0" message="Nenhuma movimentacao registrada" />
-      <DataTable v-if="movements.length > 0" :value="movements" stripedRows responsiveLayout="scroll">
-        <Column header="Tipo">
-          <template #body="{ data }">
-            {{ movementTypeLabel(data.type) }}
-          </template>
-        </Column>
-        <Column header="Data">
-          <template #body="{ data }">
-            {{ formatDate(data.movement_date) }}
-          </template>
-        </Column>
-        <Column field="reason" header="Motivo" />
-        <Column header="Escola Origem">
-          <template #body="{ data }">
-            {{ data.origin_school?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Escola Destino">
-          <template #body="{ data }">
-            {{ data.destination_school?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Criado em">
-          <template #body="{ data }">
-            {{ formatDateTime(data.created_at) }}
-          </template>
-        </Column>
-      </DataTable>
-    </div>
-
-    <EnrollmentDocumentsSection v-if="enrollment" :enrollmentId="enrollmentId" />
-
-    <FormDialog v-model:visible="assignDialogVisible" title="Enturmar Aluno" :loading="assignLoading" @save="handleAssign">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Turma *</label>
-          <Select v-model="assignForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data de Inicio *</label>
-          <DatePicker v-model="assignForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
-        </div>
-      </div>
-    </FormDialog>
-
-    <FormDialog v-model:visible="movementDialogVisible" title="Registrar Movimentacao" :loading="movementLoading" @save="handleMovement">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Tipo *</label>
-          <Select v-model="movementForm.type" :options="movementTypeOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data *</label>
-          <DatePicker v-model="movementForm.movement_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
-        </div>
-        <div v-if="isTransferType(movementForm.type)" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola Destino</label>
-          <Select v-model="movementForm.destination_school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Motivo</label>
-          <InputText v-model="movementForm.reason" placeholder="Motivo da movimentacao" class="w-full" />
-        </div>
-      </div>
-    </FormDialog>
-
-    <FormDialog v-model:visible="editAssignmentDialogVisible" title="Editar Enturmacao" :loading="editAssignmentLoading" @save="handleEditAssignment">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Turma *</label>
-          <Select v-model="editAssignmentForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data de Inicio *</label>
-          <DatePicker v-model="editAssignmentForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data de Fim</label>
-          <DatePicker v-model="editAssignmentForm.end_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon showButtonBar />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Status *</label>
-          <Select v-model="editAssignmentForm.status" :options="classAssignmentStatusOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
-        </div>
-      </div>
-    </FormDialog>
   </div>
+
+  <div v-if="enrollment" class="card">
+    <div class="detail-grid">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Numero</span>
+        <span class="text-[0.9375rem]">{{ enrollment.enrollment_number }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Aluno</span>
+        <span class="text-[0.9375rem]">{{ enrollment.student?.name ?? '--' }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Escola</span>
+        <span class="text-[0.9375rem]">{{ enrollment.school?.name ?? '--' }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Ano Letivo</span>
+        <span class="text-[0.9375rem]">{{ enrollment.academic_year?.year ?? '--' }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Tipo</span>
+        <span class="text-[0.9375rem]">{{ enrollment.enrollment_type_label ?? '--' }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Status</span>
+        <StatusBadge :status="enrollment.status" :label="enrollmentStatusLabel(enrollment.status)" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-semibold uppercase text-md-text-secondary">Data Matricula</span>
+        <span class="text-[0.9375rem]">{{ formatDate(enrollment.enrollment_date) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="enrollment" class="card mt-6">
+    <h2 class="text-lg font-semibold mb-4">Enturmacoes</h2>
+    <EmptyState v-if="!enrollment.class_assignments || enrollment.class_assignments.length === 0" message="Nenhuma enturmacao registrada" />
+    <DataTable v-if="enrollment.class_assignments && enrollment.class_assignments.length > 0" :value="enrollment.class_assignments" stripedRows responsiveLayout="scroll">
+      <Column header="Turma">
+        <template #body="{ data }">
+          {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
+        </template>
+      </Column>
+      <Column header="Status">
+        <template #body="{ data }">
+          <StatusBadge :status="data.status" :label="classAssignmentStatusLabel(data.status)" />
+        </template>
+      </Column>
+      <Column header="Inicio">
+        <template #body="{ data }">
+          {{ formatDate(data.start_date) }}
+        </template>
+      </Column>
+      <Column header="Fim">
+        <template #body="{ data }">
+          {{ formatDate(data.end_date) }}
+        </template>
+      </Column>
+      <Column header="Acoes" :style="{ width: '120px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" text rounded class="mr-1" @click="openEditAssignment(data)" />
+          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDeleteAssignment(data)" />
+        </template>
+      </Column>
+    </DataTable>
+  </div>
+
+  <div class="card mt-6">
+    <h2 class="text-lg font-semibold mb-4">Movimentacoes</h2>
+    <EmptyState v-if="movements.length === 0" message="Nenhuma movimentacao registrada" />
+    <DataTable v-if="movements.length > 0" :value="movements" stripedRows responsiveLayout="scroll">
+      <Column header="Tipo">
+        <template #body="{ data }">
+          {{ movementTypeLabel(data.type) }}
+        </template>
+      </Column>
+      <Column header="Data">
+        <template #body="{ data }">
+          {{ formatDate(data.movement_date) }}
+        </template>
+      </Column>
+      <Column field="reason" header="Motivo" />
+      <Column header="Escola Origem">
+        <template #body="{ data }">
+          {{ data.origin_school?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Escola Destino">
+        <template #body="{ data }">
+          {{ data.destination_school?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Criado em">
+        <template #body="{ data }">
+          {{ formatDateTime(data.created_at) }}
+        </template>
+      </Column>
+    </DataTable>
+  </div>
+
+  <EnrollmentDocumentsSection v-if="enrollment" :enrollmentId="enrollmentId" />
+
+  <FormDialog v-model:visible="assignDialogVisible" title="Enturmar Aluno" :loading="assignLoading" @save="handleAssign">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Turma *</label>
+        <Select v-model="assignForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data de Inicio *</label>
+        <DatePicker v-model="assignForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+      </div>
+    </div>
+  </FormDialog>
+
+  <FormDialog v-model:visible="movementDialogVisible" title="Registrar Movimentacao" :loading="movementLoading" @save="handleMovement">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Tipo *</label>
+        <Select v-model="movementForm.type" :options="movementTypeOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data *</label>
+        <DatePicker v-model="movementForm.movement_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+      </div>
+      <div v-if="isTransferType(movementForm.type)" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola Destino</label>
+        <Select v-model="movementForm.destination_school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Motivo</label>
+        <InputText v-model="movementForm.reason" placeholder="Motivo da movimentacao" class="w-full" />
+      </div>
+    </div>
+  </FormDialog>
+
+  <FormDialog v-model:visible="editAssignmentDialogVisible" title="Editar Enturmacao" :loading="editAssignmentLoading" @save="handleEditAssignment">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Turma *</label>
+        <Select v-model="editAssignmentForm.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data de Inicio *</label>
+        <DatePicker v-model="editAssignmentForm.start_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data de Fim</label>
+        <DatePicker v-model="editAssignmentForm.end_date" dateFormat="dd/mm/yy" placeholder="dd/mm/aaaa" class="w-full" showIcon showButtonBar />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Status *</label>
+        <Select v-model="editAssignmentForm.status" :options="classAssignmentStatusOptions" optionLabel="label" optionValue="value" placeholder="Selecione" class="w-full" />
+      </div>
+    </div>
+  </FormDialog>
 </template>

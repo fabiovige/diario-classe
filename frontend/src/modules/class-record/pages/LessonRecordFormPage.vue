@@ -126,45 +126,43 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Registro de Aula' : 'Novo Registro de Aula' }}</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">{{ isEdit ? 'Editar Registro de Aula' : 'Novo Registro de Aula' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Turma *</label>
-          <Select v-model="form.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Disciplina *</label>
-          <Select v-model="form.teacher_assignment_id" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!form.class_group_id || loadingAssignments || assignments.length === 0" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data *</label>
-          <InputText v-model="form.date" type="date" required class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Conteudo *</label>
-          <Textarea v-model="form.content" rows="4" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Metodologia</label>
-          <Textarea v-model="form.methodology" rows="3" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Observacoes</label>
-          <Textarea v-model="form.observations" rows="3" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Quantidade de Aulas *</label>
-          <InputNumber v-model="form.class_count" :min="1" :max="10" class="w-full" />
-        </div>
+  <div class="card max-w-[700px]">
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Turma *</label>
+        <Select v-model="form.class_group_id" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" filter @change="onClassGroupChange" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Disciplina *</label>
+        <Select v-model="form.teacher_assignment_id" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!form.class_group_id || loadingAssignments || assignments.length === 0" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data *</label>
+        <InputText v-model="form.date" type="date" required class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Conteudo *</label>
+        <Textarea v-model="form.content" rows="4" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Metodologia</label>
+        <Textarea v-model="form.methodology" rows="3" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Observacoes</label>
+        <Textarea v-model="form.observations" rows="3" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Quantidade de Aulas *</label>
+        <InputNumber v-model="form.class_count" :min="1" :max="10" class="w-full" />
+      </div>
 
-        <div class="mt-4 flex justify-end gap-3">
-          <Button label="Cancelar" severity="secondary" @click="router.push('/class-record')" />
-          <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
-        </div>
-      </form>
-    </div>
+      <div class="mt-4 flex justify-end gap-3">
+        <Button label="Cancelar" severity="secondary" @click="router.push('/class-record')" />
+        <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
+      </div>
+    </form>
   </div>
 </template>

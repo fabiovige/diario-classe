@@ -195,90 +195,88 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Resultado Final</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Resultado Final</h1>
 
-    <div class="mb-6 flex flex-wrap items-end gap-4">
-      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-        <label class="text-sm font-medium">Escola</label>
-        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas" class="w-full" filter showClear />
-      </div>
-      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-        <label class="text-sm font-medium">Escola</label>
-        <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-      </div>
-
-      <div class="flex flex-col gap-1.5 w-full md:w-72">
-        <label class="text-sm font-medium">Turma</label>
-        <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas" class="w-full" :disabled="!selectedSchoolId" filter showClear />
-      </div>
-
-      <div class="flex flex-col gap-1.5 w-full md:w-72">
-        <label class="text-sm font-medium">Aluno *</label>
-        <Select v-model="selectedStudentId" :options="students" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
-      </div>
-
-      <div class="flex items-end gap-2">
-        <Button label="Calcular" icon="pi pi-calculator" severity="info" @click="calculateResult" :disabled="!selectedStudentId" :loading="loading" />
-      </div>
-
-      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+  <div class="mb-6 flex flex-wrap items-end gap-4">
+    <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+      <label class="text-sm font-medium">Escola</label>
+      <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas" class="w-full" filter showClear />
+    </div>
+    <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+      <label class="text-sm font-medium">Escola</label>
+      <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
     </div>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <EmptyState v-if="!loading && !result" message="Selecione um aluno para visualizar o resultado final" />
+    <div class="flex flex-col gap-1.5 w-full md:w-72">
+      <label class="text-sm font-medium">Turma</label>
+      <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas" class="w-full" :disabled="!selectedSchoolId" filter showClear />
+    </div>
 
-      <div v-if="result" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
-        <div class="flex flex-col gap-1">
-          <span class="text-sm font-semibold uppercase text-[#616161]">Aluno</span>
-          <span class="text-[0.9375rem]">{{ result.student?.name ?? `Aluno #${result.student_id}` }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-sm font-semibold uppercase text-[#616161]">Resultado</span>
-          <StatusBadge :status="result.result" :label="finalResultStatusLabel(result.result)" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-sm font-semibold uppercase text-[#616161]">Media Geral</span>
-          <span class="text-2xl font-bold">{{ result.overall_average ?? '--' }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-sm font-semibold uppercase text-[#616161]">Frequencia Geral</span>
-          <span class="text-[0.9375rem]">{{ formatPercentage(result.overall_frequency) }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-          <span class="text-sm font-semibold uppercase text-[#616161]">Conselho</span>
-          <span class="text-[0.9375rem]">{{ result.council_override ? 'Sim' : 'Nao' }}</span>
-        </div>
-        <div v-if="result.observations" class="col-span-full flex flex-col gap-1">
-          <span class="text-sm font-semibold uppercase text-[#616161]">Observacoes</span>
-          <span class="text-[0.9375rem]">{{ result.observations }}</span>
-        </div>
+    <div class="flex flex-col gap-1.5 w-full md:w-72">
+      <label class="text-sm font-medium">Aluno *</label>
+      <Select v-model="selectedStudentId" :options="students" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
+    </div>
+
+    <div class="flex items-end gap-2">
+      <Button label="Calcular" icon="pi pi-calculator" severity="info" @click="calculateResult" :disabled="!selectedStudentId" :loading="loading" />
+    </div>
+
+    <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+  </div>
+
+  <div class="card">
+    <EmptyState v-if="!loading && !result" message="Selecione um aluno para visualizar o resultado final" />
+
+    <div v-if="result" class="detail-grid">
+      <div class="flex flex-col gap-1">
+        <span class="text-sm font-semibold uppercase text-md-text-secondary">Aluno</span>
+        <span class="text-[0.9375rem]">{{ result.student?.name ?? `Aluno #${result.student_id}` }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-sm font-semibold uppercase text-md-text-secondary">Resultado</span>
+        <StatusBadge :status="result.result" :label="finalResultStatusLabel(result.result)" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-sm font-semibold uppercase text-md-text-secondary">Media Geral</span>
+        <span class="text-2xl font-bold">{{ result.overall_average ?? '--' }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-sm font-semibold uppercase text-md-text-secondary">Frequencia Geral</span>
+        <span class="text-[0.9375rem]">{{ formatPercentage(result.overall_frequency) }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-sm font-semibold uppercase text-md-text-secondary">Conselho</span>
+        <span class="text-[0.9375rem]">{{ result.council_override ? 'Sim' : 'Nao' }}</span>
+      </div>
+      <div v-if="result.observations" class="col-span-full flex flex-col gap-1">
+        <span class="text-sm font-semibold uppercase text-md-text-secondary">Observacoes</span>
+        <span class="text-[0.9375rem]">{{ result.observations }}</span>
       </div>
     </div>
+  </div>
 
-    <div v-if="reportCard && reportCard.subjects.length > 0" class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-[#0078D4]">Detalhamento por Disciplina</h2>
+  <div v-if="reportCard && reportCard.subjects.length > 0" class="card mt-6">
+    <h2 class="mb-4 text-lg font-semibold text-md-primary">Detalhamento por Disciplina</h2>
 
-      <DataTable :value="reportCard.subjects" stripedRows responsiveLayout="scroll">
-        <Column header="Disciplina" field="name" :style="{ minWidth: '180px' }" />
-        <Column v-for="period in reportCard.assessment_periods" :key="period.id" :header="period.name" :style="{ minWidth: '80px', textAlign: 'center' }">
-          <template #body="{ data: subject }">
-            {{ formatGrade(subject.periods?.[String(period.number)]?.average ?? null) }}
-          </template>
-        </Column>
-        <Column header="Media Final" :style="{ minWidth: '100px', textAlign: 'center' }">
-          <template #body="{ data: subject }">
-            <span class="font-bold" :class="subject.final_grade !== null && reportCard!.summary && subject.final_grade >= reportCard!.summary.passing_grade ? 'text-[#0F7B0F]' : subject.final_grade !== null ? 'text-[#C42B1C]' : ''">
-              {{ formatGrade(subject.final_grade ?? subject.final_average) }}
-            </span>
-          </template>
-        </Column>
-        <Column header="Freq %" :style="{ minWidth: '80px', textAlign: 'center' }">
-          <template #body="{ data: subject }">
-            {{ subject.frequency_percentage !== null ? `${subject.frequency_percentage.toFixed(1)}%` : '--' }}
-          </template>
-        </Column>
-      </DataTable>
-    </div>
+    <DataTable :value="reportCard.subjects" stripedRows responsiveLayout="scroll">
+      <Column header="Disciplina" field="name" :style="{ minWidth: '180px' }" />
+      <Column v-for="period in reportCard.assessment_periods" :key="period.id" :header="period.name" :style="{ minWidth: '80px', textAlign: 'center' }">
+        <template #body="{ data: subject }">
+          {{ formatGrade(subject.periods?.[String(period.number)]?.average ?? null) }}
+        </template>
+      </Column>
+      <Column header="Media Final" :style="{ minWidth: '100px', textAlign: 'center' }">
+        <template #body="{ data: subject }">
+          <span class="font-bold" :class="subject.final_grade !== null && reportCard!.summary && subject.final_grade >= reportCard!.summary.passing_grade ? 'text-md-success' : subject.final_grade !== null ? 'text-md-error' : ''">
+            {{ formatGrade(subject.final_grade ?? subject.final_average) }}
+          </span>
+        </template>
+      </Column>
+      <Column header="Freq %" :style="{ minWidth: '80px', textAlign: 'center' }">
+        <template #body="{ data: subject }">
+          {{ subject.frequency_percentage !== null ? `${subject.frequency_percentage.toFixed(1)}%` : '--' }}
+        </template>
+      </Column>
+    </DataTable>
   </div>
 </template>

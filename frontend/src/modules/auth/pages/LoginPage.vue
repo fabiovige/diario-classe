@@ -34,8 +34,8 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="rounded-xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
-    <h2 class="mb-6 text-center text-xl font-semibold text-[#0078D4]">Entrar</h2>
+  <div class="rounded-xl bg-white p-8 shadow-login">
+    <h2 class="mb-6 text-center text-xl font-semibold text-md-primary">Entrar</h2>
 
     <Message v-if="errorMessage" severity="error" :closable="false" class="mb-4">
       {{ errorMessage }}
@@ -43,12 +43,12 @@ async function handleLogin() {
 
     <form @submit.prevent="handleLogin" class="flex flex-col gap-5">
       <div class="flex flex-col gap-1.5">
-        <label for="email" class="text-sm font-medium text-[#1A1A1A]">E-mail</label>
+        <label for="email" class="text-sm font-medium text-md-text">E-mail</label>
         <InputText id="email" v-model="email" type="email" placeholder="seu@email.com" class="w-full" required autofocus />
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label for="password" class="text-sm font-medium text-[#1A1A1A]">Senha</label>
+        <label for="password" class="text-sm font-medium text-md-text">Senha</label>
         <Password id="password" v-model="password" :feedback="false" toggleMask class="w-full" inputClass="w-full" required />
       </div>
 

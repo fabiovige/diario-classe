@@ -380,188 +380,186 @@ onMounted(loadInitialData)
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="mb-6 flex items-start justify-between">
-      <div v-if="assignment">
-        <h1 class="text-2xl font-semibold text-[#0078D4]">{{ contextLabel }}</h1>
-        <p class="mt-1 text-[0.875rem] text-[#605E5C]">{{ formattedDate }}</p>
-      </div>
-      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" size="small" @click="router.push('/my-classes')" />
+  <div class="mb-6 flex items-start justify-between">
+    <div v-if="assignment">
+      <h1 class="text-2xl font-semibold text-md-primary">{{ contextLabel }}</h1>
+      <p class="mt-1 text-[0.875rem] text-md-text-secondary">{{ formattedDate }}</p>
     </div>
+    <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" size="small" @click="router.push('/my-classes')" />
+  </div>
 
-    <div v-if="loading" class="flex items-center justify-center py-16">
-      <ProgressSpinner strokeWidth="3" />
-    </div>
+  <div v-if="loading" class="flex items-center justify-center py-16">
+    <ProgressSpinner strokeWidth="3" />
+  </div>
 
-    <Tabs v-if="!loading && assignment" value="attendance">
-      <TabList>
-        <Tab value="attendance">
-          <span class="flex items-center gap-2">
-            <i v-if="attendanceSaved" class="pi pi-check-circle text-green-600" />
-            Chamada
-          </span>
-        </Tab>
-        <Tab value="lesson">
-          <span class="flex items-center gap-2">
-            <i v-if="lessonSaved" class="pi pi-check-circle text-green-600" />
-            Registro de Aula
-          </span>
-        </Tab>
-        <Tab v-if="hasOpenPeriod" value="assessment">Avaliacao</Tab>
-      </TabList>
+  <Tabs v-if="!loading && assignment" value="attendance">
+    <TabList>
+      <Tab value="attendance">
+        <span class="flex items-center gap-2">
+          <i v-if="attendanceSaved" class="pi pi-check-circle text-green-600" />
+          Chamada
+        </span>
+      </Tab>
+      <Tab value="lesson">
+        <span class="flex items-center gap-2">
+          <i v-if="lessonSaved" class="pi pi-check-circle text-green-600" />
+          Registro de Aula
+        </span>
+      </Tab>
+      <Tab v-if="hasOpenPeriod" value="assessment">Avaliacao</Tab>
+    </TabList>
 
-      <TabPanels>
-        <TabPanel value="attendance">
-          <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-            <div v-if="students.length > 0" class="mb-4 rounded-md border border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3">
-              <p class="mb-2 text-[0.8125rem] font-semibold text-[#323130]">Legenda — clique no botao correspondente para cada aluno:</p>
-              <div class="flex flex-wrap gap-x-6 gap-y-1.5">
-                <span class="flex items-center gap-1.5 text-[0.8125rem]">
-                  <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-green-100 text-xs font-bold text-green-800">P</span>
-                  Presente
-                </span>
-                <span class="flex items-center gap-1.5 text-[0.8125rem]">
-                  <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-red-100 text-xs font-bold text-red-800">A</span>
-                  Ausente (falta)
-                </span>
-                <span class="flex items-center gap-1.5 text-[0.8125rem]">
-                  <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-bold text-blue-800">J</span>
-                  Falta Justificada (com atestado)
-                </span>
-                <span class="flex items-center gap-1.5 text-[0.8125rem]">
-                  <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">D</span>
-                  Dispensado
-                </span>
-              </div>
+    <TabPanels>
+      <TabPanel value="attendance">
+        <div class="card">
+          <div v-if="students.length > 0" class="mb-4 rounded-md border border-md-border bg-md-hover px-4 py-3">
+            <p class="mb-2 text-[0.8125rem] font-semibold text-md-text">Legenda — clique no botao correspondente para cada aluno:</p>
+            <div class="flex flex-wrap gap-x-6 gap-y-1.5">
+              <span class="flex items-center gap-1.5 text-[0.8125rem]">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-green-100 text-xs font-bold text-green-800">P</span>
+                Presente
+              </span>
+              <span class="flex items-center gap-1.5 text-[0.8125rem]">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-red-100 text-xs font-bold text-red-800">A</span>
+                Ausente (falta)
+              </span>
+              <span class="flex items-center gap-1.5 text-[0.8125rem]">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-bold text-blue-800">J</span>
+                Falta Justificada (com atestado)
+              </span>
+              <span class="flex items-center gap-1.5 text-[0.8125rem]">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">D</span>
+                Dispensado
+              </span>
             </div>
+          </div>
 
-            <EmptyState v-if="students.length === 0" message="Nenhum aluno matriculado nesta turma" />
+          <EmptyState v-if="students.length === 0" message="Nenhum aluno matriculado nesta turma" />
 
-            <DataTable v-if="students.length > 0" :value="students" stripedRows responsiveLayout="scroll">
+          <DataTable v-if="students.length > 0" :value="students" stripedRows responsiveLayout="scroll">
+            <Column field="student_name" header="Aluno" sortable />
+            <Column header="Presenca" :style="{ width: '240px' }">
+              <template #body="{ data }">
+                <div class="flex items-center gap-1.5">
+                  <Button
+                    v-for="opt in statusOptions"
+                    :key="opt.value"
+                    :label="opt.label"
+                    :severity="(data.status === opt.value ? getStatusSeverity(opt.value) : 'secondary') as any"
+                    :outlined="data.status !== opt.value"
+                    size="small"
+                    @click="handleStatusClick(data, opt.value)"
+                  />
+                  <Button
+                    v-if="data.notes && (data.status === 'justified_absence' || data.status === 'excused')"
+                    icon="pi pi-comment"
+                    severity="info"
+                    text
+                    rounded
+                    size="small"
+                    v-tooltip.top="data.notes"
+                    @click="openNotesEdit(data)"
+                  />
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+
+          <div v-if="students.length > 0" class="mt-4 flex justify-end border-t border-md-border pt-4">
+            <Button label="Salvar Chamada" icon="pi pi-check" :loading="submittingAttendance" @click="handleSaveAttendance" />
+          </div>
+
+          <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: 'min(480px, 95vw)' }" modal :draggable="false">
+            <div class="flex flex-col gap-3">
+              <p class="text-[0.8125rem] text-md-text-secondary">
+                {{ notesDialogStatus === 'justified_absence' ? 'Informe o motivo da falta justificada:' : 'Informe o motivo da dispensa:' }}
+              </p>
+              <Textarea v-model="notesDialogText" :placeholder="notesDialogPlaceholder" rows="3" class="w-full" autofocus />
+            </div>
+            <template #footer>
+              <Button label="Cancelar" icon="pi pi-times" text @click="cancelNotes" />
+              <Button label="Confirmar" icon="pi pi-check" @click="confirmNotes" />
+            </template>
+          </Dialog>
+        </div>
+      </TabPanel>
+
+      <TabPanel value="lesson">
+        <div class="card max-w-[700px]">
+          <form @submit.prevent="handleSaveLesson" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium">Conteudo *</label>
+              <Textarea v-model="lessonForm.content" rows="4" class="w-full" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium">Metodologia</label>
+              <Textarea v-model="lessonForm.methodology" rows="3" class="w-full" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium">Observacoes</label>
+              <Textarea v-model="lessonForm.observations" rows="3" class="w-full" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium">Quantidade de Aulas *</label>
+              <InputNumber v-model="lessonForm.class_count" :min="1" :max="10" class="w-full" />
+            </div>
+            <div class="mt-4 flex justify-end">
+              <Button type="submit" :label="lessonForm.id ? 'Atualizar Registro' : 'Salvar Registro'" icon="pi pi-check" :loading="submittingLesson" />
+            </div>
+          </form>
+        </div>
+      </TabPanel>
+
+      <TabPanel v-if="hasOpenPeriod" value="assessment">
+        <div class="card">
+          <div class="mb-4 metric-grid">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium">Periodo *</label>
+              <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium">Instrumento *</label>
+              <Select
+                v-model="selectedInstrumentId"
+                :options="instruments"
+                optionLabel="name"
+                optionValue="id"
+                :placeholder="instruments.length === 0 ? 'Nenhum instrumento configurado' : 'Selecione'"
+                :disabled="instruments.length === 0"
+                class="w-full"
+              />
+            </div>
+          </div>
+
+          <Message v-if="isDescriptive" severity="info" :closable="false">
+            Esta turma utiliza avaliacao descritiva. Acesse a pagina de
+            <router-link to="/assessment/descriptive" class="font-semibold underline">Relatorios Descritivos</router-link>
+            para registrar as avaliacoes.
+          </Message>
+
+          <template v-if="!isDescriptive">
+            <EmptyState v-if="gradeStudents.length === 0" message="Nenhum aluno para avaliar" />
+
+            <DataTable v-if="gradeStudents.length > 0" :value="gradeStudents" :loading="loadingGrades" stripedRows responsiveLayout="scroll">
               <Column field="student_name" header="Aluno" sortable />
-              <Column header="Presenca" :style="{ width: '240px' }">
+              <Column v-if="isNumeric" header="Nota" :style="{ width: '150px' }">
                 <template #body="{ data }">
-                  <div class="flex items-center gap-1.5">
-                    <Button
-                      v-for="opt in statusOptions"
-                      :key="opt.value"
-                      :label="opt.label"
-                      :severity="(data.status === opt.value ? getStatusSeverity(opt.value) : 'secondary') as any"
-                      :outlined="data.status !== opt.value"
-                      size="small"
-                      @click="handleStatusClick(data, opt.value)"
-                    />
-                    <Button
-                      v-if="data.notes && (data.status === 'justified_absence' || data.status === 'excused')"
-                      icon="pi pi-comment"
-                      severity="info"
-                      text
-                      rounded
-                      size="small"
-                      v-tooltip.top="data.notes"
-                      @click="openNotesEdit(data)"
-                    />
-                  </div>
+                  <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :maxFractionDigits="config?.rounding_precision ?? 2" class="w-full" />
+                </template>
+              </Column>
+              <Column v-if="isConceptual" header="Conceito" :style="{ width: '180px' }">
+                <template #body="{ data }">
+                  <Select v-model="data.conceptual_value" :options="conceptualOptions" optionLabel="label" optionValue="value" placeholder="--" class="w-full" showClear />
                 </template>
               </Column>
             </DataTable>
 
-            <div v-if="students.length > 0" class="mt-4 flex justify-end border-t border-[#E0E0E0] pt-4">
-              <Button label="Salvar Chamada" icon="pi pi-check" :loading="submittingAttendance" @click="handleSaveAttendance" />
+            <div v-if="gradeStudents.length > 0 && !isDescriptive" class="mt-4 flex justify-end border-t border-md-border pt-4">
+              <Button label="Salvar Notas" icon="pi pi-check" :loading="submittingGrades" :disabled="!canSubmitGrades" @click="handleSaveGrades" />
             </div>
-
-            <Dialog v-model:visible="notesDialogVisible" :header="notesDialogTitle" :style="{ width: 'min(480px, 95vw)' }" modal :draggable="false">
-              <div class="flex flex-col gap-3">
-                <p class="text-[0.8125rem] text-[#605E5C]">
-                  {{ notesDialogStatus === 'justified_absence' ? 'Informe o motivo da falta justificada:' : 'Informe o motivo da dispensa:' }}
-                </p>
-                <Textarea v-model="notesDialogText" :placeholder="notesDialogPlaceholder" rows="3" class="w-full" autofocus />
-              </div>
-              <template #footer>
-                <Button label="Cancelar" icon="pi pi-times" text @click="cancelNotes" />
-                <Button label="Confirmar" icon="pi pi-check" @click="confirmNotes" />
-              </template>
-            </Dialog>
-          </div>
-        </TabPanel>
-
-        <TabPanel value="lesson">
-          <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-            <form @submit.prevent="handleSaveLesson" class="flex flex-col gap-4">
-              <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium">Conteudo *</label>
-                <Textarea v-model="lessonForm.content" rows="4" class="w-full" />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium">Metodologia</label>
-                <Textarea v-model="lessonForm.methodology" rows="3" class="w-full" />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium">Observacoes</label>
-                <Textarea v-model="lessonForm.observations" rows="3" class="w-full" />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium">Quantidade de Aulas *</label>
-                <InputNumber v-model="lessonForm.class_count" :min="1" :max="10" class="w-full" />
-              </div>
-              <div class="mt-4 flex justify-end">
-                <Button type="submit" :label="lessonForm.id ? 'Atualizar Registro' : 'Salvar Registro'" icon="pi pi-check" :loading="submittingLesson" />
-              </div>
-            </form>
-          </div>
-        </TabPanel>
-
-        <TabPanel v-if="hasOpenPeriod" value="assessment">
-          <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-            <div class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-              <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium">Periodo *</label>
-                <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium">Instrumento *</label>
-                <Select
-                  v-model="selectedInstrumentId"
-                  :options="instruments"
-                  optionLabel="name"
-                  optionValue="id"
-                  :placeholder="instruments.length === 0 ? 'Nenhum instrumento configurado' : 'Selecione'"
-                  :disabled="instruments.length === 0"
-                  class="w-full"
-                />
-              </div>
-            </div>
-
-            <Message v-if="isDescriptive" severity="info" :closable="false">
-              Esta turma utiliza avaliacao descritiva. Acesse a pagina de
-              <router-link to="/assessment/descriptive" class="font-semibold underline">Relatorios Descritivos</router-link>
-              para registrar as avaliacoes.
-            </Message>
-
-            <template v-if="!isDescriptive">
-              <EmptyState v-if="gradeStudents.length === 0" message="Nenhum aluno para avaliar" />
-
-              <DataTable v-if="gradeStudents.length > 0" :value="gradeStudents" :loading="loadingGrades" stripedRows responsiveLayout="scroll">
-                <Column field="student_name" header="Aluno" sortable />
-                <Column v-if="isNumeric" header="Nota" :style="{ width: '150px' }">
-                  <template #body="{ data }">
-                    <InputNumber v-model="data.numeric_value" :min="config?.scale_min ?? 0" :max="config?.scale_max ?? 10" :maxFractionDigits="config?.rounding_precision ?? 2" class="w-full" />
-                  </template>
-                </Column>
-                <Column v-if="isConceptual" header="Conceito" :style="{ width: '180px' }">
-                  <template #body="{ data }">
-                    <Select v-model="data.conceptual_value" :options="conceptualOptions" optionLabel="label" optionValue="value" placeholder="--" class="w-full" showClear />
-                  </template>
-                </Column>
-              </DataTable>
-
-              <div v-if="gradeStudents.length > 0 && !isDescriptive" class="mt-4 flex justify-end border-t border-[#E0E0E0] pt-4">
-                <Button label="Salvar Notas" icon="pi pi-check" :loading="submittingGrades" :disabled="!canSubmitGrades" @click="handleSaveGrades" />
-              </div>
-            </template>
-          </div>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
-  </div>
+          </template>
+        </div>
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>

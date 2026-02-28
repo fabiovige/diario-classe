@@ -227,71 +227,69 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Grade de Aulas</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Grade de Aulas</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-56">
-          <label class="text-sm font-medium">Turma</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione a turma" class="w-full" filter :disabled="!selectedSchoolId && shouldShowSchoolFilter" />
-        </div>
+  <div class="card">
+    <div class="mb-4 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
+      </div>
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-56">
+        <label class="text-sm font-medium">Turma</label>
+        <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione a turma" class="w-full" filter :disabled="!selectedSchoolId && shouldShowSchoolFilter" />
+      </div>
+    </div>
+
+    <EmptyState v-if="!selectedClassGroupId" message="Selecione uma turma para visualizar a grade de aulas" />
+
+    <div v-if="selectedClassGroupId && !loading && timeSlots.length > 0" class="mt-4">
+      <div v-if="hasChanges" class="mb-4 flex items-center justify-end gap-3">
+        <Button label="Descartar" severity="secondary" icon="pi pi-times" @click="pendingChanges.clear()" />
+        <Button label="Salvar Grade" icon="pi pi-check" :loading="saving" @click="saveChanges" />
       </div>
 
-      <EmptyState v-if="!selectedClassGroupId" message="Selecione uma turma para visualizar a grade de aulas" />
-
-      <div v-if="selectedClassGroupId && !loading && timeSlots.length > 0" class="mt-4">
-        <div v-if="hasChanges" class="mb-4 flex items-center justify-end gap-3">
-          <Button label="Descartar" severity="secondary" icon="pi pi-times" @click="pendingChanges.clear()" />
-          <Button label="Salvar Grade" icon="pi pi-check" :loading="saving" @click="saveChanges" />
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr>
-                <th class="border border-fluent-border bg-gray-50 px-3 py-2 text-left text-sm font-medium" :style="{ width: '120px' }">Horario</th>
-                <th v-for="day in days" :key="day.value" class="border border-fluent-border bg-gray-50 px-3 py-2 text-center text-sm font-medium">{{ day.label }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in grid" :key="row.slot.id" :class="{ 'bg-amber-50': row.isBreak }">
-                <td class="border border-fluent-border px-3 py-2 text-sm">
-                  <div class="font-medium">{{ row.isBreak ? 'Intervalo' : `${row.slot.number}a Aula` }}</div>
-                  <div class="text-xs text-gray-500">{{ row.slot.start_time }} - {{ row.slot.end_time }}</div>
-                </td>
-                <td v-for="cell in row.cells" :key="cell.day" class="border border-fluent-border px-1 py-1 text-center">
-                  <template v-if="!row.isBreak">
-                    <Select
-                      :modelValue="getCellAssignmentId(row.slot.id, cell.day)"
-                      @update:modelValue="onCellChange(row.slot.id, cell.day, $event)"
-                      :options="assignmentOptions"
-                      optionLabel="label"
-                      optionValue="id"
-                      placeholder="-"
-                      class="w-full text-xs"
-                      :class="{ 'ring-2 ring-blue-300': pendingChanges.has(cellKey(row.slot.id, cell.day)) }"
-                    />
-                  </template>
-                  <span v-else class="text-xs text-gray-400">-</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="border border-md-border bg-gray-50 px-3 py-2 text-left text-sm font-medium" :style="{ width: '120px' }">Horario</th>
+              <th v-for="day in days" :key="day.value" class="border border-md-border bg-gray-50 px-3 py-2 text-center text-sm font-medium">{{ day.label }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in grid" :key="row.slot.id" :class="{ 'bg-amber-50': row.isBreak }">
+              <td class="border border-md-border px-3 py-2 text-sm">
+                <div class="font-medium">{{ row.isBreak ? 'Intervalo' : `${row.slot.number}a Aula` }}</div>
+                <div class="text-xs text-gray-500">{{ row.slot.start_time }} - {{ row.slot.end_time }}</div>
+              </td>
+              <td v-for="cell in row.cells" :key="cell.day" class="border border-md-border px-1 py-1 text-center">
+                <template v-if="!row.isBreak">
+                  <Select
+                    :modelValue="getCellAssignmentId(row.slot.id, cell.day)"
+                    @update:modelValue="onCellChange(row.slot.id, cell.day, $event)"
+                    :options="assignmentOptions"
+                    optionLabel="label"
+                    optionValue="id"
+                    placeholder="-"
+                    class="w-full text-xs"
+                    :class="{ 'ring-2 ring-blue-300': pendingChanges.has(cellKey(row.slot.id, cell.day)) }"
+                  />
+                </template>
+                <span v-else class="text-xs text-gray-400">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <i class="pi pi-spin pi-spinner text-2xl text-gray-400" />
-      </div>
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-2xl text-gray-400" />
     </div>
   </div>
 </template>

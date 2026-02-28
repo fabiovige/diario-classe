@@ -88,37 +88,35 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Turma' : 'Nova Turma' }}</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">{{ isEdit ? 'Editar Turma' : 'Nova Turma' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Ano Letivo *</label>
-          <Select v-model="form.academic_year_id" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Nivel de Ensino *</label>
-          <Select v-model="form.grade_level_id" :options="gradeLevels" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Turno *</label>
-          <Select v-model="form.shift_id" :options="shifts" optionLabel="name_label" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Nome *</label>
-          <InputText v-model="form.name" required class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Max. Alunos *</label>
-          <InputNumber v-model="form.max_students" :min="1" :max="100" class="w-full" />
-        </div>
+  <div class="card max-w-[700px]">
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Ano Letivo *</label>
+        <Select v-model="form.academic_year_id" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Nivel de Ensino *</label>
+        <Select v-model="form.grade_level_id" :options="gradeLevels" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Turno *</label>
+        <Select v-model="form.shift_id" :options="shifts" optionLabel="name_label" optionValue="id" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Nome *</label>
+        <InputText v-model="form.name" required class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Max. Alunos *</label>
+        <InputNumber v-model="form.max_students" :min="1" :max="100" class="w-full" />
+      </div>
 
-        <div class="mt-4 flex justify-end gap-3">
-          <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/class-groups')" />
-          <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
-        </div>
-      </form>
-    </div>
+      <div class="mt-4 flex justify-end gap-3">
+        <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/class-groups')" />
+        <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
+      </div>
+    </form>
   </div>
 </template>

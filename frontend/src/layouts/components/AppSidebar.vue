@@ -1,97 +1,35 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import PanelMenu from 'primevue/panelmenu'
-import Button from 'primevue/button'
-import { useAppStore } from '@/stores/app'
-import { useAuthStore } from '@/stores/auth'
-import { getMenuByRole } from '@/config/permissions'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
+import AppMenu from './AppMenu.vue'
+import { useLayout } from '../composables/useLayout'
 
-const router = useRouter()
-const route = useRoute()
-const appStore = useAppStore()
-const authStore = useAuthStore()
+const { hideMobileMenu, isDesktop, layoutState } = useLayout()
 
-const menuItems = computed(() => {
-  if (!authStore.roleSlug) return []
+const sidebarRef = ref<HTMLElement | null>(null)
 
-  return getMenuByRole(authStore.roleSlug).map((item) => mapMenuItem(item))
-})
+function onOutsideClick(event: MouseEvent) {
+  if (!sidebarRef.value) return
+  if (!layoutState.mobileMenuActive) return
+  if (isDesktop()) return
 
-function mapMenuItem(item: { label: string; icon: string; to?: string; items?: any[] }): any {
-  const mapped: any = {
-    label: item.label,
-    icon: item.icon,
-  }
+  const target = event.target as HTMLElement
+  if (sidebarRef.value.contains(target)) return
+  if (target.closest('.layout-menu-button')) return
 
-  if (item.to) {
-    mapped.command = () => router.push(item.to!)
-  }
-
-  if (item.items) {
-    mapped.items = item.items.map(mapMenuItem)
-  }
-
-  return mapped
+  hideMobileMenu()
 }
 
-watch(() => route.path, () => {
-  appStore.closeMobileMenu()
+onMounted(() => {
+  document.addEventListener('click', onOutsideClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onOutsideClick)
 })
 </script>
 
 <template>
-  <div
-    v-if="appStore.mobileMenuOpen"
-    class="fixed inset-0 z-[99] bg-black/50 md:hidden"
-    @click="appStore.closeMobileMenu()"
-  />
-
-  <aside
-    class="fixed inset-y-0 left-0 z-[100] flex flex-col overflow-y-auto border-r border-fluent-border bg-fluent-surface transition-all duration-300"
-    :class="[
-      appStore.mobileMenuOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full',
-      appStore.sidebarCollapsed ? 'md:w-[var(--sidebar-collapsed-width)]' : 'md:w-[var(--sidebar-width)]',
-      'max-md:w-[280px]',
-    ]"
-  >
-    <div class="flex min-h-[var(--header-height)] items-center gap-2 border-b border-fluent-border px-3 py-3">
-      <template v-if="!appStore.sidebarCollapsed">
-        <img src="/img/logo-jandira.svg" alt="Jandira" class="h-8 w-8" />
-        <span class="whitespace-nowrap text-sm font-bold text-fluent-primary">Diario de Classe</span>
-      </template>
-      <Button
-        :icon="appStore.sidebarCollapsed ? 'pi pi-angle-right' : 'pi pi-angle-left'"
-        text
-        rounded
-        severity="secondary"
-        class="ml-auto max-md:hidden"
-        @click="appStore.toggleSidebar()"
-      />
-      <Button
-        icon="pi pi-times"
-        text
-        rounded
-        severity="secondary"
-        class="ml-auto md:hidden"
-        @click="appStore.closeMobileMenu()"
-      />
-    </div>
-    <div v-if="!appStore.sidebarCollapsed || appStore.mobileMenuOpen" class="flex-1 overflow-y-auto p-2 max-md:block">
-      <PanelMenu :model="menuItems" />
-    </div>
-    <div v-if="appStore.sidebarCollapsed && !appStore.mobileMenuOpen" class="flex flex-col items-center gap-1 py-2 max-md:hidden">
-      <Button
-        v-for="item in menuItems"
-        :key="item.label"
-        :icon="item.icon"
-        text
-        rounded
-        severity="secondary"
-        v-tooltip.right="item.label"
-        class="h-10 w-10"
-        @click="item.command ? item.command() : appStore.toggleSidebar()"
-      />
-    </div>
-  </aside>
+  <div ref="sidebarRef" class="layout-sidebar">
+    <AppMenu />
+  </div>
 </template>

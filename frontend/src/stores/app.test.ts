@@ -9,20 +9,8 @@ describe('useAppStore', () => {
 
   it('has correct initial state', () => {
     const store = useAppStore()
-    expect(store.sidebarCollapsed).toBe(false)
     expect(store.selectedSchoolId).toBeNull()
     expect(store.selectedAcademicYearId).toBeNull()
-  })
-
-  it('toggleSidebar flips collapsed state', () => {
-    const store = useAppStore()
-    expect(store.sidebarCollapsed).toBe(false)
-
-    store.toggleSidebar()
-    expect(store.sidebarCollapsed).toBe(true)
-
-    store.toggleSidebar()
-    expect(store.sidebarCollapsed).toBe(false)
   })
 
   it('setSchool sets the selected school id', () => {

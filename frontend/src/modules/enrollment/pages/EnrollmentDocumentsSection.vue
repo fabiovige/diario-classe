@@ -40,12 +40,12 @@ function formatFileSize(bytes: number | null): string {
 function cardClass(status: string): string {
   const base = 'rounded-lg border px-5 py-4 transition-colors'
   const styles: Record<string, string> = {
-    not_uploaded: `${base} bg-white border-[#E0E0E0]`,
-    pending_review: `${base} bg-[#FFFBEB] border-[#F59E0B]`,
-    approved: `${base} bg-[#F0FFF4] border-[#38A169]`,
-    rejected: `${base} bg-[#FFF5F5] border-[#E53E3E]`,
+    not_uploaded: `${base} bg-white border-md-border`,
+    pending_review: `${base} doc-status-pending`,
+    approved: `${base} doc-status-approved`,
+    rejected: `${base} doc-status-rejected`,
   }
-  return styles[status] ?? `${base} bg-white border-[#E0E0E0]`
+  return styles[status] ?? `${base} bg-white border-md-border`
 }
 
 function isImage(mimeType: string | null): boolean {
@@ -175,15 +175,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm mt-6">
+  <div class="card mt-6">
     <div class="flex items-center justify-between mb-5">
       <h2 class="text-lg font-semibold">Documentos</h2>
-      <span v-if="documents.length > 0" class="text-sm text-[#616161]">
+      <span v-if="documents.length > 0" class="text-sm text-md-text-secondary">
         {{ approvedCount }}/{{ documents.length }} aprovados
       </span>
     </div>
 
-    <div v-if="loading" class="text-sm text-[#616161]">Carregando...</div>
+    <div v-if="loading" class="text-sm text-md-text-secondary">Carregando...</div>
 
     <div v-if="!loading && documents.length > 0" class="flex flex-col gap-3">
       <div
@@ -196,12 +196,12 @@ onUnmounted(() => {
           <StatusBadge :status="doc.status" :label="doc.status_label" />
         </div>
 
-        <div v-if="doc.has_file" class="text-xs text-[#616161] mb-2">
+        <div v-if="doc.has_file" class="text-xs text-md-text-secondary mb-2">
           {{ doc.original_filename }}
           <span v-if="doc.file_size"> &middot; {{ formatFileSize(doc.file_size) }}</span>
         </div>
 
-        <div v-if="doc.status === 'rejected' && doc.rejection_reason" class="text-sm text-[#E53E3E] mb-2">
+        <div v-if="doc.status === 'rejected' && doc.rejection_reason" class="text-sm text-md-error mb-2">
           <span class="font-medium">Motivo:</span> {{ doc.rejection_reason }}
         </div>
 
@@ -291,7 +291,7 @@ onUnmounted(() => {
       @hide="closePreview"
     >
       <div v-if="previewLoading" class="flex items-center justify-center h-full">
-        <span class="text-[#616161]">Carregando...</span>
+        <span class="text-md-text-secondary">Carregando...</span>
       </div>
       <div v-if="!previewLoading && previewUrl" class="w-full h-full flex items-center justify-center">
         <img
@@ -316,7 +316,7 @@ onUnmounted(() => {
       :style="{ width: 'min(500px, 95vw)' }"
     >
       <div class="flex flex-col gap-3">
-        <p class="text-sm text-[#616161]">
+        <p class="text-sm text-md-text-secondary">
           Informe o motivo da rejeicao de <strong>{{ rejectDoc?.document_type_label }}</strong>:
         </p>
         <Textarea

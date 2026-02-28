@@ -87,37 +87,35 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Ano Letivo' : 'Novo Ano Letivo' }}</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">{{ isEdit ? 'Editar Ano Letivo' : 'Novo Ano Letivo' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola *</label>
-          <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Ano *</label>
-          <InputNumber v-model="form.year" :useGrouping="false" :min="2020" :max="2050" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Status *</label>
-          <Select v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data Inicio</label>
-          <InputText v-model="form.start_date" type="date" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Data Fim</label>
-          <InputText v-model="form.end_date" type="date" class="w-full" />
-        </div>
+  <div class="card max-w-[700px]">
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola *</label>
+        <Select v-model="form.school_id" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Ano *</label>
+        <InputNumber v-model="form.year" :useGrouping="false" :min="2020" :max="2050" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Status *</label>
+        <Select v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data Inicio</label>
+        <InputText v-model="form.start_date" type="date" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Data Fim</label>
+        <InputText v-model="form.end_date" type="date" class="w-full" />
+      </div>
 
-        <div class="mt-4 flex justify-end gap-3">
-          <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/academic-years')" />
-          <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
-        </div>
-      </form>
-    </div>
+      <div class="mt-4 flex justify-end gap-3">
+        <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/academic-years')" />
+        <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
+      </div>
+    </form>
   </div>
 </template>

@@ -116,74 +116,72 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Atribuicoes de Professores</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Atribuicoes de Professores</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <InputText v-model="search" placeholder="Buscar professor..." @keyup.enter="onSearch" />
-        </div>
-        <Button icon="pi pi-search" @click="onSearch" />
-        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-        <div class="ml-auto">
-          <Button label="Nova Atribuicao" icon="pi pi-plus" @click="router.push('/curriculum/assignments/new')" />
-        </div>
+  <div class="card">
+    <div class="mb-4 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
       </div>
-
-      <EmptyState v-if="!loading && items.length === 0" message="Nenhuma atribuicao encontrada" />
-
-      <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column header="Professor">
-          <template #body="{ data }">
-            {{ data.teacher?.user?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Turma">
-          <template #body="{ data }">
-            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
-          </template>
-        </Column>
-        <Column header="Componente/Campo">
-          <template #body="{ data }">
-            {{ data.curricular_component?.name ?? data.experience_field?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Inicio">
-          <template #body="{ data }">
-            {{ formatDate(data.start_date) }}
-          </template>
-        </Column>
-        <Column header="Status" :style="{ width: '100px' }">
-          <template #body="{ data }">
-            <StatusBadge :status="data.active ? 'active' : 'inactive'" :label="data.active ? 'Ativo' : 'Inativo'" />
-          </template>
-        </Column>
-        <Column header="Acoes" :style="{ width: '120px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/curriculum/assignments/${data.id}/edit`)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
-          </template>
-        </Column>
-      </DataTable>
-
-      <Paginator
-        v-if="totalRecords > perPage"
-        class="mt-4 border-t border-fluent-border pt-3"
-        :rows="perPage"
-        :totalRecords="totalRecords"
-        :first="(currentPage - 1) * perPage"
-        :rowsPerPageOptions="[10, 15, 25, 50]"
-        @page="onPageChange"
-      />
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <InputText v-model="search" placeholder="Buscar professor..." @keyup.enter="onSearch" />
+      </div>
+      <Button icon="pi pi-search" @click="onSearch" />
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+      <div class="ml-auto">
+        <Button label="Nova Atribuicao" icon="pi pi-plus" @click="router.push('/curriculum/assignments/new')" />
+      </div>
     </div>
+
+    <EmptyState v-if="!loading && items.length === 0" message="Nenhuma atribuicao encontrada" />
+
+    <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+      <Column header="Professor">
+        <template #body="{ data }">
+          {{ data.teacher?.user?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Turma">
+        <template #body="{ data }">
+          {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
+        </template>
+      </Column>
+      <Column header="Componente/Campo">
+        <template #body="{ data }">
+          {{ data.curricular_component?.name ?? data.experience_field?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Inicio">
+        <template #body="{ data }">
+          {{ formatDate(data.start_date) }}
+        </template>
+      </Column>
+      <Column header="Status" :style="{ width: '100px' }">
+        <template #body="{ data }">
+          <StatusBadge :status="data.active ? 'active' : 'inactive'" :label="data.active ? 'Ativo' : 'Inativo'" />
+        </template>
+      </Column>
+      <Column header="Acoes" :style="{ width: '120px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/curriculum/assignments/${data.id}/edit`)" />
+          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
+        </template>
+      </Column>
+    </DataTable>
+
+    <Paginator
+      v-if="totalRecords > perPage"
+      class="mt-4 border-t border-md-border pt-3"
+      :rows="perPage"
+      :totalRecords="totalRecords"
+      :first="(currentPage - 1) * perPage"
+      :rowsPerPageOptions="[10, 15, 25, 50]"
+      @page="onPageChange"
+    />
   </div>
 </template>

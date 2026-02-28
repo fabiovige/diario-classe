@@ -251,7 +251,7 @@ function formatGrade(value: number | null): string {
 
 function gradeColor(value: number | null): string {
   if (value === null || !data.value) return ''
-  return value >= data.value.summary.passing_grade ? 'text-[#0F7B0F] font-bold' : 'text-[#C42B1C] font-bold'
+  return value >= data.value.summary.passing_grade ? 'text-md-success font-bold' : 'text-md-error font-bold'
 }
 
 function resultLabel(result: string | null): string {
@@ -306,184 +306,182 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Resultado Anual</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Resultado Anual</h1>
 
-    <div class="mb-6 flex flex-wrap items-end gap-4">
-      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-        <label class="text-sm font-medium">Escola</label>
-        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
-      </div>
-      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-        <label class="text-sm font-medium">Escola</label>
-        <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-      </div>
-
-      <div class="flex flex-col gap-1.5 w-full md:w-48">
-        <label class="text-sm font-medium">Ano Letivo</label>
-        <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" showClear />
-      </div>
-
-      <div class="flex flex-col gap-1.5 w-full md:w-72">
-        <label class="text-sm font-medium">Turma</label>
-        <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter showClear />
-      </div>
-
-      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+  <div class="mb-6 flex flex-wrap items-end gap-4">
+    <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+      <label class="text-sm font-medium">Escola</label>
+      <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
+    </div>
+    <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+      <label class="text-sm font-medium">Escola</label>
+      <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
     </div>
 
-    <!-- PAINEL STATUS DAS TURMAS -->
-    <div v-if="showClassGroupOverview" class="mb-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold">Status das Turmas</h2>
-        <div v-if="classGroupStatusList.length > 0" class="flex items-center gap-3">
-          <span class="text-sm text-[#616161]">{{ classGroupStatusList.filter(c => c.ready).length }}/{{ classGroupStatusList.length }} prontas</span>
-          <Button
-            label="Encerrar Ano Letivo"
-            icon="pi pi-lock"
-            severity="danger"
-            size="small"
-            :disabled="!allClassGroupsReady"
-            v-tooltip.top="!allClassGroupsReady ? `${notReadyCount} turma(s) nao estao prontas` : ''"
-            @click="showCloseDialog = true"
-          />
-        </div>
+    <div class="flex flex-col gap-1.5 w-full md:w-48">
+      <label class="text-sm font-medium">Ano Letivo</label>
+      <Select v-model="selectedAcademicYearId" :options="academicYears" optionLabel="year" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" showClear />
+    </div>
+
+    <div class="flex flex-col gap-1.5 w-full md:w-72">
+      <label class="text-sm font-medium">Turma</label>
+      <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter showClear />
+    </div>
+
+    <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+  </div>
+
+  <!-- PAINEL STATUS DAS TURMAS -->
+  <div v-if="showClassGroupOverview" class="card mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Status das Turmas</h2>
+      <div v-if="classGroupStatusList.length > 0" class="flex items-center gap-3">
+        <span class="text-sm text-md-text-secondary">{{ classGroupStatusList.filter(c => c.ready).length }}/{{ classGroupStatusList.length }} prontas</span>
+        <Button
+          label="Encerrar Ano Letivo"
+          icon="pi pi-lock"
+          severity="danger"
+          size="small"
+          :disabled="!allClassGroupsReady"
+          v-tooltip.top="!allClassGroupsReady ? `${notReadyCount} turma(s) nao estao prontas` : ''"
+          @click="showCloseDialog = true"
+        />
       </div>
+    </div>
 
-      <EmptyState v-if="!classGroupStatusLoading && classGroupStatusList.length === 0" message="Nenhuma turma encontrada" />
+    <EmptyState v-if="!classGroupStatusLoading && classGroupStatusList.length === 0" message="Nenhuma turma encontrada" />
 
-      <DataTable v-if="classGroupStatusList.length > 0" :value="classGroupStatusList" :loading="classGroupStatusLoading" stripedRows size="small">
-        <Column header="Turma" :style="{ minWidth: '200px' }">
-          <template #body="{ data: cg }">
-            <button class="text-[#0078D4] hover:underline font-medium cursor-pointer" @click="selectClassGroup(cg.class_group_id)">
-              {{ cg.name }}
-            </button>
+    <DataTable v-if="classGroupStatusList.length > 0" :value="classGroupStatusList" :loading="classGroupStatusLoading" stripedRows size="small">
+      <Column header="Turma" :style="{ minWidth: '200px' }">
+        <template #body="{ data: cg }">
+          <button class="text-md-primary hover:underline font-medium cursor-pointer" @click="selectClassGroup(cg.class_group_id)">
+            {{ cg.name }}
+          </button>
+        </template>
+      </Column>
+      <Column header="Nivel" field="grade_level" />
+      <Column header="Turno" field="shift" />
+      <Column header="Fechamentos" :style="{ minWidth: '200px' }">
+        <template #body="{ data: cg }">
+          <div class="flex items-center gap-2">
+            <ProgressBar :value="closingProgress(cg)" :showValue="false" class="h-4 flex-1" />
+            <span class="text-xs text-md-text-secondary whitespace-nowrap">{{ cg.closed_closings }}/{{ cg.total_closings }}</span>
+          </div>
+        </template>
+      </Column>
+      <Column header="Resultados" :style="{ minWidth: '150px' }">
+        <template #body="{ data: cg }">
+          <span :class="cg.students_with_results >= cg.total_students && cg.total_students > 0 ? 'text-md-success' : 'text-md-warning'">
+            {{ cg.students_with_results }}/{{ cg.total_students }}
+          </span>
+        </template>
+      </Column>
+      <Column header="Pronta?" :style="{ width: '80px', textAlign: 'center' }">
+        <template #body="{ data: cg }">
+          <i :class="cg.ready ? 'pi pi-check-circle text-md-success text-lg' : 'pi pi-times-circle text-md-error text-lg'" />
+        </template>
+      </Column>
+    </DataTable>
+  </div>
+
+  <!-- RESULTADOS DA TURMA SELECIONADA -->
+  <template v-if="data">
+    <div class="mb-6 metric-grid-md">
+      <MetricCard title="Total" :value="data.summary.total" label="Alunos" color="#1976D2" icon="pi pi-users" />
+      <MetricCard title="Aprovados" :value="data.summary.approved" label="Alunos" color="#0F7B0F" icon="pi pi-check-circle" />
+      <MetricCard title="Retidos" :value="data.summary.retained" label="Alunos" color="#C42B1C" icon="pi pi-times-circle" />
+      <MetricCard title="Pendentes" :value="data.summary.pending" label="Sem resultado" color="#9D5D00" icon="pi pi-clock" />
+    </div>
+
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      <Button label="Calcular Resultados" icon="pi pi-calculator" severity="info" :loading="calculating" :disabled="isYearClosed" @click="calculateBulk" />
+      <Button label="Exportar PDF" icon="pi pi-file-pdf" severity="secondary" @click="exportPdf" />
+      <span v-if="isYearClosed" class="flex items-center gap-1 text-sm font-semibold text-md-success">
+        <i class="pi pi-lock" /> Ano letivo encerrado
+      </span>
+    </div>
+
+    <div class="card">
+      <EmptyState v-if="!loading && data.students.length === 0" message="Nenhum aluno encontrado nesta turma" />
+
+      <DataTable v-if="data.students.length > 0" :value="data.students" :loading="loading" stripedRows responsiveLayout="scroll" scrollable scrollHeight="600px">
+        <Column header="Aluno" frozen :style="{ minWidth: '220px' }">
+          <template #body="{ data: student }">
+            <span class="font-medium">{{ student.name }}</span>
           </template>
         </Column>
-        <Column header="Nivel" field="grade_level" />
-        <Column header="Turno" field="shift" />
-        <Column header="Fechamentos" :style="{ minWidth: '200px' }">
-          <template #body="{ data: cg }">
-            <div class="flex items-center gap-2">
-              <ProgressBar :value="closingProgress(cg)" :showValue="false" class="h-4 flex-1" />
-              <span class="text-xs text-[#616161] whitespace-nowrap">{{ cg.closed_closings }}/{{ cg.total_closings }}</span>
-            </div>
+        <Column v-for="period in data.assessment_periods" :key="period.id" :header="period.name" :style="{ minWidth: '90px', textAlign: 'center' }">
+          <template #body="{ data: student }">
+            <span v-if="student.subjects.length > 0" :class="gradeColor(student.subjects[0]?.periods?.[String(period.number)] ?? null)">
+              {{ formatGrade(student.subjects[0]?.periods?.[String(period.number)] ?? null) }}
+            </span>
+            <span v-else>--</span>
           </template>
         </Column>
-        <Column header="Resultados" :style="{ minWidth: '150px' }">
-          <template #body="{ data: cg }">
-            <span :class="cg.students_with_results >= cg.total_students && cg.total_students > 0 ? 'text-[#0F7B0F]' : 'text-[#9D5D00]'">
-              {{ cg.students_with_results }}/{{ cg.total_students }}
+        <Column header="Media Final" :style="{ minWidth: '110px', textAlign: 'center' }">
+          <template #body="{ data: student }">
+            <span :class="gradeColor(student.overall_average)">{{ overallAverage(student) }}</span>
+          </template>
+        </Column>
+        <Column header="Freq %" :style="{ minWidth: '90px', textAlign: 'center' }">
+          <template #body="{ data: student }">
+            <span :class="student.overall_frequency !== null && student.overall_frequency < 75 ? 'text-md-error font-bold' : ''">
+              {{ overallFrequency(student) }}
             </span>
           </template>
         </Column>
-        <Column header="Pronta?" :style="{ width: '80px', textAlign: 'center' }">
-          <template #body="{ data: cg }">
-            <i :class="cg.ready ? 'pi pi-check-circle text-[#0F7B0F] text-lg' : 'pi pi-times-circle text-[#C42B1C] text-lg'" />
+        <Column header="Situacao" :style="{ minWidth: '140px' }">
+          <template #body="{ data: student }">
+            <StatusBadge :status="resultBadgeStatus(student.result)" :label="resultLabel(student.result)" />
           </template>
         </Column>
       </DataTable>
     </div>
+  </template>
 
-    <!-- RESULTADOS DA TURMA SELECIONADA -->
-    <template v-if="data">
-      <div class="mb-6 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-        <MetricCard title="Total" :value="data.summary.total" label="Alunos" color="#0078D4" icon="pi pi-users" />
-        <MetricCard title="Aprovados" :value="data.summary.approved" label="Alunos" color="#0F7B0F" icon="pi pi-check-circle" />
-        <MetricCard title="Retidos" :value="data.summary.retained" label="Alunos" color="#C42B1C" icon="pi pi-times-circle" />
-        <MetricCard title="Pendentes" :value="data.summary.pending" label="Sem resultado" color="#9D5D00" icon="pi pi-clock" />
-      </div>
-
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Button label="Calcular Resultados" icon="pi pi-calculator" severity="info" :loading="calculating" :disabled="isYearClosed" @click="calculateBulk" />
-        <Button label="Exportar PDF" icon="pi pi-file-pdf" severity="secondary" @click="exportPdf" />
-        <span v-if="isYearClosed" class="flex items-center gap-1 text-sm font-semibold text-[#0F7B0F]">
-          <i class="pi pi-lock" /> Ano letivo encerrado
-        </span>
-      </div>
-
-      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <EmptyState v-if="!loading && data.students.length === 0" message="Nenhum aluno encontrado nesta turma" />
-
-        <DataTable v-if="data.students.length > 0" :value="data.students" :loading="loading" stripedRows responsiveLayout="scroll" scrollable scrollHeight="600px">
-          <Column header="Aluno" frozen :style="{ minWidth: '220px' }">
-            <template #body="{ data: student }">
-              <span class="font-medium">{{ student.name }}</span>
-            </template>
-          </Column>
-          <Column v-for="period in data.assessment_periods" :key="period.id" :header="period.name" :style="{ minWidth: '90px', textAlign: 'center' }">
-            <template #body="{ data: student }">
-              <span v-if="student.subjects.length > 0" :class="gradeColor(student.subjects[0]?.periods?.[String(period.number)] ?? null)">
-                {{ formatGrade(student.subjects[0]?.periods?.[String(period.number)] ?? null) }}
-              </span>
-              <span v-else>--</span>
-            </template>
-          </Column>
-          <Column header="Media Final" :style="{ minWidth: '110px', textAlign: 'center' }">
-            <template #body="{ data: student }">
-              <span :class="gradeColor(student.overall_average)">{{ overallAverage(student) }}</span>
-            </template>
-          </Column>
-          <Column header="Freq %" :style="{ minWidth: '90px', textAlign: 'center' }">
-            <template #body="{ data: student }">
-              <span :class="student.overall_frequency !== null && student.overall_frequency < 75 ? 'text-[#C42B1C] font-bold' : ''">
-                {{ overallFrequency(student) }}
-              </span>
-            </template>
-          </Column>
-          <Column header="Situacao" :style="{ minWidth: '140px' }">
-            <template #body="{ data: student }">
-              <StatusBadge :status="resultBadgeStatus(student.result)" :label="resultLabel(student.result)" />
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-    </template>
-
-    <div v-if="!data && !showClassGroupOverview" class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <EmptyState message="Selecione escola, ano letivo e turma para visualizar os resultados" />
-    </div>
-
-    <!-- DIALOG CONFIRMAR ENCERRAMENTO -->
-    <Dialog v-model:visible="showCloseDialog" header="Encerrar Ano Letivo" :modal="true" :style="{ width: 'min(480px, 95vw)' }">
-      <div class="flex flex-col gap-4">
-        <p>Tem certeza que deseja encerrar o ano letivo <strong>{{ data?.class_group?.academic_year?.year ?? academicYears.find(a => a.id === selectedAcademicYearId)?.year }}</strong>?</p>
-        <p class="text-sm text-[#616161]">Esta acao e irreversivel. Apos o encerramento, nenhuma alteracao podera ser feita nos resultados finais deste ano.</p>
-      </div>
-      <template #footer>
-        <Button label="Cancelar" text @click="showCloseDialog = false" />
-        <Button label="Encerrar" severity="danger" icon="pi pi-lock" :loading="closingYear" @click="closeAcademicYear" />
-      </template>
-    </Dialog>
-
-    <!-- DIALOG BLOQUEIOS DETALHADOS -->
-    <Dialog v-model:visible="showBlockersDialog" header="Pendencias para Encerramento" :modal="true" :style="{ width: 'min(700px, 95vw)' }">
-      <div class="flex flex-col gap-6">
-        <div v-if="closeErrors?.pending_closings_by_teacher && closeErrors.pending_closings_by_teacher.length > 0">
-          <h3 class="text-base font-semibold mb-3 text-[#C42B1C]">
-            <i class="pi pi-exclamation-triangle mr-1" /> Fechamentos Pendentes por Professor
-          </h3>
-          <div v-for="teacher in closeErrors.pending_closings_by_teacher" :key="teacher.teacher_name" class="mb-3 rounded border border-[#E0E0E0] p-3">
-            <div class="font-medium mb-1">{{ teacher.teacher_name }} <span class="text-sm text-[#616161]">({{ teacher.count }} pendente(s))</span></div>
-            <ul class="list-disc list-inside text-sm text-[#616161]">
-              <li v-for="(detail, i) in teacher.details" :key="i">{{ detail }}</li>
-            </ul>
-          </div>
-        </div>
-
-        <div v-if="closeErrors?.students_without_results && closeErrors.students_without_results.length > 0">
-          <h3 class="text-base font-semibold mb-3 text-[#C42B1C]">
-            <i class="pi pi-exclamation-triangle mr-1" /> Alunos sem Resultado Final
-          </h3>
-          <div v-for="group in closeErrors.students_without_results" :key="group.class_group" class="flex items-center gap-2 mb-1 text-sm">
-            <span class="font-medium">{{ group.class_group }}:</span>
-            <span class="text-[#616161]">{{ group.count }} aluno(s)</span>
-          </div>
-        </div>
-      </div>
-      <template #footer>
-        <Button label="Fechar" @click="showBlockersDialog = false" />
-      </template>
-    </Dialog>
+  <div v-if="!data && !showClassGroupOverview" class="card">
+    <EmptyState message="Selecione escola, ano letivo e turma para visualizar os resultados" />
   </div>
+
+  <!-- DIALOG CONFIRMAR ENCERRAMENTO -->
+  <Dialog v-model:visible="showCloseDialog" header="Encerrar Ano Letivo" :modal="true" :style="{ width: 'min(480px, 95vw)' }">
+    <div class="flex flex-col gap-4">
+      <p>Tem certeza que deseja encerrar o ano letivo <strong>{{ data?.class_group?.academic_year?.year ?? academicYears.find(a => a.id === selectedAcademicYearId)?.year }}</strong>?</p>
+      <p class="text-sm text-md-text-secondary">Esta acao e irreversivel. Apos o encerramento, nenhuma alteracao podera ser feita nos resultados finais deste ano.</p>
+    </div>
+    <template #footer>
+      <Button label="Cancelar" text @click="showCloseDialog = false" />
+      <Button label="Encerrar" severity="danger" icon="pi pi-lock" :loading="closingYear" @click="closeAcademicYear" />
+    </template>
+  </Dialog>
+
+  <!-- DIALOG BLOQUEIOS DETALHADOS -->
+  <Dialog v-model:visible="showBlockersDialog" header="Pendencias para Encerramento" :modal="true" :style="{ width: 'min(700px, 95vw)' }">
+    <div class="flex flex-col gap-6">
+      <div v-if="closeErrors?.pending_closings_by_teacher && closeErrors.pending_closings_by_teacher.length > 0">
+        <h3 class="text-base font-semibold mb-3 text-md-error">
+          <i class="pi pi-exclamation-triangle mr-1" /> Fechamentos Pendentes por Professor
+        </h3>
+        <div v-for="teacher in closeErrors.pending_closings_by_teacher" :key="teacher.teacher_name" class="mb-3 rounded border border-md-border p-3">
+          <div class="font-medium mb-1">{{ teacher.teacher_name }} <span class="text-sm text-md-text-secondary">({{ teacher.count }} pendente(s))</span></div>
+          <ul class="list-disc list-inside text-sm text-md-text-secondary">
+            <li v-for="(detail, i) in teacher.details" :key="i">{{ detail }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div v-if="closeErrors?.students_without_results && closeErrors.students_without_results.length > 0">
+        <h3 class="text-base font-semibold mb-3 text-md-error">
+          <i class="pi pi-exclamation-triangle mr-1" /> Alunos sem Resultado Final
+        </h3>
+        <div v-for="group in closeErrors.students_without_results" :key="group.class_group" class="flex items-center gap-2 mb-1 text-sm">
+          <span class="font-medium">{{ group.class_group }}:</span>
+          <span class="text-md-text-secondary">{{ group.count }} aluno(s)</span>
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <Button label="Fechar" @click="showBlockersDialog = false" />
+    </template>
+  </Dialog>
 </template>

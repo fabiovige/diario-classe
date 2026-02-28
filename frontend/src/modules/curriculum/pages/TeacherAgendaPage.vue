@@ -319,119 +319,118 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Agenda</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Agenda</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
-      <div v-if="isManager" class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-fluent-border bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Professor</label>
-          <Select
-            v-model="selectedTeacherId"
-            :options="teachers"
-            optionLabel="label"
-            optionValue="id"
-            :placeholder="loadingTeachers ? 'Carregando...' : 'Selecione'"
-            :disabled="loadingTeachers || (shouldShowSchoolFilter && !selectedSchoolId)"
-            filter
-            class="w-full"
-          />
-        </div>
+  <div class="card">
+    <div v-if="isManager" class="mb-4 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione a escola" class="w-full" filter />
       </div>
-
-      <div v-if="isManager && !selectedTeacherId && !loading">
-        <EmptyState icon="pi pi-user" message="Selecione um professor para visualizar a agenda" />
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
       </div>
-
-      <div v-if="loading" class="flex items-center justify-center py-16">
-        <ProgressSpinner strokeWidth="3" />
+      <div class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Professor</label>
+        <Select
+          v-model="selectedTeacherId"
+          :options="teachers"
+          optionLabel="label"
+          optionValue="id"
+          :placeholder="loadingTeachers ? 'Carregando...' : 'Selecione'"
+          :disabled="loadingTeachers || (shouldShowSchoolFilter && !selectedSchoolId)"
+          filter
+          class="w-full"
+        />
       </div>
+    </div>
 
-      <div v-if="!loading && (isTeacher ? teacherId : selectedTeacherId)">
-        <EmptyState v-if="schedules.length === 0" icon="pi pi-calendar" message="Nenhuma aula cadastrada na grade" />
+    <div v-if="isManager && !selectedTeacherId && !loading">
+      <EmptyState icon="pi pi-user" message="Selecione um professor para visualizar a agenda" />
+    </div>
 
-        <template v-if="schedules.length > 0">
-          <div class="mb-5 flex items-center justify-between">
-            <Button icon="pi pi-chevron-left" text rounded @click="prevMonth" />
-            <div class="flex items-center gap-3">
-              <h2 class="text-lg font-semibold capitalize text-[#323130]">{{ monthLabel }}</h2>
-              <Button label="Hoje" size="small" severity="secondary" @click="goToday" />
-            </div>
-            <Button icon="pi pi-chevron-right" text rounded @click="nextMonth" />
+    <div v-if="loading" class="flex items-center justify-center py-16">
+      <ProgressSpinner strokeWidth="3" />
+    </div>
+
+    <div v-if="!loading && (isTeacher ? teacherId : selectedTeacherId)">
+      <EmptyState v-if="schedules.length === 0" icon="pi pi-calendar" message="Nenhuma aula cadastrada na grade" />
+
+      <template v-if="schedules.length > 0">
+        <div class="mb-5 flex items-center justify-between">
+          <Button icon="pi pi-chevron-left" text rounded @click="prevMonth" />
+          <div class="flex items-center gap-3">
+            <h2 class="text-lg font-semibold capitalize text-md-text">{{ monthLabel }}</h2>
+            <Button label="Hoje" size="small" severity="secondary" @click="goToday" />
+          </div>
+          <Button icon="pi pi-chevron-right" text rounded @click="nextMonth" />
+        </div>
+
+        <div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-md-border bg-md-border">
+          <div
+            v-for="wd in weekDays"
+            :key="wd"
+            class="bg-gray-50 px-2 py-2 text-center text-xs font-semibold text-gray-500"
+          >
+            {{ wd }}
           </div>
 
-          <div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-fluent-border bg-fluent-border">
+          <div
+            v-for="(day, idx) in calendarDays"
+            :key="idx"
+            class="min-h-[100px] bg-white p-1.5 transition-colors"
+            :class="{
+              'bg-gray-50/50 text-gray-300': !day.isCurrentMonth,
+              'bg-blue-50/40': day.isToday,
+              'bg-gray-50': day.isWeekend && day.isCurrentMonth,
+              'cursor-pointer hover:bg-blue-50': day.isCurrentMonth && !day.isWeekend && day.classes.length > 0,
+            }"
+            @click="openDay(day)"
+          >
             <div
-              v-for="wd in weekDays"
-              :key="wd"
-              class="bg-gray-50 px-2 py-2 text-center text-xs font-semibold text-gray-500"
-            >
-              {{ wd }}
-            </div>
-
-            <div
-              v-for="(day, idx) in calendarDays"
-              :key="idx"
-              class="min-h-[100px] bg-white p-1.5 transition-colors"
+              class="mb-1 text-right text-xs font-medium"
               :class="{
-                'bg-gray-50/50 text-gray-300': !day.isCurrentMonth,
-                'bg-blue-50/40': day.isToday,
-                'bg-gray-50': day.isWeekend && day.isCurrentMonth,
-                'cursor-pointer hover:bg-blue-50': day.isCurrentMonth && !day.isWeekend && day.classes.length > 0,
+                'text-gray-300': !day.isCurrentMonth,
+                'text-gray-400': day.isWeekend && day.isCurrentMonth,
+                'text-md-text': day.isCurrentMonth && !day.isWeekend,
               }"
-              @click="openDay(day)"
             >
-              <div
-                class="mb-1 text-right text-xs font-medium"
-                :class="{
-                  'text-gray-300': !day.isCurrentMonth,
-                  'text-gray-400': day.isWeekend && day.isCurrentMonth,
-                  'text-[#323130]': day.isCurrentMonth && !day.isWeekend,
-                }"
-              >
-                <span
-                  v-if="day.isToday"
-                  class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#0078D4] text-white"
-                >{{ day.date }}</span>
-                <span v-else>{{ day.date }}</span>
-              </div>
+              <span
+                v-if="day.isToday"
+                class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-md-primary text-white"
+              >{{ day.date }}</span>
+              <span v-else>{{ day.date }}</span>
+            </div>
 
-              <div v-if="day.isCurrentMonth && !day.isWeekend && day.classes.length > 0" class="flex flex-col gap-0.5">
-                <template v-for="slot in uniqueSlots" :key="slot.id">
-                  <div
-                    v-for="schedule in getSchedulesBySlot(day.classes, slot.number)"
-                    :key="schedule.id"
-                    class="truncate rounded px-1 py-0.5 text-[0.6rem] font-medium leading-tight"
-                    :class="getScheduleColor(schedule)"
-                    :title="`${slot.start_time} - ${schedule.teacher_assignment?.curricular_component?.name ?? schedule.teacher_assignment?.experience_field?.name ?? ''} - ${schedule.teacher_assignment?.class_group?.name ?? ''}`"
-                  >
-                    {{ getScheduleLabel(schedule) }}
-                  </div>
-                </template>
-              </div>
+            <div v-if="day.isCurrentMonth && !day.isWeekend && day.classes.length > 0" class="flex flex-col gap-0.5">
+              <template v-for="slot in uniqueSlots" :key="slot.id">
+                <div
+                  v-for="schedule in getSchedulesBySlot(day.classes, slot.number)"
+                  :key="schedule.id"
+                  class="truncate rounded px-1 py-0.5 text-[0.6rem] font-medium leading-tight"
+                  :class="getScheduleColor(schedule)"
+                  :title="`${slot.start_time} - ${schedule.teacher_assignment?.curricular_component?.name ?? schedule.teacher_assignment?.experience_field?.name ?? ''} - ${schedule.teacher_assignment?.class_group?.name ?? ''}`"
+                >
+                  {{ getScheduleLabel(schedule) }}
+                </div>
+              </template>
             </div>
           </div>
 
-          <div class="mt-4 flex flex-wrap gap-3">
-            <div
-              v-for="(color, code) in COMPONENT_COLORS"
-              :key="code"
-              class="flex items-center gap-1.5"
-            >
-              <span class="inline-block h-3 w-3 rounded" :class="color.split(' ')[0]" />
-              <span class="text-xs text-gray-600">{{ code }}</span>
-            </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-3">
+          <div
+            v-for="(color, code) in COMPONENT_COLORS"
+            :key="code"
+            class="flex items-center gap-1.5"
+          >
+            <span class="inline-block h-3 w-3 rounded" :class="color.split(' ')[0]" />
+            <span class="text-xs text-gray-600">{{ code }}</span>
           </div>
-        </template>
-      </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>

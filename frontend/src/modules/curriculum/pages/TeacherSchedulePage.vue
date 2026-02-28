@@ -111,44 +111,42 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Minha Grade</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Minha Grade</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
-      <EmptyState v-if="!loading && schedules.length === 0" message="Voce ainda nao possui horarios definidos" />
+  <div class="card">
+    <EmptyState v-if="!loading && schedules.length === 0" message="Voce ainda nao possui horarios definidos" />
 
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <i class="pi pi-spin pi-spinner text-2xl text-gray-400" />
-      </div>
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-2xl text-gray-400" />
+    </div>
 
-      <div v-if="!loading && schedules.length > 0" class="overflow-x-auto">
-        <table class="w-full border-collapse">
-          <thead>
-            <tr>
-              <th class="border border-fluent-border bg-gray-50 px-3 py-2 text-left text-sm font-medium" :style="{ width: '120px' }">Horario</th>
-              <th v-for="day in days" :key="day.value" class="border border-fluent-border bg-gray-50 px-3 py-2 text-center text-sm font-medium">{{ day.label }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in grid" :key="row.slot.number + '-' + row.slot.type" :class="{ 'bg-amber-50': row.isBreak }">
-              <td class="border border-fluent-border px-3 py-2 text-sm">
-                <div class="font-medium">{{ row.isBreak ? 'Intervalo' : `${row.slot.number}a Aula` }}</div>
-                <div class="text-xs text-gray-500">{{ row.slot.start_time }} - {{ row.slot.end_time }}</div>
-              </td>
-              <td v-for="cell in row.cells" :key="cell.day" class="border border-fluent-border px-1 py-1 text-center">
-                <template v-if="!row.isBreak">
-                  <div v-for="schedule in cell.schedules" :key="schedule.id" class="rounded px-2 py-1 text-xs" :class="getCellColor(schedule)">
-                    <div class="font-medium">{{ schedule.teacher_assignment?.curricular_component?.name ?? schedule.teacher_assignment?.experience_field?.name ?? '' }}</div>
-                    <div class="text-[0.65rem] opacity-75">{{ [schedule.teacher_assignment?.class_group?.grade_level?.name, schedule.teacher_assignment?.class_group?.name].filter(Boolean).join(' ') }}</div>
-                  </div>
-                  <span v-if="cell.schedules.length === 0" class="text-xs text-gray-300">-</span>
-                </template>
-                <span v-else class="text-xs text-gray-400">-</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div v-if="!loading && schedules.length > 0" class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr>
+            <th class="border border-md-border bg-gray-50 px-3 py-2 text-left text-sm font-medium" :style="{ width: '120px' }">Horario</th>
+            <th v-for="day in days" :key="day.value" class="border border-md-border bg-gray-50 px-3 py-2 text-center text-sm font-medium">{{ day.label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in grid" :key="row.slot.number + '-' + row.slot.type" :class="{ 'bg-amber-50': row.isBreak }">
+            <td class="border border-md-border px-3 py-2 text-sm">
+              <div class="font-medium">{{ row.isBreak ? 'Intervalo' : `${row.slot.number}a Aula` }}</div>
+              <div class="text-xs text-gray-500">{{ row.slot.start_time }} - {{ row.slot.end_time }}</div>
+            </td>
+            <td v-for="cell in row.cells" :key="cell.day" class="border border-md-border px-1 py-1 text-center">
+              <template v-if="!row.isBreak">
+                <div v-for="schedule in cell.schedules" :key="schedule.id" class="rounded px-2 py-1 text-xs" :class="getCellColor(schedule)">
+                  <div class="font-medium">{{ schedule.teacher_assignment?.curricular_component?.name ?? schedule.teacher_assignment?.experience_field?.name ?? '' }}</div>
+                  <div class="text-[0.65rem] opacity-75">{{ [schedule.teacher_assignment?.class_group?.grade_level?.name, schedule.teacher_assignment?.class_group?.name].filter(Boolean).join(' ') }}</div>
+                </div>
+                <span v-if="cell.schedules.length === 0" class="text-xs text-gray-300">-</span>
+              </template>
+              <span v-else class="text-xs text-gray-400">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>

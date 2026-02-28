@@ -66,41 +66,39 @@ onMounted(loadSchool)
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">{{ isEdit ? 'Editar Escola' : 'Nova Escola' }}</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">{{ isEdit ? 'Editar Escola' : 'Nova Escola' }}</h1>
 
-    <div class="max-w-[700px] rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Nome *</label>
-          <InputText v-model="form.name" required class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Codigo INEP *</label>
-          <InputText v-model="form.inep_code" required class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Endereco</label>
-          <InputText v-model="form.address" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Telefone</label>
-          <InputText v-model="form.phone" class="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">E-mail</label>
-          <InputText v-model="form.email" type="email" class="w-full" />
-        </div>
-        <div class="flex items-center gap-2">
-          <Checkbox v-model="form.active" :binary="true" inputId="active" />
-          <label for="active">Ativa</label>
-        </div>
+  <div class="card max-w-[700px]">
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Nome *</label>
+        <InputText v-model="form.name" required class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Codigo INEP *</label>
+        <InputText v-model="form.inep_code" required class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Endereco</label>
+        <InputText v-model="form.address" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Telefone</label>
+        <InputText v-model="form.phone" class="w-full" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">E-mail</label>
+        <InputText v-model="form.email" type="email" class="w-full" />
+      </div>
+      <div class="flex items-center gap-2">
+        <Checkbox v-model="form.active" :binary="true" inputId="active" />
+        <label for="active">Ativa</label>
+      </div>
 
-        <div class="mt-4 flex justify-end gap-3">
-          <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/schools')" />
-          <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
-        </div>
-      </form>
-    </div>
+      <div class="mt-4 flex justify-end gap-3">
+        <Button label="Cancelar" severity="secondary" @click="router.push('/school-structure/schools')" />
+        <Button type="submit" :label="isEdit ? 'Atualizar' : 'Criar'" icon="pi pi-check" :loading="loading" />
+      </div>
+    </form>
   </div>
 </template>

@@ -1,22 +1,7 @@
-.p-datatable .p-datatable-thead > tr > th {
-  background-color: #0078D4;
-  color: #fff;
-  font-weight: 600;
-}
-
-.p-datatable .p-datatable-tbody > tr:nth-child(even) {
-  background-color: #f9fafb;
-}
-
 .p-toast {
   z-index: 9999;
 }
 
 .p-dialog-mask {
   z-index: 9998;
-}
-
-.p-menuitem-link:focus {
-  outline: 2px solid #60CDFF;
-  outline-offset: -2px;
 }

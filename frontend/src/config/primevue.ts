@@ -2,34 +2,34 @@ import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
 import type { PrimeVueConfiguration } from 'primevue'
 
-const Windows11Preset = definePreset(Aura, {
+const AuraBlue = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '#e5f1fb',
-      100: '#b3d7f2',
-      200: '#80bde9',
-      300: '#4da3e0',
-      400: '#2690d9',
-      500: '#0078D4',
-      600: '#006cbe',
-      700: '#005A9E',
-      800: '#004880',
-      900: '#003662',
-      950: '#002444',
+      50: '#E3F2FD',
+      100: '#BBDEFB',
+      200: '#90CAF9',
+      300: '#64B5F6',
+      400: '#42A5F5',
+      500: '#1976D2',
+      600: '#1565C0',
+      700: '#0D47A1',
+      800: '#0A3D91',
+      900: '#062E6F',
+      950: '#041E47',
     },
     colorScheme: {
       light: {
         primary: {
-          color: '#0078D4',
-          inverseColor: '#ffffff',
-          hoverColor: '#005A9E',
-          activeColor: '#004880',
+          color: '#1976D2',
+          contrastColor: '#ffffff',
+          hoverColor: '#1565C0',
+          activeColor: '#0D47A1',
         },
         highlight: {
-          background: '#0078D4',
-          focusBackground: '#005A9E',
-          color: '#ffffff',
-          focusColor: '#ffffff',
+          background: '{primary.50}',
+          focusBackground: '{primary.100}',
+          color: '{primary.700}',
+          focusColor: '{primary.800}',
         },
       },
     },
@@ -38,7 +38,7 @@ const Windows11Preset = definePreset(Aura, {
 
 export const primevueConfig: PrimeVueConfiguration = {
   theme: {
-    preset: Windows11Preset,
+    preset: AuraBlue,
     options: {
       darkModeSelector: '.app-dark',
     },

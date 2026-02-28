@@ -66,47 +66,45 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-fluent-primary">Componentes Curriculares</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Componentes Curriculares</h1>
 
-    <div class="rounded-lg border border-fluent-border bg-white p-6 max-md:p-4 shadow-sm">
-      <Toolbar class="mb-4 border-none bg-transparent p-0">
-        <template #start>
-          <InputText v-model="search" placeholder="Buscar componente..." @keyup.enter="onSearch" />
-          <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
+  <div class="card">
+    <Toolbar class="mb-4 border-none bg-transparent p-0">
+      <template #start>
+        <InputText v-model="search" placeholder="Buscar componente..." @keyup.enter="onSearch" />
+        <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
+      </template>
+      <template #end>
+        <Button label="Novo Componente" icon="pi pi-plus" @click="router.push('/curriculum/components/new')" />
+      </template>
+    </Toolbar>
+
+    <EmptyState v-if="!loading && items.length === 0" message="Nenhum componente curricular encontrado" />
+
+    <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+      <Column field="name" header="Nome" sortable />
+      <Column header="Area de Conhecimento" sortable>
+        <template #body="{ data }">
+          {{ data.knowledge_area_label ?? data.knowledge_area }}
         </template>
-        <template #end>
-          <Button label="Novo Componente" icon="pi pi-plus" @click="router.push('/curriculum/components/new')" />
+      </Column>
+      <Column field="code" header="Codigo" sortable />
+      <Column header="Acoes" :style="{ width: '120px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/curriculum/components/${data.id}/edit`)" />
+          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
         </template>
-      </Toolbar>
+      </Column>
+    </DataTable>
 
-      <EmptyState v-if="!loading && items.length === 0" message="Nenhum componente curricular encontrado" />
-
-      <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column field="name" header="Nome" sortable />
-        <Column header="Area de Conhecimento" sortable>
-          <template #body="{ data }">
-            {{ data.knowledge_area_label ?? data.knowledge_area }}
-          </template>
-        </Column>
-        <Column field="code" header="Codigo" sortable />
-        <Column header="Acoes" :style="{ width: '120px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/curriculum/components/${data.id}/edit`)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
-          </template>
-        </Column>
-      </DataTable>
-
-      <Paginator
-        v-if="totalRecords > perPage"
-        class="mt-4 border-t border-fluent-border pt-3"
-        :rows="perPage"
-        :totalRecords="totalRecords"
-        :first="(currentPage - 1) * perPage"
-        :rowsPerPageOptions="[10, 15, 25, 50]"
-        @page="onPageChange"
-      />
-    </div>
+    <Paginator
+      v-if="totalRecords > perPage"
+      class="mt-4 border-t border-md-border pt-3"
+      :rows="perPage"
+      :totalRecords="totalRecords"
+      :first="(currentPage - 1) * perPage"
+      :rowsPerPageOptions="[10, 15, 25, 50]"
+      @page="onPageChange"
+    />
   </div>
 </template>

@@ -71,7 +71,7 @@ function getStatusShort(status: string): string {
 }
 
 function getStatusColor(status: string): string {
-  const map: Record<string, string> = { present: '#0F7B0F', absent: '#C42B1C', justified_absence: '#0078D4', excused: '#94a3b8' }
+  const map: Record<string, string> = { present: '#0F7B0F', absent: '#C42B1C', justified_absence: '#1976D2', excused: '#94a3b8' }
   return map[status] ?? '#94a3b8'
 }
 
@@ -79,53 +79,51 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="mb-4 flex items-center justify-between">
-      <h1 class="text-2xl font-semibold text-[#0078D4]">Mapa de Frequencia</h1>
-      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
-    </div>
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-md-primary">Mapa de Frequencia</h1>
+    <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
+  </div>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <EmptyState v-if="!loading && groupedData.length === 0" message="Nenhum registro de frequencia encontrado" />
+  <div class="card">
+    <EmptyState v-if="!loading && groupedData.length === 0" message="Nenhum registro de frequencia encontrado" />
 
-      <div v-if="groupedData.length > 0" class="overflow-x-auto">
-        <table class="w-full border-collapse text-[0.8125rem]">
-          <thead>
-            <tr>
-              <th class="border border-[#E0E0E0] p-2 text-center bg-[#f9fafb] font-semibold whitespace-nowrap sticky left-0 z-[1] min-w-[200px] text-left">Aluno</th>
-              <th
-                v-for="date in dates"
-                :key="date"
-                class="border border-[#E0E0E0] p-2 text-center bg-[#f9fafb] font-semibold whitespace-nowrap min-w-[70px]"
+    <div v-if="groupedData.length > 0" class="overflow-x-auto">
+      <table class="w-full border-collapse text-[0.8125rem]">
+        <thead>
+          <tr>
+            <th class="border border-md-border p-2 text-center bg-md-hover font-semibold whitespace-nowrap sticky left-0 z-[1] min-w-[200px] text-left">Aluno</th>
+            <th
+              v-for="date in dates"
+              :key="date"
+              class="border border-md-border p-2 text-center bg-md-hover font-semibold whitespace-nowrap min-w-[70px]"
+            >
+              {{ formatDate(date) }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in groupedData" :key="row.student_id">
+            <td class="border border-md-border p-2 text-center sticky left-0 z-[1] min-w-[200px] bg-white text-left">
+              <a
+                class="cursor-pointer text-md-primary underline"
+                @click="router.push(`/attendance/student/${row.student_id}`)"
               >
-                {{ formatDate(date) }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in groupedData" :key="row.student_id">
-              <td class="border border-[#E0E0E0] p-2 text-center sticky left-0 z-[1] min-w-[200px] bg-white text-left">
-                <a
-                  class="cursor-pointer text-[#0078D4] underline"
-                  @click="router.push(`/attendance/student/${row.student_id}`)"
-                >
-                  {{ row.student_name }}
-                </a>
-              </td>
-              <td
-                v-for="date in dates"
-                :key="date"
-                class="border border-[#E0E0E0] p-2 text-center min-w-[70px]"
-              >
-                <span v-if="row.records[date]" class="font-bold" :style="{ color: getStatusColor(row.records[date].status) }">
-                  {{ getStatusShort(row.records[date].status) }}
-                </span>
-                <span v-else class="font-bold text-[#cbd5e1]">-</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                {{ row.student_name }}
+              </a>
+            </td>
+            <td
+              v-for="date in dates"
+              :key="date"
+              class="border border-md-border p-2 text-center min-w-[70px]"
+            >
+              <span v-if="row.records[date]" class="font-bold" :style="{ color: getStatusColor(row.records[date].status) }">
+                {{ getStatusShort(row.records[date].status) }}
+              </span>
+              <span v-else class="font-bold text-gray-300">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>

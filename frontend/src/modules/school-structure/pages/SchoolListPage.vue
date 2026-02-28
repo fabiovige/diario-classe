@@ -67,48 +67,46 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Escolas</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Escolas</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <Toolbar class="mb-4 border-none bg-transparent p-0">
-        <template #start>
-          <InputText v-model="search" placeholder="Buscar escola..." @keyup.enter="onSearch" />
-          <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
+  <div class="card">
+    <Toolbar class="mb-4 border-none bg-transparent p-0">
+      <template #start>
+        <InputText v-model="search" placeholder="Buscar escola..." @keyup.enter="onSearch" />
+        <Button icon="pi pi-search" class="ml-2" @click="onSearch" />
+      </template>
+      <template #end>
+        <Button label="Nova Escola" icon="pi pi-plus" @click="router.push('/school-structure/schools/new')" />
+      </template>
+    </Toolbar>
+
+    <EmptyState v-if="!loading && items.length === 0" message="Nenhuma escola encontrada" />
+
+    <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+      <Column field="name" header="Nome" sortable />
+      <Column field="inep_code" header="Codigo INEP" sortable />
+      <Column field="phone" header="Telefone" />
+      <Column header="Status">
+        <template #body="{ data }">
+          <StatusBadge :status="data.active ? 'active' : 'inactive'" :label="data.active ? 'Ativa' : 'Inativa'" />
         </template>
-        <template #end>
-          <Button label="Nova Escola" icon="pi pi-plus" @click="router.push('/school-structure/schools/new')" />
+      </Column>
+      <Column header="Acoes" :style="{ width: '120px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/school-structure/schools/${data.id}/edit`)" />
+          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
         </template>
-      </Toolbar>
+      </Column>
+    </DataTable>
 
-      <EmptyState v-if="!loading && items.length === 0" message="Nenhuma escola encontrada" />
-
-      <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column field="name" header="Nome" sortable />
-        <Column field="inep_code" header="Codigo INEP" sortable />
-        <Column field="phone" header="Telefone" />
-        <Column header="Status">
-          <template #body="{ data }">
-            <StatusBadge :status="data.active ? 'active' : 'inactive'" :label="data.active ? 'Ativa' : 'Inativa'" />
-          </template>
-        </Column>
-        <Column header="Acoes" :style="{ width: '120px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/school-structure/schools/${data.id}/edit`)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
-          </template>
-        </Column>
-      </DataTable>
-
-      <Paginator
-        v-if="totalRecords > perPage"
-        :rows="perPage"
-        :totalRecords="totalRecords"
-        :first="(currentPage - 1) * perPage"
-        :rowsPerPageOptions="[10, 15, 25, 50]"
-        @page="onPageChange"
-        class="mt-4 border-t border-[#E0E0E0] pt-3"
-      />
-    </div>
+    <Paginator
+      v-if="totalRecords > perPage"
+      :rows="perPage"
+      :totalRecords="totalRecords"
+      :first="(currentPage - 1) * perPage"
+      :rowsPerPageOptions="[10, 15, 25, 50]"
+      @page="onPageChange"
+      class="mt-4 border-t border-md-border pt-3"
+    />
   </div>
 </template>

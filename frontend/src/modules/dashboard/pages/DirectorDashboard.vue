@@ -42,13 +42,11 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Dashboard - Diretor(a)</h1>
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-      <MetricCard title="Turmas" :value="metrics.classGroups" label="Na escola" icon="pi pi-th-large" color="#0078D4" :loading="loading" />
-      <MetricCard title="Matriculas" :value="metrics.enrollments" label="Ativas" icon="pi pi-users" color="#0F7B0F" :loading="loading" />
-      <MetricCard title="Professores" :value="metrics.teachers" label="Na escola" icon="pi pi-user" color="#60CDFF" :loading="loading" />
-      <MetricCard title="Fechamentos" :value="metrics.closingsPending" label="Pendentes de aprovacao" icon="pi pi-clock" color="#9D5D00" :loading="loading" />
-    </div>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Dashboard - Diretor(a)</h1>
+  <div class="metric-grid">
+    <MetricCard title="Turmas" :value="metrics.classGroups" label="Na escola" icon="pi pi-th-large" color="#1976D2" :loading="loading" />
+    <MetricCard title="Matriculas" :value="metrics.enrollments" label="Ativas" icon="pi pi-users" color="#0F7B0F" :loading="loading" />
+    <MetricCard title="Professores" :value="metrics.teachers" label="Na escola" icon="pi pi-user" color="#60CDFF" :loading="loading" />
+    <MetricCard title="Fechamentos" :value="metrics.closingsPending" label="Pendentes de aprovacao" icon="pi pi-clock" color="#9D5D00" :loading="loading" />
   </div>
 </template>

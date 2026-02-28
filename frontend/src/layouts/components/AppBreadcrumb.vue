@@ -15,5 +15,5 @@ const items = computed(() => {
 </script>
 
 <template>
-  <Breadcrumb :home="home" :model="items" class="border-none bg-transparent p-0 text-[0.8125rem]" />
+  <Breadcrumb :home="home" :model="items" class="max-md:hidden border-none bg-transparent p-0 text-[0.8125rem]" />
 </template>

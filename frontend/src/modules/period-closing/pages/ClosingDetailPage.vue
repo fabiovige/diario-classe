@@ -161,131 +161,129 @@ onMounted(loadClosing)
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-semibold text-[#0078D4]">Detalhe do Fechamento</h1>
-      <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/period-closing')" />
-    </div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold text-md-primary">Detalhe do Fechamento</h1>
+    <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/period-closing')" />
+  </div>
 
-    <div v-if="loading" class="flex items-center justify-center py-16">
-      <ProgressSpinner strokeWidth="3" />
-    </div>
+  <div v-if="loading" class="flex items-center justify-center py-16">
+    <ProgressSpinner strokeWidth="3" />
+  </div>
 
-    <template v-if="closing">
-      <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Turma</span>
-            <span class="text-[0.9375rem] font-medium">{{ turmaName(closing) }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Disciplina</span>
-            <span class="text-[0.9375rem] font-medium">{{ disciplineName(closing) }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Periodo</span>
-            <span class="text-[0.9375rem]">{{ closing.assessment_period?.name ?? '--' }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Status</span>
-            <StatusBadge :status="closing.status" :label="periodClosingStatusLabel(closing.status)" />
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Enviado em</span>
-            <span class="text-[0.9375rem]">{{ closing.submitted_at ? formatDateTime(closing.submitted_at) : '--' }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Validado em</span>
-            <span class="text-[0.9375rem]">{{ closing.validated_at ? formatDateTime(closing.validated_at) : '--' }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Aprovado em</span>
-            <span class="text-[0.9375rem]">{{ closing.approved_at ? formatDateTime(closing.approved_at) : '--' }}</span>
-          </div>
-          <div v-if="closing.rejection_reason" class="col-span-full flex flex-col gap-1">
-            <span class="text-sm font-semibold uppercase text-[#616161]">Motivo Rejeicao/Reabertura</span>
-            <span class="text-[0.9375rem] text-[#C42B1C]">{{ closing.rejection_reason }}</span>
-          </div>
+  <template v-if="closing">
+    <div class="card">
+      <div class="detail-grid">
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Turma</span>
+          <span class="text-[0.9375rem] font-medium">{{ turmaName(closing) }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Disciplina</span>
+          <span class="text-[0.9375rem] font-medium">{{ disciplineName(closing) }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Periodo</span>
+          <span class="text-[0.9375rem]">{{ closing.assessment_period?.name ?? '--' }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Status</span>
+          <StatusBadge :status="closing.status" :label="periodClosingStatusLabel(closing.status)" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Enviado em</span>
+          <span class="text-[0.9375rem]">{{ closing.submitted_at ? formatDateTime(closing.submitted_at) : '--' }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Validado em</span>
+          <span class="text-[0.9375rem]">{{ closing.validated_at ? formatDateTime(closing.validated_at) : '--' }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Aprovado em</span>
+          <span class="text-[0.9375rem]">{{ closing.approved_at ? formatDateTime(closing.approved_at) : '--' }}</span>
+        </div>
+        <div v-if="closing.rejection_reason" class="col-span-full flex flex-col gap-1">
+          <span class="text-sm font-semibold uppercase text-md-text-secondary">Motivo Rejeicao/Reabertura</span>
+          <span class="text-[0.9375rem] text-md-error">{{ closing.rejection_reason }}</span>
         </div>
       </div>
+    </div>
 
-      <div class="mt-6 rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-        <h2 class="text-lg font-semibold mb-4">Acoes</h2>
+    <div class="card mt-6">
+      <h2 class="text-lg font-semibold mb-4">Acoes</h2>
 
-        <!-- PENDING: Professor pode fechar direto ou enviar para validacao -->
-        <div v-if="closing.status === 'pending'" class="flex flex-col gap-4">
-          <template v-if="isTeacher">
-            <p class="text-sm text-[#616161]">
-              Clique em <strong>Fechar Bimestre</strong> para fechar diretamente (o sistema verificara automaticamente se os dados estao completos).
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <Button label="Fechar Bimestre" icon="pi pi-check-circle" severity="success" :loading="closing_" @click="handleTeacherClose" />
-              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined :loading="checking" @click="handleCheck" />
-            </div>
-          </template>
-          <template v-else>
-            <p class="text-sm text-[#616161]">
-              Use <strong>Verificar</strong> para checar se notas, frequencia e registros estao completos.
-              Quando tudo estiver OK, clique em <strong>Fechar</strong>.
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined :loading="checking" @click="handleCheck" />
-              <Button label="Fechar" icon="pi pi-lock" severity="success" :loading="closing_" @click="handleClose" />
-            </div>
-          </template>
-        </div>
-
-        <!-- IN_VALIDATION: Coordenacao aprova ou rejeita -->
-        <div v-else-if="closing.status === 'in_validation'" class="flex flex-col gap-4">
-          <p class="text-sm text-[#616161]">
-            Este fechamento esta aguardando validacao da coordenacao. Aprove ou rejeite com justificativa.
-          </p>
-          <div class="flex flex-col gap-3">
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-medium">Motivo da rejeicao (obrigatorio para rejeitar)</label>
-              <InputText v-model="rejectionReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
-            </div>
-            <div class="flex flex-wrap gap-3">
-              <Button label="Aprovar" icon="pi pi-check" severity="success" :loading="approving" @click="handleApprove" />
-              <Button label="Rejeitar" icon="pi pi-times" severity="danger" :loading="rejecting" @click="handleReject" />
-            </div>
-          </div>
-        </div>
-
-        <!-- APPROVED: Fechar definitivamente -->
-        <div v-else-if="closing.status === 'approved'" class="flex flex-col gap-4">
-          <p class="text-sm text-[#616161]">
-            Fechamento aprovado. Clique para fechar definitivamente o periodo.
+      <!-- PENDING: Professor pode fechar direto ou enviar para validacao -->
+      <div v-if="closing.status === 'pending'" class="flex flex-col gap-4">
+        <template v-if="isTeacher">
+          <p class="text-sm text-md-text-secondary">
+            Clique em <strong>Fechar Bimestre</strong> para fechar diretamente (o sistema verificara automaticamente se os dados estao completos).
           </p>
           <div class="flex flex-wrap gap-3">
-            <Button label="Fechar Periodo" icon="pi pi-lock" severity="success" :loading="closing_" @click="handleClose" />
+            <Button label="Fechar Bimestre" icon="pi pi-check-circle" severity="success" :loading="closing_" @click="handleTeacherClose" />
+            <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined :loading="checking" @click="handleCheck" />
+          </div>
+        </template>
+        <template v-else>
+          <p class="text-sm text-md-text-secondary">
+            Use <strong>Verificar</strong> para checar se notas, frequencia e registros estao completos.
+            Quando tudo estiver OK, clique em <strong>Fechar</strong>.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined :loading="checking" @click="handleCheck" />
+            <Button label="Fechar" icon="pi pi-lock" severity="success" :loading="closing_" @click="handleClose" />
+          </div>
+        </template>
+      </div>
+
+      <!-- IN_VALIDATION: Coordenacao aprova ou rejeita -->
+      <div v-else-if="closing.status === 'in_validation'" class="flex flex-col gap-4">
+        <p class="text-sm text-md-text-secondary">
+          Este fechamento esta aguardando validacao da coordenacao. Aprove ou rejeite com justificativa.
+        </p>
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium">Motivo da rejeicao (obrigatorio para rejeitar)</label>
+            <InputText v-model="rejectionReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <Button label="Aprovar" icon="pi pi-check" severity="success" :loading="approving" @click="handleApprove" />
+            <Button label="Rejeitar" icon="pi pi-times" severity="danger" :loading="rejecting" @click="handleReject" />
           </div>
         </div>
+      </div>
 
-        <!-- CLOSED: Mensagem + opcao de reabrir para coordenador/diretor -->
-        <div v-else-if="closing.status === 'closed'" class="flex flex-col gap-4">
-          <p class="text-sm text-[#0F7B0F] font-medium">
-            <i class="pi pi-lock mr-1" /> Este periodo esta fechado.
-          </p>
-
-          <template v-if="isCoordinatorOrDirector">
-            <div class="border-t border-[#E0E0E0] pt-4">
-              <p class="text-sm text-[#616161] mb-3">
-                Como coordenador/diretor, voce pode reabrir este fechamento para que o professor faca correcoes.
-              </p>
-              <div class="flex flex-col gap-3">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-sm font-medium">Motivo da reabertura</label>
-                  <InputText v-model="reopenReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
-                </div>
-                <div>
-                  <Button label="Reabrir Fechamento" icon="pi pi-replay" severity="warn" :loading="reopening" @click="handleReopen" />
-                </div>
-              </div>
-            </div>
-          </template>
+      <!-- APPROVED: Fechar definitivamente -->
+      <div v-else-if="closing.status === 'approved'" class="flex flex-col gap-4">
+        <p class="text-sm text-md-text-secondary">
+          Fechamento aprovado. Clique para fechar definitivamente o periodo.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <Button label="Fechar Periodo" icon="pi pi-lock" severity="success" :loading="closing_" @click="handleClose" />
         </div>
       </div>
-    </template>
-  </div>
+
+      <!-- CLOSED: Mensagem + opcao de reabrir para coordenador/diretor -->
+      <div v-else-if="closing.status === 'closed'" class="flex flex-col gap-4">
+        <p class="text-sm text-md-success font-medium">
+          <i class="pi pi-lock mr-1" /> Este periodo esta fechado.
+        </p>
+
+        <template v-if="isCoordinatorOrDirector">
+          <div class="border-t border-md-border pt-4">
+            <p class="text-sm text-md-text-secondary mb-3">
+              Como coordenador/diretor, voce pode reabrir este fechamento para que o professor faca correcoes.
+            </p>
+            <div class="flex flex-col gap-3">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-medium">Motivo da reabertura</label>
+                <InputText v-model="reopenReason" placeholder="Informe o motivo..." class="w-full max-w-[500px]" />
+              </div>
+              <div>
+                <Button label="Reabrir Fechamento" icon="pi pi-replay" severity="warn" :loading="reopening" @click="handleReopen" />
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
 </template>

@@ -177,77 +177,75 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Relatorios Descritivos</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Relatorios Descritivos</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
-        </div>
-        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-          <label class="text-sm font-medium">Escola</label>
-          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-56">
-          <label class="text-sm font-medium">Turma</label>
-          <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas as turmas" class="w-full" filter showClear :disabled="!selectedSchoolId" />
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-48">
-          <label class="text-sm font-medium">Periodo</label>
-          <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Todos os periodos" class="w-full" showClear :disabled="!selectedClassGroupId" />
-        </div>
-        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-        <div class="ml-auto">
-          <Button label="Novo Relatorio" icon="pi pi-plus" @click="router.push('/assessment/descriptive/new')" />
-        </div>
+  <div class="card">
+    <div class="mb-4 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas as escolas" class="w-full" filter showClear />
       </div>
-
-      <EmptyState v-if="!loading && items.length === 0" message="Nenhum relatorio descritivo encontrado" />
-
-      <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column header="Aluno">
-          <template #body="{ data }">
-            {{ data.student?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Turma">
-          <template #body="{ data }">
-            {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
-          </template>
-        </Column>
-        <Column header="Campo de Experiencia">
-          <template #body="{ data }">
-            {{ data.experience_field?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Periodo">
-          <template #body="{ data }">
-            {{ data.assessment_period?.name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Conteudo">
-          <template #body="{ data }">
-            {{ truncate(data.content) }}
-          </template>
-        </Column>
-        <Column header="Acoes" :style="{ width: '80px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded @click="router.push(`/assessment/descriptive/${data.id}/edit`)" />
-          </template>
-        </Column>
-      </DataTable>
-
-      <Paginator
-        v-if="totalRecords > perPage"
-        :rows="perPage"
-        :totalRecords="totalRecords"
-        :first="(currentPage - 1) * perPage"
-        :rowsPerPageOptions="[10, 15, 25, 50]"
-        class="mt-4 border-t border-[#E0E0E0] pt-3"
-        @page="onPageChange"
-      />
+      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium">Escola</label>
+        <span class="flex h-[2.375rem] items-center rounded-md border border-md-border bg-md-hover px-3 text-sm">{{ userSchoolName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-56">
+        <label class="text-sm font-medium">Turma</label>
+        <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Todas as turmas" class="w-full" filter showClear :disabled="!selectedSchoolId" />
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-48">
+        <label class="text-sm font-medium">Periodo</label>
+        <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" placeholder="Todos os periodos" class="w-full" showClear :disabled="!selectedClassGroupId" />
+      </div>
+      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
+      <div class="ml-auto">
+        <Button label="Novo Relatorio" icon="pi pi-plus" @click="router.push('/assessment/descriptive/new')" />
+      </div>
     </div>
+
+    <EmptyState v-if="!loading && items.length === 0" message="Nenhum relatorio descritivo encontrado" />
+
+    <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+      <Column header="Aluno">
+        <template #body="{ data }">
+          {{ data.student?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Turma">
+        <template #body="{ data }">
+          {{ [data.class_group?.grade_level?.name, data.class_group?.name, data.class_group?.shift?.name_label].filter(Boolean).join(' - ') || '--' }}
+        </template>
+      </Column>
+      <Column header="Campo de Experiencia">
+        <template #body="{ data }">
+          {{ data.experience_field?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Periodo">
+        <template #body="{ data }">
+          {{ data.assessment_period?.name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Conteudo">
+        <template #body="{ data }">
+          {{ truncate(data.content) }}
+        </template>
+      </Column>
+      <Column header="Acoes" :style="{ width: '80px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" text rounded @click="router.push(`/assessment/descriptive/${data.id}/edit`)" />
+        </template>
+      </Column>
+    </DataTable>
+
+    <Paginator
+      v-if="totalRecords > perPage"
+      :rows="perPage"
+      :totalRecords="totalRecords"
+      :first="(currentPage - 1) * perPage"
+      :rowsPerPageOptions="[10, 15, 25, 50]"
+      class="mt-4 border-t border-md-border pt-3"
+      @page="onPageChange"
+    />
   </div>
 </template>

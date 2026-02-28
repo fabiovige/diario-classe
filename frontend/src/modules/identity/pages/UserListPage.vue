@@ -123,69 +123,67 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Usuarios</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Usuarios</h1>
 
-    <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 max-md:p-4 shadow-sm">
-      <div class="mb-4 flex flex-wrap items-end gap-4">
-        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
-          <label class="text-sm font-medium">Escola</label>
-          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas" class="w-full" showClear filter />
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-44">
-          <label class="text-sm font-medium">Perfil</label>
-          <Select v-model="selectedRoleId" :options="roles" optionLabel="name" optionValue="id" placeholder="Todos" class="w-full" showClear />
-        </div>
-        <div class="flex flex-col gap-1.5 w-full md:w-40">
-          <label class="text-sm font-medium">Status</label>
-          <Select v-model="selectedStatus" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Todos" class="w-full" showClear />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <InputText v-model="search" placeholder="Nome ou e-mail..." @keyup.enter="onSearch" />
-        </div>
-        <Button icon="pi pi-search" @click="onSearch" />
-        <div class="ml-auto">
-          <Button label="Novo Usuario" icon="pi pi-plus" @click="router.push('/identity/users/new')" />
-        </div>
+  <div class="card">
+    <div class="mb-4 flex flex-wrap items-end gap-4">
+      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">
+        <label class="text-sm font-medium">Escola</label>
+        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Todas" class="w-full" showClear filter />
       </div>
-
-      <EmptyState v-if="!loading && items.length === 0" message="Nenhum usuario encontrado" />
-
-      <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
-        <Column field="name" header="Nome" sortable />
-        <Column field="email" header="E-mail" sortable />
-        <Column header="Perfil">
-          <template #body="{ data }">
-            {{ data.role ? roleLabel(data.role.slug) : '--' }}
-          </template>
-        </Column>
-        <Column v-if="shouldShowSchoolFilter" header="Escola">
-          <template #body="{ data }">
-            {{ data.school_name ?? '--' }}
-          </template>
-        </Column>
-        <Column header="Status">
-          <template #body="{ data }">
-            <StatusBadge :status="data.status" :label="userStatusLabel(data.status)" />
-          </template>
-        </Column>
-        <Column header="Acoes" :style="{ width: '120px' }">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/identity/users/${data.id}/edit`)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
-          </template>
-        </Column>
-      </DataTable>
-
-      <Paginator
-        v-if="totalRecords > perPage"
-        :rows="perPage"
-        :totalRecords="totalRecords"
-        :first="(currentPage - 1) * perPage"
-        :rowsPerPageOptions="[10, 15, 25, 50]"
-        @page="onPageChange"
-        class="mt-4 border-t border-[#E0E0E0] pt-3"
-      />
+      <div class="flex flex-col gap-1.5 w-full md:w-44">
+        <label class="text-sm font-medium">Perfil</label>
+        <Select v-model="selectedRoleId" :options="roles" optionLabel="name" optionValue="id" placeholder="Todos" class="w-full" showClear />
+      </div>
+      <div class="flex flex-col gap-1.5 w-full md:w-40">
+        <label class="text-sm font-medium">Status</label>
+        <Select v-model="selectedStatus" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Todos" class="w-full" showClear />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <InputText v-model="search" placeholder="Nome ou e-mail..." @keyup.enter="onSearch" />
+      </div>
+      <Button icon="pi pi-search" @click="onSearch" />
+      <div class="ml-auto">
+        <Button label="Novo Usuario" icon="pi pi-plus" @click="router.push('/identity/users/new')" />
+      </div>
     </div>
+
+    <EmptyState v-if="!loading && items.length === 0" message="Nenhum usuario encontrado" />
+
+    <DataTable v-if="items.length > 0" :value="items" :loading="loading" stripedRows responsiveLayout="scroll">
+      <Column field="name" header="Nome" sortable />
+      <Column field="email" header="E-mail" sortable />
+      <Column header="Perfil">
+        <template #body="{ data }">
+          {{ data.role ? roleLabel(data.role.slug) : '--' }}
+        </template>
+      </Column>
+      <Column v-if="shouldShowSchoolFilter" header="Escola">
+        <template #body="{ data }">
+          {{ data.school_name ?? '--' }}
+        </template>
+      </Column>
+      <Column header="Status">
+        <template #body="{ data }">
+          <StatusBadge :status="data.status" :label="userStatusLabel(data.status)" />
+        </template>
+      </Column>
+      <Column header="Acoes" :style="{ width: '120px' }">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" text rounded class="mr-1" @click="router.push(`/identity/users/${data.id}/edit`)" />
+          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data)" />
+        </template>
+      </Column>
+    </DataTable>
+
+    <Paginator
+      v-if="totalRecords > perPage"
+      :rows="perPage"
+      :totalRecords="totalRecords"
+      :first="(currentPage - 1) * perPage"
+      :rowsPerPageOptions="[10, 15, 25, 50]"
+      @page="onPageChange"
+      class="mt-4 border-t border-md-border pt-3"
+    />
   </div>
 </template>

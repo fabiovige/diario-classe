@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import AuthLayout from '@/layouts/AuthLayout.vue'
-import MainLayout from '@/layouts/MainLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const route = useRoute()
 
 const layout = computed(() => {
   if (route.meta.layout === 'auth') return AuthLayout
-  return MainLayout
+  return AppLayout
 })
 </script>
 
 <template>
-  <Toast position="top-right" />
   <ConfirmDialog />
   <component :is="layout">
     <router-view />
