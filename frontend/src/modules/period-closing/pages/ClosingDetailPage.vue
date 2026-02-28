@@ -77,17 +77,6 @@ function handleTeacherClose() {
   }, 'Fechar Bimestre')
 }
 
-function handleSubmit() {
-  confirmAction('Deseja enviar este fechamento para validacao da coordenacao?', async () => {
-    try {
-      closing.value = await periodClosingService.submit(closingId)
-      toast.success('Fechamento enviado para validacao')
-    } catch (error: unknown) {
-      toast.error(extractApiError(error, 'Erro ao enviar'))
-    }
-  })
-}
-
 function handleApprove() {
   confirmAction('Deseja aprovar este fechamento?', async () => {
     try {
@@ -232,11 +221,11 @@ onMounted(loadClosing)
           <template v-else>
             <p class="text-sm text-[#616161]">
               Use <strong>Verificar</strong> para checar se notas, frequencia e registros estao completos.
-              Quando tudo estiver completo, clique em <strong>Enviar</strong> para submeter a coordenacao.
+              Quando tudo estiver OK, clique em <strong>Fechar</strong>.
             </p>
             <div class="flex flex-wrap gap-3">
-              <Button label="Verificar Completude" icon="pi pi-search" severity="info" @click="handleCheck" />
-              <Button label="Enviar para Validacao" icon="pi pi-send" severity="warn" @click="handleSubmit" />
+              <Button label="Verificar Completude" icon="pi pi-search" severity="info" outlined @click="handleCheck" />
+              <Button label="Fechar" icon="pi pi-lock" severity="success" @click="handleClose" />
             </div>
           </template>
         </div>

@@ -89,6 +89,7 @@ Route::middleware(['auth:sanctum', 'school.scope'])->group(function () {
     Route::post('grades/bulk', [AssessmentController::class, 'bulkGrades']);
     Route::get('grades', [AssessmentController::class, 'indexGrades']);
     Route::put('grades/{id}', [AssessmentController::class, 'updateGrade']);
+    Route::delete('grades/{id}', [AssessmentController::class, 'destroyGrade']);
     Route::post('grades/recovery', [AssessmentController::class, 'recoveryGrade']);
     Route::post('period-averages/calculate', [AssessmentController::class, 'calculatePeriodAverage']);
     Route::post('descriptive-reports', [AssessmentController::class, 'storeDescriptiveReport']);

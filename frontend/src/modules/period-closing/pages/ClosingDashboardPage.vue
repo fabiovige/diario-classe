@@ -415,6 +415,11 @@ onMounted(() => {
                             <StatusBadge :status="data.status" :label="periodClosingStatusLabel(data.status)" />
                           </template>
                         </Column>
+                        <Column header="Acoes" :style="{ width: '80px' }">
+                          <template #body="{ data }">
+                            <Button icon="pi pi-eye" text rounded size="small" @click="router.push(`/period-closing/${data.id}`)" />
+                          </template>
+                        </Column>
                       </DataTable>
                     </div>
                   </div>

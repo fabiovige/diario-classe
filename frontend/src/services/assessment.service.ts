@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from '@/config/api'
+import { apiGet, apiPost, apiPut, apiDelete } from '@/config/api'
 import type { PaginatedData } from '@/types/api'
 import type { Grade, PeriodAverage, DescriptiveReport, AssessmentConfig, BulkGradeRequest, ReportCardResponse } from '@/types/assessment'
 
@@ -11,6 +11,9 @@ export const assessmentService = {
   },
   updateGrade(id: number, data: Partial<Grade>): Promise<Grade> {
     return apiPut<Grade>(`grades/${id}`, data)
+  },
+  deleteGrade(id: number): Promise<void> {
+    return apiDelete(`grades/${id}`)
   },
   recoveryGrade(data: Partial<Grade>): Promise<Grade> {
     return apiPost<Grade>('grades/recovery', data)

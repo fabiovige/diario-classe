@@ -295,36 +295,33 @@ onMounted(async () => {
   <div class="p-6">
     <h1 class="mb-6 text-2xl font-semibold text-[#0078D4]">Lancamento de Notas</h1>
 
-    <div class="mb-6 flex flex-wrap items-end gap-4">
-      <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-64">
-        <label class="text-[0.8125rem] font-medium">Escola</label>
-        <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
-      </div>
-      <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
-        <label class="text-[0.8125rem] font-medium">Escola</label>
-        <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
-      </div>
-      <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
-    </div>
-
     <div class="rounded-lg border border-[#E0E0E0] bg-white p-6 shadow-sm">
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-        <div class="flex flex-col gap-1.5">
+      <div class="flex flex-wrap items-end gap-4">
+        <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-56">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <Select v-model="selectedSchoolId" :options="schools" optionLabel="name" optionValue="id" placeholder="Selecione" class="w-full" filter showClear />
+        </div>
+        <div v-if="!shouldShowSchoolFilter && userSchoolName" class="flex flex-col gap-1.5">
+          <label class="text-[0.8125rem] font-medium">Escola</label>
+          <span class="flex h-[2.375rem] items-center rounded-md border border-[#E0E0E0] bg-[#F5F5F5] px-3 text-sm">{{ userSchoolName }}</span>
+        </div>
+        <div class="flex flex-col gap-1.5 w-56">
           <label class="text-[0.8125rem] font-medium">Turma *</label>
           <Select v-model="selectedClassGroupId" :options="classGroups" optionLabel="label" optionValue="id" placeholder="Selecione" class="w-full" :disabled="!selectedSchoolId" filter @change="onClassGroupChange" />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1.5 w-56">
           <label class="text-[0.8125rem] font-medium">Disciplina *</label>
           <Select v-model="selectedAssignmentId" :options="assignments" optionLabel="label" optionValue="id" :placeholder="assignmentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || assignments.length === 0" class="w-full" />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1.5 w-48">
           <label class="text-[0.8125rem] font-medium">Periodo *</label>
           <Select v-model="selectedPeriodId" :options="periods" optionLabel="name" optionValue="id" :placeholder="depsPlaceholder" :disabled="!selectedClassGroupId || loadingDeps" class="w-full" />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1.5 w-56">
           <label class="text-[0.8125rem] font-medium">Instrumento *</label>
           <Select v-model="selectedInstrumentId" :options="instruments" optionLabel="name" optionValue="id" :placeholder="instrumentPlaceholder" :disabled="!selectedClassGroupId || loadingDeps || instruments.length === 0" class="w-full" />
         </div>
+        <Button v-if="hasActiveFilters" label="Limpar filtros" icon="pi pi-filter-slash" text @click="clearFilters" />
       </div>
     </div>
 

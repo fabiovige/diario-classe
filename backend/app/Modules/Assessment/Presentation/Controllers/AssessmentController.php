@@ -47,7 +47,13 @@ class AssessmentController extends ApiController
 
     public function indexGrades(Request $request): JsonResponse
     {
-        $grades = Grade::with('student')
+        $grades = Grade::with([
+            'student',
+            'teacherAssignment.curricularComponent',
+            'teacherAssignment.experienceField',
+            'assessmentPeriod',
+            'assessmentInstrument',
+        ])
             ->when($request->query('school_id'), fn ($q, $id) => $q->whereHas('classGroup.academicYear', fn ($q2) => $q2->where('school_id', $id)))
             ->when($request->query('student_id'), fn ($q, $id) => $q->where('student_id', $id))
             ->when($request->query('class_group_id'), fn ($q, $id) => $q->where('class_group_id', $id))
@@ -55,6 +61,7 @@ class AssessmentController extends ApiController
             ->when($request->query('assessment_period_id'), fn ($q, $id) => $q->where('assessment_period_id', $id))
             ->when($request->query('assessment_instrument_id'), fn ($q, $id) => $q->where('assessment_instrument_id', $id))
             ->orderBy('student_id')
+            ->orderBy('assessment_period_id')
             ->paginate($request->query('per_page', 50));
 
         return $this->success(GradeResource::collection($grades)->response()->getData(true));
@@ -65,7 +72,21 @@ class AssessmentController extends ApiController
         $grade = Grade::findOrFail($id);
         $grade->update($request->only(['numeric_value', 'conceptual_value', 'observations']));
 
-        return $this->success(new GradeResource($grade->refresh()->load('student')));
+        return $this->success(new GradeResource($grade->refresh()->load([
+            'student',
+            'teacherAssignment.curricularComponent',
+            'teacherAssignment.experienceField',
+            'assessmentPeriod',
+            'assessmentInstrument',
+        ])));
+    }
+
+    public function destroyGrade(int $id): JsonResponse
+    {
+        $grade = Grade::findOrFail($id);
+        $grade->delete();
+
+        return $this->noContent();
     }
 
     public function recoveryGrade(RecordRecoveryGradeRequest $request, RecordRecoveryGradeUseCase $useCase): JsonResponse

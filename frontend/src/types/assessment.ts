@@ -1,4 +1,5 @@
 import type { GradeType } from './enums'
+import type { TeacherAssignment } from './curriculum'
 import type { Student } from './people'
 import type { ClassGroup } from './school-structure'
 
@@ -16,6 +17,9 @@ export interface Grade {
   recovery_type: string | null
   recorded_by: number
   student?: Student
+  teacher_assignment?: TeacherAssignment
+  assessment_period?: { id: number; name: string }
+  assessment_instrument?: { id: number; name: string }
   created_at: string
   updated_at: string
 }

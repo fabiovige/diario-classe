@@ -2,6 +2,8 @@
 
 namespace App\Modules\Assessment\Presentation\Resources;
 
+use App\Modules\AcademicCalendar\Presentation\Resources\AssessmentPeriodResource;
+use App\Modules\Curriculum\Presentation\Resources\TeacherAssignmentResource;
 use App\Modules\People\Presentation\Resources\StudentResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,6 +28,9 @@ class GradeResource extends JsonResource
             'recovery_type' => $this->recovery_type,
             'recorded_by' => $this->recorded_by,
             'student' => new StudentResource($this->whenLoaded('student')),
+            'teacher_assignment' => new TeacherAssignmentResource($this->whenLoaded('teacherAssignment')),
+            'assessment_period' => new AssessmentPeriodResource($this->whenLoaded('assessmentPeriod')),
+            'assessment_instrument' => new AssessmentInstrumentResource($this->whenLoaded('assessmentInstrument')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
