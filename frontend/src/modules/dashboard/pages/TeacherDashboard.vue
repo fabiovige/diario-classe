@@ -34,7 +34,6 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Dashboard - Professor(a)</h1>
 
   <div
     class="mb-6 flex items-center justify-between rounded-lg border border-md-primary bg-md-selected p-5"

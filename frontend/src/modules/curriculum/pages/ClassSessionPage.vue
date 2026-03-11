@@ -147,14 +147,6 @@ const canSubmitGrades = computed(() =>
   selectedPeriodId.value && selectedInstrumentId.value && gradeStudents.value.length > 0,
 )
 
-const contextLabel = computed(() => {
-  if (!assignment.value) return ''
-  const cg = assignment.value.class_group
-  const parts = [cg?.grade_level?.name, cg?.name, cg?.shift?.name_label].filter(Boolean)
-  const subject = assignment.value.curricular_component?.name ?? assignment.value.experience_field?.name ?? ''
-  return `${parts.join(' - ')} | ${subject}`
-})
-
 const formattedDate = computed(() => {
   const [y, m, d] = date.value.split('-')
   return `${d}/${m}/${y}`
@@ -382,7 +374,6 @@ onMounted(loadInitialData)
 <template>
   <div class="mb-6 flex items-start justify-between">
     <div v-if="assignment">
-      <h1 class="text-2xl font-semibold text-md-primary">{{ contextLabel }}</h1>
       <p class="mt-1 text-[0.875rem] text-md-text-secondary">{{ formattedDate }}</p>
     </div>
     <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" size="small" @click="router.push('/my-classes')" />
@@ -485,7 +476,7 @@ onMounted(loadInitialData)
       </TabPanel>
 
       <TabPanel value="lesson">
-        <div class="card max-w-[700px]">
+        <div class="card card-form">
           <form @submit.prevent="handleSaveLesson" class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium">Conteudo *</label>

@@ -162,7 +162,6 @@ onMounted(loadClosing)
 
 <template>
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-semibold text-md-primary">Detalhe do Fechamento</h1>
     <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/period-closing')" />
   </div>
 

@@ -186,7 +186,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Alunos</h1>
 
   <div class="card">
     <div class="mb-4 flex flex-wrap items-end gap-4">

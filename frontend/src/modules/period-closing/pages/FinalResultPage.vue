@@ -195,7 +195,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Resultado Final</h1>
 
   <div class="mb-6 flex flex-wrap items-end gap-4">
     <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">

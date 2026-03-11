@@ -239,7 +239,6 @@ onMounted(loadEnrollment)
 
 <template>
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold text-md-primary">Detalhes da Matricula</h1>
     <div class="flex gap-2">
       <Button v-if="enrollment?.status === 'active'" label="Enturmar" icon="pi pi-users" @click="openAssignDialog" />
       <Button v-if="enrollment?.status === 'active'" label="Movimentar" icon="pi pi-arrow-right-arrow-left" severity="warning" @click="openMovementDialog" />

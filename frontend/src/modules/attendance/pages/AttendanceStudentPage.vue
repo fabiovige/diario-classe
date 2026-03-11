@@ -62,7 +62,6 @@ onMounted(async () => {
 
 <template>
   <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-2xl font-semibold text-md-primary">Frequencia do Aluno</h1>
     <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
   </div>
 

@@ -38,7 +38,6 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Dashboard - Coordenador(a)</h1>
   <div class="metric-grid">
     <MetricCard title="Turmas" :value="metrics.classGroups" label="Na escola" icon="pi pi-th-large" color="#1976D2" :loading="loading" />
     <MetricCard title="Diarios" :value="metrics.lessonRecords" label="Registros de aula" icon="pi pi-book" color="#0F7B0F" :loading="loading" />

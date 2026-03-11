@@ -43,7 +43,6 @@ function itemClick(_event: Event, item: MenuItem) {
     return
   }
 
-  layoutState.overlayMenuActive = false
   layoutState.mobileMenuActive = false
   layoutState.menuHoverActive = false
 }

@@ -279,7 +279,6 @@ onMounted(() => {
 <template>
   <!-- VISAO PROFESSOR -->
   <template v-if="isTeacher">
-    <h1 class="mb-6 text-2xl font-semibold text-md-primary">Meus Fechamentos</h1>
 
     <div v-if="myClosings.length > 0" class="mb-6 metric-grid-sm">
       <MetricCard title="Total" :value="myClosings.length" label="Fechamentos" color="#1976D2" icon="pi pi-list" />
@@ -338,7 +337,6 @@ onMounted(() => {
 
   <!-- VISAO ADMIN/DIRETOR/COORDENADOR -->
   <template v-else>
-    <h1 class="mb-6 text-2xl font-semibold text-md-primary">Fechamento de Periodo</h1>
 
     <div class="mb-6 flex flex-wrap items-end gap-4">
       <div v-if="shouldShowSchoolFilter" class="flex flex-col gap-1.5 w-full md:w-64">

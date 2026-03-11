@@ -180,7 +180,6 @@ onMounted(loadData)
 
 <template>
   <div class="card flex items-center justify-between">
-    <h1 class="text-2xl font-semibold">Boletim Escolar</h1>
     <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
   </div>
 

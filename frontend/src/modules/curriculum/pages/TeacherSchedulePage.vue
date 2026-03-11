@@ -111,7 +111,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Minha Grade</h1>
 
   <div class="card">
     <EmptyState v-if="!loading && schedules.length === 0" message="Voce ainda nao possui horarios definidos" />

@@ -108,9 +108,8 @@ onMounted(loadStudent)
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">{{ isEdit ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
 
-  <div class="card max-w-[700px]">
+  <div class="card card-form">
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-medium">Nome *</label>

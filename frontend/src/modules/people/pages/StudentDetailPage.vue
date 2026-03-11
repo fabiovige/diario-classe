@@ -36,7 +36,6 @@ onMounted(loadStudent)
 
 <template>
   <div class="mb-4 flex items-center justify-between">
-    <h1 class="mb-6 text-2xl font-semibold text-md-primary">Detalhes do Aluno</h1>
     <div class="flex gap-2">
       <Button label="Boletim" icon="pi pi-book" @click="router.push(`/assessment/report-card/${studentId}`)" />
       <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" @click="router.push('/people/students')" />

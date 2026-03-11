@@ -37,7 +37,6 @@ onMounted(loadMetrics)
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">Dashboard - Secretario(a)</h1>
   <div class="metric-grid">
     <MetricCard title="Matriculas" :value="metrics.enrollments" label="Ativas" icon="pi pi-file" color="#1976D2" :loading="loading" />
     <MetricCard title="Alunos" :value="metrics.students" label="Cadastrados" icon="pi pi-users" color="#0F7B0F" :loading="loading" />

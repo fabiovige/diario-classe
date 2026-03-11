@@ -42,8 +42,6 @@ const isEmpty = computed(() => !props.loading && props.items.length === 0)
 </script>
 
 <template>
-  <h1 class="mb-6 text-2xl font-semibold text-md-primary">{{ title }}</h1>
-
   <div class="card">
     <Toolbar class="mb-4 border-none bg-transparent p-0">
       <template #start>
