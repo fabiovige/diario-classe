@@ -461,6 +461,26 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator'], breadcrumb: 'Resultado Anual' },
     },
 
+    // Reports
+    {
+      path: '/reports/attendance',
+      name: 'report-attendance',
+      component: () => import('@/modules/reports/pages/ReportAttendancePage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'secretary', 'teacher'], breadcrumb: 'Frequencia' },
+    },
+    {
+      path: '/reports/class-record',
+      name: 'report-class-record',
+      component: () => import('@/modules/reports/pages/ReportClassRecordPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Diario de Classe' },
+    },
+    {
+      path: '/reports/teacher-classes',
+      name: 'report-teacher-classes',
+      component: () => import('@/modules/reports/pages/ReportTeacherClassesPage.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'director', 'coordinator', 'teacher'], breadcrumb: 'Aulas do Professor' },
+    },
+
     // 404
     {
       path: '/:pathMatch(.*)*',

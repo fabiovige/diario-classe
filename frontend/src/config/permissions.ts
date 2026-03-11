@@ -73,6 +73,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
         { label: 'Resultado Anual', icon: 'pi pi-chart-line', to: '/period-closing/annual-results' },
       ],
     },
+    {
+      label: 'Relatorios', icon: 'pi pi-file-export', path: '/reports', items: [
+        { label: 'Frequencia', icon: 'pi pi-check-square', to: '/reports/attendance' },
+        { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/reports/class-record' },
+        { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/reports/teacher-classes' },
+      ],
+    },
   ],
   director: [
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
@@ -107,6 +114,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
         { label: 'Resultado Anual', icon: 'pi pi-chart-line', to: '/period-closing/annual-results' },
       ],
     },
+    {
+      label: 'Relatorios', icon: 'pi pi-file-export', path: '/reports', items: [
+        { label: 'Frequencia', icon: 'pi pi-check-square', to: '/reports/attendance' },
+        { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/reports/class-record' },
+        { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/reports/teacher-classes' },
+      ],
+    },
   ],
   coordinator: [
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
@@ -137,6 +151,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
         { label: 'Resultado Anual', icon: 'pi pi-chart-line', to: '/period-closing/annual-results' },
       ],
     },
+    {
+      label: 'Relatorios', icon: 'pi pi-file-export', path: '/reports', items: [
+        { label: 'Frequencia', icon: 'pi pi-check-square', to: '/reports/attendance' },
+        { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/reports/class-record' },
+        { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/reports/teacher-classes' },
+      ],
+    },
   ],
   secretary: [
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
@@ -165,6 +186,11 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
         { label: 'Frequencia', icon: 'pi pi-check-square', to: '/attendance' },
       ],
     },
+    {
+      label: 'Relatorios', icon: 'pi pi-file-export', path: '/reports', items: [
+        { label: 'Frequencia', icon: 'pi pi-check-square', to: '/reports/attendance' },
+      ],
+    },
   ],
   teacher: [
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
@@ -181,6 +207,13 @@ const MENU_MAP: Record<RoleSlug, MenuItem[]> = {
       ],
     },
     { label: 'Fechamento', icon: 'pi pi-lock', to: '/period-closing' },
+    {
+      label: 'Relatorios', icon: 'pi pi-file-export', path: '/reports', items: [
+        { label: 'Frequencia', icon: 'pi pi-check-square', to: '/reports/attendance' },
+        { label: 'Diario de Classe', icon: 'pi pi-pencil', to: '/reports/class-record' },
+        { label: 'Aulas do Professor', icon: 'pi pi-book', to: '/reports/teacher-classes' },
+      ],
+    },
   ],
   guardian: [
     { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
